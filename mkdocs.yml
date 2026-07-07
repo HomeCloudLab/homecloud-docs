@@ -11,27 +11,19 @@ theme:
   language: en
   custom_dir: overrides
   palette:
-    - scheme: homelab
-      toggle:
-        icon: material/brightness-7
-        name: Switch to light mode
-    - scheme: homelab-light
-      toggle:
-        icon: material/brightness-4
-        name: Switch to dark mode
+    scheme: console
   font:
     text: Geist
     code: Geist Mono
   features:
+    - navigation.instant
+    - navigation.instant.progress
     - navigation.tracking
     - navigation.tabs
     - navigation.tabs.sticky
     - navigation.sections
     - navigation.expand
     - navigation.top
-    - search.suggest
-    - search.highlight
-    - search.share
     - content.code.copy
     - content.code.annotate
     - content.tabs.link
@@ -45,7 +37,7 @@ plugins:
   - i18n:
       docs_structure: folder
       fallback_to_default: true
-      reconfigure_material: true
+      reconfigure_material: false
       languages:
         - locale: en
           default: true
@@ -117,10 +109,3 @@ extra:
   social:
     - icon: fontawesome/brands/github
       link: https://github.com/HomeCloudLab
-  alternate:
-    - name: English
-      link: /
-      lang: en
-    - name: עברית
-      link: /he/
-      lang: he
