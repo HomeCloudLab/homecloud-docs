@@ -30,12 +30,25 @@ Shows live progress by default.
 
 ## sync
 
-Upload a directory (one-way, like `aws s3 sync local → remote`):
+Bidirectional directory sync (like `aws s3 sync`). Direction is determined by argument order:
 
-```bash
-homecloud so sync ./dist so://my-website/
-homecloud so sync ./dist so://my-website/ --delete
-```
+=== "Upload (local → SO)"
+
+    ```bash
+    homecloud so sync ./dist so://my-website/
+    homecloud so sync ./dist so://my-website/ --delete
+    ```
+
+    `--delete` removes remote objects that are not present locally (mirror mode).
+
+=== "Download (SO → local)"
+
+    ```powershell
+    homecloud so sync so://docs/ ./site
+    homecloud so sync so://docs/ ./site --delete
+    ```
+
+    `--delete` removes local files that are not present in the bucket (mirror mode).
 
 ### Live output (default)
 
@@ -48,6 +61,8 @@ upload  assets/app.js
 skip    favicon.ico
 delete  old-bundle.js
 ```
+
+Download shows `sync ← so://bucket/` and `download` lines instead of `upload`.
 
 Use `--output json` in CI to suppress progress and emit a JSON summary.
 

@@ -16,7 +16,7 @@
 | `homecloud so ls-buckets` | JWT | List buckets |
 | `homecloud so ls` | Access Key | List objects |
 | `homecloud so cp` | Access Key | Upload file |
-| `homecloud so sync` | Access Key | Sync directory → bucket |
+| `homecloud so sync` | Access Key | Sync directory ↔ bucket (upload or download) |
 | `homecloud so rm` | Access Key | Delete object / prefix |
 
 ## URI scheme
@@ -26,6 +26,7 @@ Object storage URIs use **`so://`** (not `s3://`):
 ```bash
 homecloud so cp ./file.txt so://media/path/file.txt
 homecloud so sync ./dist so://my-website/ --delete
+homecloud so sync so://docs/ ./site --delete
 homecloud so rm so://media/old/ --recursive
 ```
 
