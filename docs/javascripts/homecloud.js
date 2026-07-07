@@ -6,9 +6,8 @@
   var activeSearchIndex = -1;
 
   function getLocaleFromPath() {
-    var path = window.location.pathname.replace(/\/+$/, "") || "/";
-    if (path === "/he" || path.indexOf("/he/") === 0) return "he";
-    return "en";
+    var segments = window.location.pathname.split("/").filter(Boolean);
+    return segments.indexOf("he") !== -1 ? "he" : "en";
   }
 
   function localePath(locale, path) {
@@ -31,8 +30,35 @@
   }
 
   function applyDocumentLocale(locale) {
+    var dir = locale === "he" ? "rtl" : "ltr";
     document.documentElement.lang = locale;
-    document.documentElement.dir = locale === "he" ? "rtl" : "ltr";
+    document.documentElement.dir = dir;
+    // Material sets dir on <body> too; keep it in sync or the layout won't flip.
+    if (document.body) {
+      document.body.setAttribute("dir", dir);
+    }
+  }
+
+  var THEME_STRINGS = {
+    he: {
+      toc: "תוכן העניינים",
+    },
+  };
+
+  // We keep reconfigure_material off (it breaks strict builds with instant nav),
+  // so localize the few visible Material UI strings ourselves.
+  function localizeThemeStrings(locale) {
+    var strings = THEME_STRINGS[locale];
+    if (!strings) return;
+
+    var tocTitle = document.querySelector(".md-sidebar--secondary .md-nav__title");
+    if (tocTitle && strings.toc) {
+      tocTitle.childNodes.forEach(function (node) {
+        if (node.nodeType === 3 && node.textContent.trim()) {
+          node.textContent = strings.toc;
+        }
+      });
+    }
   }
 
   function markTechnicalBlocks() {
@@ -286,16 +312,20 @@
   }
 
   function init() {
-    applyDocumentLocale(getLocaleFromPath());
+    var locale = getLocaleFromPath();
+    applyDocumentLocale(locale);
     buildChromeStack();
     installKeyboardShortcuts();
     markTechnicalBlocks();
+    localizeThemeStrings(locale);
     loadSearchIndex();
 
     if (typeof document$ !== "undefined" && document$.subscribe) {
       document$.subscribe(function () {
-        applyDocumentLocale(getLocaleFromPath());
+        var current = getLocaleFromPath();
+        applyDocumentLocale(current);
         markTechnicalBlocks();
+        localizeThemeStrings(current);
         searchPrefix = searchBasePath();
       });
     }

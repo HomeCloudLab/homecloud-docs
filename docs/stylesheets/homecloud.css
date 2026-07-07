@@ -422,6 +422,16 @@ body,
   color: var(--hc-sidebar-muted);
 }
 
+@media screen and (min-width: 76.25em) {
+  .md-sidebar--primary
+    .md-nav--lifted
+    > .md-nav__list
+    > .md-nav__item--active
+    > .md-nav__link {
+    top: var(--hc-chrome-h);
+  }
+}
+
 .md-nav__link {
   color: var(--hc-sidebar-muted);
 }
@@ -448,12 +458,22 @@ body,
   }
 }
 
-/* TOC title sits on the light column — keep it light, not the dark rail style */
+/* TOC title sits on the light column — keep it light, not the dark rail style.
+   Material sticks it at top:0, which hides it behind our sticky chrome; pin it
+   just below the chrome so it stays visible while scrolling. */
 .md-sidebar--secondary .md-nav__title {
   background: var(--hc-bg);
   color: var(--hc-content-muted);
   font-weight: 600;
   box-shadow: 0 0 0.4rem 0.4rem var(--hc-bg);
+}
+
+@media screen and (min-width: 76.25em) {
+  .md-sidebar--secondary .md-nav__title {
+    position: sticky;
+    top: var(--hc-chrome-h);
+    z-index: 1;
+  }
 }
 
 .md-sidebar--secondary .md-nav__link {

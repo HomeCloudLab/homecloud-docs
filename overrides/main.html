@@ -4,12 +4,22 @@
   {{ super() }}
   <script>
     (function () {
-      var p = window.location.pathname.replace(/\/+$/, "") || "/";
-      var he = p === "/he" || p.indexOf("/he/") === 0;
+      var segments = window.location.pathname.split("/").filter(Boolean);
+      var he = segments.indexOf("he") !== -1;
+      var dir = he ? "rtl" : "ltr";
       var el = document.documentElement;
       el.setAttribute("data-md-color-scheme", "console");
       el.setAttribute("lang", he ? "he" : "en");
-      el.setAttribute("dir", he ? "rtl" : "ltr");
+      el.setAttribute("dir", dir);
+      // Material renders <body dir="ltr"> (theme language is en); that attribute
+      // overrides the layout direction. The body isn't parsed yet here, so set it
+      // as soon as it appears to flip RTL without a flash of LTR.
+      new MutationObserver(function (mutations, observer) {
+        if (document.body) {
+          document.body.setAttribute("dir", dir);
+          observer.disconnect();
+        }
+      }).observe(el, { childList: true });
     })();
   </script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
