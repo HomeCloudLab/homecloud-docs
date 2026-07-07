@@ -15,6 +15,7 @@ https://homecloud-cli.so.holab.abrdns.com/releases/latest/homecloud-windows-amd6
 
 | Version | Highlights |
 |---------|------------|
+| v0.2.14 | Retry transient transfer errors, cache account resolution, clearer error messages |
 | v0.2.13 | Parallel `so sync` / `so rm -r` (`-j` workers), HTTP connection reuse |
 | v0.2.12 | Bidirectional `so sync` (upload + download), `client.so` API |
 | v0.2.11 | Live progress for `so sync` / `cp` / `rm` |
