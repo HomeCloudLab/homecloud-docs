@@ -4,26 +4,25 @@ site_description: HomeCloud platform, CLI, and SDK documentation
 
 repo_name: HomeCloudLab/homecloud-docs
 repo_url: https://github.com/HomeCloudLab/homecloud-docs
-edit_uri: edit/main/docs/
+edit_uri: edit/main/docs/en/
 
 theme:
   name: material
   language: en
+  custom_dir: overrides
   palette:
-    - scheme: default
-      primary: indigo
-      accent: indigo
+    - scheme: homelab
       toggle:
         icon: material/brightness-7
-        name: Switch to dark mode
-    - scheme: slate
-      primary: indigo
-      accent: indigo
+        name: Switch to light mode
+    - scheme: homelab-light
       toggle:
         icon: material/brightness-4
-        name: Switch to light mode
+        name: Switch to dark mode
+  font:
+    text: Geist
+    code: Geist Mono
   features:
-    - navigation.instant
     - navigation.tracking
     - navigation.tabs
     - navigation.tabs.sticky
@@ -32,6 +31,7 @@ theme:
     - navigation.top
     - search.suggest
     - search.highlight
+    - search.share
     - content.code.copy
     - content.code.annotate
     - content.tabs.link
@@ -39,7 +39,28 @@ theme:
     repo: fontawesome/brands/github
 
 plugins:
-  - search
+  - search:
+      lang:
+        - en
+  - i18n:
+      docs_structure: folder
+      fallback_to_default: true
+      reconfigure_material: true
+      languages:
+        - locale: en
+          default: true
+          name: English
+          build: true
+        - locale: he
+          name: עברית
+          build: true
+          nav_translations:
+            Home: בית
+            Getting started: התחלה
+            CLI: CLI
+            SDK: SDK
+            Platform: פלטפורמה
+            Operations: תפעול
   - tags
 
 markdown_extensions:
@@ -51,7 +72,6 @@ markdown_extensions:
       line_spans: __span
       pygments_lang_class: true
   - pymdownx.inlinehilite
-  - pymdownx.snippets
   - pymdownx.tabbed:
       alternate_style: true
   - pymdownx.emoji:
@@ -87,7 +107,20 @@ nav:
   - Operations:
       - operations/docs-site.md
 
+extra_css:
+  - stylesheets/homecloud.css
+
+extra_javascript:
+  - javascripts/homecloud.js
+
 extra:
   social:
     - icon: fontawesome/brands/github
       link: https://github.com/HomeCloudLab
+  alternate:
+    - name: English
+      link: /
+      lang: en
+    - name: עברית
+      link: /he/
+      lang: he

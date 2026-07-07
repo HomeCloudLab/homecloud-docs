@@ -81,8 +81,11 @@ Create IAM Access Key with:
 ```bash
 pip install -r requirements.txt
 mkdocs serve
-# → http://127.0.0.1:8000
+# → http://127.0.0.1:8000  (English)
+# → http://127.0.0.1:8000/he/  (Hebrew)
 ```
+
+Source pages live under `docs/en/` and `docs/he/` (Hebrew falls back to English when a page is not translated yet). Theme and chrome match the HomeCloud console (`docs/stylesheets/homecloud.css`).
 
 ## Manual deploy
 
