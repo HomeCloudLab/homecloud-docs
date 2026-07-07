@@ -1,0 +1,93 @@
+site_name: HomeCloud Docs
+site_url: https://docs.web.holab.abrdns.com
+site_description: HomeCloud platform, CLI, and SDK documentation
+
+repo_name: HomeCloudLab/homecloud-docs
+repo_url: https://github.com/HomeCloudLab/homecloud-docs
+edit_uri: edit/main/docs/
+
+theme:
+  name: material
+  language: en
+  palette:
+    - scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+    - content.code.annotate
+    - content.tabs.link
+  icon:
+    repo: fontawesome/brands/github
+
+plugins:
+  - search
+  - tags
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - attr_list
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+
+nav:
+  - Home: index.md
+  - Getting started:
+      - getting-started/overview.md
+      - getting-started/accounts.md
+      - getting-started/access-keys.md
+  - CLI:
+      - cli/index.md
+      - cli/install.md
+      - cli/authentication.md
+      - cli/commands/index.md
+      - cli/commands/configure.md
+      - cli/commands/mq.md
+      - cli/commands/so.md
+      - cli/commands/login.md
+      - cli/releases.md
+  - SDK:
+      - sdk/index.md
+  - Platform:
+      - platform/architecture.md
+      - platform/services.md
+  - Operations:
+      - operations/docs-site.md
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/HomeCloudLab

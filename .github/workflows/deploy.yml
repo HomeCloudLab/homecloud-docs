@@ -1,0 +1,63 @@
+name: Deploy docs
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+concurrency:
+  group: docs-deploy-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install MkDocs
+        run: pip install -r requirements.txt
+
+      - name: Build site
+        run: mkdocs build --strict
+
+      - name: Upload site artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: site
+          path: site/
+
+  deploy:
+    needs: build
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: site
+          path: site/
+
+      - name: Install HomeCloud CLI
+        run: |
+          curl -fsSL https://homecloud-cli.so.holab.abrdns.com/releases/latest/homecloud-linux-amd64 -o homecloud
+          chmod +x homecloud
+          sudo mv homecloud /usr/local/bin/
+          homecloud version
+
+      - name: Sync to SO bucket (docs.web)
+        env:
+          HOMECLOUD_ACCESS_KEY_ID: ${{ secrets.HOMECLOUD_ACCESS_KEY_ID }}
+          HOMECLOUD_SECRET_ACCESS_KEY: ${{ secrets.HOMECLOUD_SECRET_ACCESS_KEY }}
+          HOMECLOUD_APEX: ${{ secrets.HOMECLOUD_APEX }}
+        run: |
+          if [ -z "$HOMECLOUD_ACCESS_KEY_ID" ] || [ -z "$HOMECLOUD_SECRET_ACCESS_KEY" ]; then
+            echo "::error::Missing HOMECLOUD_ACCESS_KEY_ID or HOMECLOUD_SECRET_ACCESS_KEY repo secrets"
+            exit 1
+          fi
+          homecloud so sync ./site so://docs/ --delete --output json
+          echo "Deployed → https://docs.web.${HOMECLOUD_APEX:-holab.abrdns.com}"

@@ -1,0 +1,58 @@
+# Access Keys
+
+Access Keys authenticate **data plane** requests (SO, MQ, Secrets).
+
+## Create a key
+
+1. Console → **IAM → Access Keys → Create**
+2. Choose permissions (`*`, `so:*`, `mq:*`, etc.)
+3. Copy **Access Key ID** (`HCAK…`) and **Secret** (shown once)
+
+## Configure the CLI
+
+=== "Interactive"
+
+    ```bash
+    homecloud configure
+    ```
+
+=== "Environment variables"
+
+    ```bash
+    export HOMECLOUD_ACCESS_KEY_ID=HCAK...
+    export HOMECLOUD_SECRET_ACCESS_KEY=...
+    export HOMECLOUD_APEX=holab.abrdns.com
+    ```
+
+=== "Per command"
+
+    ```bash
+    homecloud --access-key-id HCAK... --secret-access-key ... so ls media
+    ```
+
+=== "Import JSON"
+
+    ```bash
+    homecloud configure import credentials.json
+    ```
+
+!!! warning
+    Never commit secrets to git. Use GitHub Actions secrets for CI/CD.
+
+## Policy example (SO deploy)
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": ["so:ListBucket", "so:PutObject", "so:DeleteObject"],
+      "Resource": [
+        "arn:holab:so:::my-website",
+        "arn:holab:so:::my-website/*"
+      ]
+    }
+  ]
+}
+```
