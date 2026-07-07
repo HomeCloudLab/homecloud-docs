@@ -411,6 +411,17 @@ body,
   opacity: 0.7;
 }
 
+/* Sticky "lifted" active section header defaults to the light page bg — blend it into the dark rail */
+.md-sidebar--primary
+  .md-nav--lifted
+  > .md-nav__list
+  > .md-nav__item--active
+  > .md-nav__link {
+  background: var(--hc-sidebar);
+  box-shadow: 0 0 0.4rem 0.4rem var(--hc-sidebar);
+  color: var(--hc-sidebar-muted);
+}
+
 .md-nav__link {
   color: var(--hc-sidebar-muted);
 }
@@ -459,16 +470,54 @@ body,
   background: var(--hc-bg);
 }
 
-/* Flush layout: sidebars are full-height rails, content hugs the chrome/footer */
+/* Flush layout: content hugs the chrome; primary sidebar is a full-height dark rail */
 @media screen and (min-width: 76.25em) {
   .md-main__inner {
     margin-top: 0;
   }
 
+  /* Sticky columns start right below the chrome */
   .md-sidebar {
     top: var(--hc-chrome-h);
     padding-top: 0.9rem;
-    min-height: calc(100vh - var(--hc-chrome-h));
+  }
+
+  /* Make the content row fill the main area so short pages still reach the footer
+     (otherwise the rail stops early and leaves a floating box above the footer) */
+  .md-main {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .md-main__inner {
+    flex: 1 0 auto;
+  }
+
+  /* Continuous dark rail behind the primary sidebar: a pseudo-element that spans the
+     full content height so the rail always reaches the footer, no floating box. The
+     sidebar nav stays sticky on top of it. Uses logical inset so it flips in RTL. */
+  .md-main__inner {
+    position: relative;
+  }
+
+  .md-main__inner::before {
+    content: "";
+    position: absolute;
+    inset-block: 0;
+    inset-inline-start: 0;
+    width: 12.1rem;
+    background: var(--hc-sidebar);
+    border-inline-end: 1px solid var(--hc-sidebar-border);
+    z-index: 0;
+  }
+
+  .md-sidebar--primary {
+    z-index: 1;
+    background: transparent;
+  }
+
+  .md-sidebar--primary .md-sidebar__scrollwrap {
+    background: transparent;
   }
 }
 

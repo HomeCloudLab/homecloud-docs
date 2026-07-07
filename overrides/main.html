@@ -3,7 +3,14 @@
 {% block extrahead %}
   {{ super() }}
   <script>
-    document.documentElement.setAttribute("data-md-color-scheme", "console");
+    (function () {
+      var p = window.location.pathname.replace(/\/+$/, "") || "/";
+      var he = p === "/he" || p.indexOf("/he/") === 0;
+      var el = document.documentElement;
+      el.setAttribute("data-md-color-scheme", "console");
+      el.setAttribute("lang", he ? "he" : "en");
+      el.setAttribute("dir", he ? "rtl" : "ltr");
+    })();
   </script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />

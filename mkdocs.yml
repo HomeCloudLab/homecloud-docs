@@ -16,8 +16,6 @@ theme:
     text: Geist
     code: Geist Mono
   features:
-    - navigation.instant
-    - navigation.instant.progress
     - navigation.tracking
     - navigation.tabs
     - navigation.tabs.sticky
@@ -37,7 +35,7 @@ plugins:
   - i18n:
       docs_structure: folder
       fallback_to_default: true
-      reconfigure_material: false
+      reconfigure_material: true
       languages:
         - locale: en
           default: true
