@@ -64,6 +64,15 @@ delete  old-bundle.js
 
 Download shows `sync ← so://bucket/` and `download` lines instead of `upload`.
 
+### Parallel transfers
+
+By default **10 files** transfer at once (`-j` / `--workers`, max 64). Reuses HTTP connections for speed:
+
+```bash
+homecloud so sync so://docs/ ./site -j 20
+homecloud so sync ./dist so://my-website/ --delete -j 16
+```
+
 Use `--output json` in CI to suppress progress and emit a JSON summary.
 
 ### Static website deploy (GitHub Actions)
