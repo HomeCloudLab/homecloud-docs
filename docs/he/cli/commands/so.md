@@ -20,13 +20,24 @@ homecloud so ls media --prefix photos/ --recursive
 
 ## cp
 
-העלאת קובץ יחיד:
+העתקת קובץ יחיד מקומי ↔ bucket. הכיוון נקבע לפי סדר הארגומנטים (התקדמות לפי בתים).
 
-```bash
-homecloud so cp ./build.zip so://media/releases/build.zip
-```
+=== "העלאה (מקומי → SO)"
 
-מציג התקדמות חיה כברירת מחדל.
+    ```bash
+    homecloud so cp ./build.zip so://media/releases/build.zip
+    ```
+
+=== "הורדה (SO → מקומי)"
+
+    ```powershell
+    homecloud so cp "so://media/releases/build.zip" ".\build.zip"
+    homecloud so cp "so://my-bucket/watch/spider noir/1/file.mkv" ".\local-dir\"
+    ```
+
+    אם היעד הוא תיקייה, שם הקובץ המקומי הוא ה-basename של מפתח ה-object.
+
+מציג התקדמות חיה לפי בתים כברירת מחדל.
 
 ## sync
 

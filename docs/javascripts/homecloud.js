@@ -322,6 +322,28 @@
   }
 
   var pinFrame = 0;
+  var sidebarMetrics = null;
+
+  function resetSidebarMetrics() {
+    sidebarMetrics = null;
+  }
+
+  function captureSidebarMetrics() {
+    if (sidebarMetrics) return sidebarMetrics;
+    sidebarMetrics = [];
+    document.querySelectorAll(".md-sidebar").forEach(function (sidebar) {
+      var wrap = sidebar.querySelector(".md-sidebar__scrollwrap");
+      if (!wrap) return;
+      var rect = sidebar.getBoundingClientRect();
+      sidebarMetrics.push({
+        wrap: wrap,
+        isPrimary: sidebar.classList.contains("md-sidebar--primary"),
+        left: rect.left,
+        width: rect.width,
+      });
+    });
+    return sidebarMetrics;
+  }
 
   function clearPinnedSidebar(wrap) {
     wrap.style.position = "";
@@ -349,25 +371,22 @@
 
     var primaryOk = window.matchMedia("(min-width: 76.25em)").matches;
     var secondaryOk = window.matchMedia("(min-width: 60em)").matches;
+    var metrics = captureSidebarMetrics();
 
-    document.querySelectorAll(".md-sidebar").forEach(function (sidebar) {
-      var wrap = sidebar.querySelector(".md-sidebar__scrollwrap");
-      if (!wrap) return;
-
-      var isPrimary = sidebar.classList.contains("md-sidebar--primary");
-      var enabled = isPrimary ? primaryOk : secondaryOk;
-      if (!enabled || window.getComputedStyle(sidebar).display === "none") {
+    metrics.forEach(function (entry) {
+      var wrap = entry.wrap;
+      var enabled = entry.isPrimary ? primaryOk : secondaryOk;
+      if (!enabled || window.getComputedStyle(wrap.closest(".md-sidebar")).display === "none") {
         clearPinnedSidebar(wrap);
         return;
       }
 
-      var rect = sidebar.getBoundingClientRect();
       var height = Math.max(0, window.innerHeight - chromeH - footerOverlap);
 
       wrap.style.position = "fixed";
       wrap.style.top = chromeH + "px";
-      wrap.style.left = rect.left + "px";
-      wrap.style.width = rect.width + "px";
+      wrap.style.left = entry.left + "px";
+      wrap.style.width = entry.width + "px";
       wrap.style.height = height + "px";
       wrap.style.bottom = "auto";
       wrap.style.right = "auto";
@@ -389,13 +408,17 @@
     var locale = getLocaleFromPath();
     applyDocumentLocale(locale);
     buildChromeStack();
+    resetSidebarMetrics();
     pinSidebars();
     installKeyboardShortcuts();
     markTechnicalBlocks();
     localizeThemeStrings(locale);
     loadSearchIndex();
 
-    window.addEventListener("resize", schedulePinSidebars);
+    window.addEventListener("resize", function () {
+      resetSidebarMetrics();
+      schedulePinSidebars();
+    });
     window.addEventListener("scroll", schedulePinSidebars, { passive: true });
 
     if (typeof document$ !== "undefined" && document$.subscribe) {
@@ -405,6 +428,7 @@
         markTechnicalBlocks();
         localizeThemeStrings(current);
         searchPrefix = searchBasePath();
+        resetSidebarMetrics();
         schedulePinSidebars();
       });
     }

@@ -15,6 +15,7 @@ https://homecloud-cli.so.holab.abrdns.com/releases/latest/homecloud-windows-amd6
 
 | Version | Highlights |
 |---------|------------|
+| v0.2.18 | Bidirectional `so cp` (download + upload); byte progress on single-file copy |
 | v0.2.17 | Unified byte-based `so sync` progress (speed, ETA) for upload and download; fix exact single-file `so://` URI sync |
 | v0.2.16 | Fix `so sync` download for keys with spaces (`Signature mismatch`) and large files (streaming) |
 | v0.2.15 | `so sync` overwrites by default; `--skip` for same-size skip (breaking vs prior size-skip default) |

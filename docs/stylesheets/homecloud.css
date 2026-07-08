@@ -538,7 +538,7 @@ html {
   }
 
   .md-sidebar__scrollwrap {
-    position: static;
+    /* Metrics captured once; JS sets position:fixed — do not reset to static here. */
     margin: 0;
     padding-top: 0.9rem;
     box-sizing: border-box;

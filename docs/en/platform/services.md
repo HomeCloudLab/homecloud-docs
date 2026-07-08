@@ -5,6 +5,7 @@
 - S3-compatible API at `https://so.{apex}`
 - Static websites at `https://{bucket}.web.{apex}`
 - Console: create buckets, policies, website config, versioning
+- Console object detail: copyable `so://bucket/key` URI for CLI/SDK (use quotes in PowerShell when the key contains spaces)
 
 ## MQ — Message Queues
 

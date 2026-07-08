@@ -20,13 +20,24 @@ homecloud so ls media --prefix photos/ --recursive
 
 ## cp
 
-Upload a single file:
+Copy a single file local ↔ bucket. Direction is determined by argument order (byte-based progress).
 
-```bash
-homecloud so cp ./build.zip so://media/releases/build.zip
-```
+=== "Upload (local → SO)"
 
-Shows live progress by default.
+    ```bash
+    homecloud so cp ./build.zip so://media/releases/build.zip
+    ```
+
+=== "Download (SO → local)"
+
+    ```powershell
+    homecloud so cp "so://media/releases/build.zip" ".\build.zip"
+    homecloud so cp "so://my-bucket/watch/spider noir/1/file.mkv" ".\local-dir\"
+    ```
+
+    If the destination is a directory, the object key basename is used as the local filename.
+
+Shows live byte progress by default.
 
 ## sync
 
