@@ -15,6 +15,7 @@ https://homecloud-cli.so.holab.abrdns.com/releases/latest/homecloud-windows-amd6
 
 | Version | Highlights |
 |---------|------------|
+| v0.2.16 | Fix `so sync` download for single-file URIs, keys with spaces (`Signature mismatch`), and large files (streaming) |
 | v0.2.15 | `so sync` overwrites by default; `--skip` for same-size skip (breaking vs prior size-skip default) |
 | v0.2.14 | Retry transient transfer errors, cache account resolution, clearer error messages |
 | v0.2.13 | Parallel `so sync` / `so rm -r` (`-j` workers), HTTP connection reuse |

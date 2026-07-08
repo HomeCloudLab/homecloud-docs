@@ -32,6 +32,8 @@ homecloud so cp ./build.zip so://media/releases/build.zip
 
 סנכרון תיקיות דו-כיווני. הכיוון נקבע לפי סדר הארגומנטים.
 
+ב-Console, בכרטיסיית **Properties** של object — העתיקו את **SO URI** (`so://bucket/key`) והשתמשו בו כארגומנט `so://` למטה.
+
 **ברירת מחדל:** דריסה של כל קובץ שקיים בצד המקור (העלאה או הורדה).
 
 | דגל | התנהגות |
@@ -58,7 +60,21 @@ homecloud so cp ./build.zip so://media/releases/build.zip
     homecloud so sync so://docs/ ./site --skip
     ```
 
+    אובייקט יחיד (העתיקו SO URI מ-**Properties** ב-Console):
+
+    ```powershell
+    homecloud so sync "so://my-bucket/watch/spider noir/1/file.mkv" ".\local-dir\"
+    ```
+
     ‏`--delete` מסיר קבצים מקומיים שאינם קיימים ב-bucket (מצב mirror).
+
+    מפתחות עם רווחים — עטיפה במירכאות ב-PowerShell:
+
+    ```powershell
+    homecloud so sync "so://watch/spider noir/1/" ".\local-dir\"
+    ```
+
+    קבצים גדולים נשמרים בזרימה לדיסק. מפתחות עם רווחים נשלחים ב-HTTP עם נתיב מקודד, בעוד החתימה משתמשת בנתיב הקנוני.
 
 !!! warning "שינוי שובר תאימות (v0.2.15)"
     לפני v0.2.15, sync דילג כברירת מחדל על קבצים באותו גודל (סגנון AWS S3 sync). מ-v0.2.15, sync **דורס כברירת מחדל**. השתמשו ב-`--skip` להתנהגות הישנה.

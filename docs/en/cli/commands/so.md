@@ -32,6 +32,8 @@ Shows live progress by default.
 
 Bidirectional directory sync. Direction is determined by argument order.
 
+In the Console, open an object’s **Properties** tab and copy the **SO URI** (`so://bucket/key`) — use that value as the `so://` argument below.
+
 **Default:** overwrite every file that exists on the source side (upload or download).
 
 | Flag | Behavior |
@@ -58,7 +60,21 @@ Bidirectional directory sync. Direction is determined by argument order.
     homecloud so sync so://docs/ ./site --skip
     ```
 
+    Single object (copy SO URI from Console **Properties**):
+
+    ```powershell
+    homecloud so sync "so://my-bucket/watch/spider noir/1/file.mkv" ".\local-dir\"
+    ```
+
     `--delete` removes local files that are not present in the bucket (mirror mode).
+
+    Keys with spaces must be quoted in PowerShell:
+
+    ```powershell
+    homecloud so sync "so://watch/spider noir/1/" ".\local-dir\"
+    ```
+
+    Large files stream to disk (no full-file memory buffer). Object keys with spaces use URL-encoded paths for HTTP while signing the canonical key path.
 
 !!! warning "Breaking change (v0.2.15)"
     Before v0.2.15, sync skipped same-size files by default (AWS S3 sync style). From v0.2.15, sync **overwrites by default**. Use `--skip` to restore the old size-based skip behavior.
