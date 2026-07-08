@@ -24,4 +24,4 @@
 ## Console
 
 - React UI for all control-plane operations
-- IAM: users, roles, access keys, policies
+- IAM: users, roles, access keys, policies — see [Access Keys security model](access-keys-security.md)

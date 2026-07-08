@@ -24,4 +24,4 @@
 ## Console
 
 - ממשק React לכל פעולות ה-control-plane
-- IAM: משתמשים, תפקידים, מפתחות גישה, מדיניות
+- IAM: משתמשים, תפקידים, מפתחות גישה, מדיניות — ראו [מודל אבטחה — Access Keys](access-keys-security.md)

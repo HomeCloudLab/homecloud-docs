@@ -39,6 +39,18 @@
 !!! warning
     לעולם אל תשמרו סודות ב-git. השתמשו ב-secrets של GitHub Actions עבור CI/CD.
 
+## מטמון Redis והפעלה מחדש ב-homelab
+
+Postgres הוא **מקור האמת** למפתחות גישה. Redis הוא מטמון חולף.
+
+אחרי הפעלה מחדש או flush ל-Redis:
+
+- ה-API ממלא מחדש מפתחות בהפעלה
+- SO/MQ/Secrets בונים מטמון בבקשה ראשונה דרך ensure פנימי
+- הריצו `homelab-resync.sh` על המארח ל-rehydrate מלא
+
+מפתחות שנוצרו **לפני** migration של `secret_encrypted` לא ניתנים לשחזור — בטלו ויצרו מחדש. ראו [מודל אבטחה — Access Keys](../platform/access-keys-security.md).
+
 ## דוגמת מדיניות (פריסה ל-SO)
 
 ```json

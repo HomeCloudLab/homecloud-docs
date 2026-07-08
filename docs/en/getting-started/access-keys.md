@@ -39,6 +39,18 @@ Access Keys authenticate **data plane** requests (SO, MQ, Secrets).
 !!! warning
     Never commit secrets to git. Use GitHub Actions secrets for CI/CD.
 
+## Redis cache and homelab restarts
+
+Postgres is the **source of truth** for access keys. Redis is a disposable cache.
+
+After a homelab restart or Redis flush:
+
+- The API rehydrates keys on startup
+- SO/MQ/Secrets rebuild cache on first request via an internal ensure call
+- Run `homelab-resync.sh` on the host for a full manual rehydrate
+
+Keys created **before** the `secret_encrypted` migration cannot be recovered — revoke and recreate them. See [Access Keys security model](../platform/access-keys-security.md).
+
 ## Policy example (SO deploy)
 
 ```json
