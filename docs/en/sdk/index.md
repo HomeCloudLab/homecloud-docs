@@ -18,7 +18,8 @@ from homecloud_sdk import HomeCloudClient
 
 client = HomeCloudClient()
 client.configure(access_key_id="HCAK...", secret_access_key="...")
-client.storage.sync_local_to_bucket("./dist", "my-bucket", delete=True)
+client.so.sync_local_to_bucket("./dist", "my-bucket", delete=True)  # overwrites by default
+client.so.sync_local_to_bucket("./dist", "my-bucket", skip=True)  # same-size skip
 ```
 
 See [homecloud-cli](https://github.com/HomeCloudLab/homecloud-cli) source for the latest API.

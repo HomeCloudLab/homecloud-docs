@@ -18,7 +18,8 @@ from homecloud_sdk import HomeCloudClient
 
 client = HomeCloudClient()
 client.configure(access_key_id="HCAK...", secret_access_key="...")
-client.storage.sync_local_to_bucket("./dist", "my-bucket", delete=True)
+client.so.sync_local_to_bucket("./dist", "my-bucket", delete=True)  # דורס כברירת מחדל
+client.so.sync_local_to_bucket("./dist", "my-bucket", skip=True)  # דילוג לפי גודל
 ```
 
 לעיון ב-API העדכני ביותר, ראו את קוד המקור של [homecloud-cli](https://github.com/HomeCloudLab/homecloud-cli).

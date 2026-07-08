@@ -30,13 +30,22 @@ Shows live progress by default.
 
 ## sync
 
-Bidirectional directory sync (like `aws s3 sync`). Direction is determined by argument order:
+Bidirectional directory sync. Direction is determined by argument order.
+
+**Default:** overwrite every file that exists on the source side (upload or download).
+
+| Flag | Behavior |
+|------|----------|
+| *(none)* | Overwrite matching keys/files |
+| `--skip` | Skip when destination size already matches (size-only, not content hash) |
+| `--delete` | Also remove extras on the destination (mirror) |
 
 === "Upload (local → SO)"
 
     ```bash
     homecloud so sync ./dist so://my-website/
     homecloud so sync ./dist so://my-website/ --delete
+    homecloud so sync ./dist so://my-website/ --skip
     ```
 
     `--delete` removes remote objects that are not present locally (mirror mode).
@@ -46,21 +55,27 @@ Bidirectional directory sync (like `aws s3 sync`). Direction is determined by ar
     ```powershell
     homecloud so sync so://docs/ ./site
     homecloud so sync so://docs/ ./site --delete
+    homecloud so sync so://docs/ ./site --skip
     ```
 
     `--delete` removes local files that are not present in the bucket (mirror mode).
 
+!!! warning "Breaking change (v0.2.15)"
+    Before v0.2.15, sync skipped same-size files by default (AWS S3 sync style). From v0.2.15, sync **overwrites by default**. Use `--skip` to restore the old size-based skip behavior.
+
 ### Live output (default)
 
 ```
-scan  57 local, 12 remote, 45 operations
+scan  57 local, 12 remote, 57 operations
 sync → so://my-website/  ━━━━━━━━━━━━━━━━━━━━ 100%
 
 upload  index.html
 upload  assets/app.js
-skip    favicon.ico
+upload  favicon.ico
 delete  old-bundle.js
 ```
+
+With `--skip`, unchanged same-size files show as `skip` instead of `upload`/`download`.
 
 Download shows `sync ← so://bucket/` and `download` lines instead of `upload`.
 
@@ -71,6 +86,7 @@ By default **10 files** transfer at once (`-j` / `--workers`, max 64). Reuses HT
 ```bash
 homecloud so sync so://docs/ ./site -j 20
 homecloud so sync ./dist so://my-website/ --delete -j 16
+homecloud so sync ./dist so://my-website/ --skip -j 16
 ```
 
 Use `--output json` in CI to suppress progress and emit a JSON summary.

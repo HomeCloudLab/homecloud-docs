@@ -395,13 +395,15 @@ body,
 }
 
 .md-sidebar--primary .md-nav__title {
+  position: static !important;
+  top: auto !important;
   background: var(--hc-sidebar);
   color: var(--hc-sidebar-muted);
   font-weight: 600;
-  box-shadow: none;
+  box-shadow: none !important;
 }
 
-/* Section headers (e.g. "Platform") read as labels, not floating boxes */
+/* Section headers (e.g. "GETTING STARTED") — labels in normal flow, not floating overlays */
 .md-sidebar--primary .md-nav__item--section > .md-nav__link {
   color: var(--hc-sidebar-muted);
   font-weight: 600;
@@ -411,25 +413,23 @@ body,
   opacity: 0.7;
 }
 
-/* Sticky "lifted" active section header defaults to the light page bg — blend it into the dark rail */
+/*
+  Material sticks the active section label (lifted nav) and paints a box-shadow "halo"
+  that covers the page items underneath while scrolling. Kill that sticky overlay so
+  "GETTING STARTED" stays a normal label above Overview / Accounts / Access Keys.
+*/
 .md-sidebar--primary
   .md-nav--lifted
   > .md-nav__list
   > .md-nav__item--active
   > .md-nav__link {
-  background: var(--hc-sidebar);
-  box-shadow: 0 0 0.4rem 0.4rem var(--hc-sidebar);
+  position: static !important;
+  top: auto !important;
+  z-index: auto;
+  margin-top: 0;
+  background: transparent;
+  box-shadow: none !important;
   color: var(--hc-sidebar-muted);
-}
-
-@media screen and (min-width: 76.25em) {
-  .md-sidebar--primary
-    .md-nav--lifted
-    > .md-nav__list
-    > .md-nav__item--active
-    > .md-nav__link {
-    top: var(--hc-chrome-h);
-  }
 }
 
 .md-nav__link {
@@ -458,22 +458,16 @@ body,
   }
 }
 
-/* TOC title sits on the light column — keep it light, not the dark rail style.
-   Material sticks it at top:0, which hides it behind our sticky chrome; pin it
-   just below the chrome so it stays visible while scrolling. */
+/* TOC title — normal flow label (Material sticky + halo caused "Table of contents"
+   to float over TOC links). */
 .md-sidebar--secondary .md-nav__title {
-  background: var(--hc-bg);
+  position: static !important;
+  top: auto !important;
+  z-index: auto;
+  background: transparent;
   color: var(--hc-content-muted);
   font-weight: 600;
-  box-shadow: 0 0 0.4rem 0.4rem var(--hc-bg);
-}
-
-@media screen and (min-width: 76.25em) {
-  .md-sidebar--secondary .md-nav__title {
-    position: sticky;
-    top: var(--hc-chrome-h);
-    z-index: 1;
-  }
+  box-shadow: none !important;
 }
 
 .md-sidebar--secondary .md-nav__link {
@@ -490,36 +484,67 @@ body,
   background: var(--hc-bg);
 }
 
-/* Flush layout: content hugs the chrome; primary sidebar is a full-height dark rail */
+/*
+  Sidebars are pinned by JS (`.md-sidebar__scrollwrap` → position:fixed) so they
+  never "unstick" at the end of `.md-main__inner` the way sticky does.
+
+  Material's `html { overflow-x: hidden }` also creates a scrollport that breaks
+  sticky; keep clip for horizontal overflow without that side effect.
+*/
+html {
+  overflow-x: clip;
+}
+
+@media screen and (min-width: 60em) {
+  .md-main__inner {
+    height: auto !important;
+    min-height: calc(100dvh - var(--hc-chrome-h));
+    align-items: flex-start;
+  }
+
+  /* Layout spacer only — the scrollwrap is fixed by pinSidebars(). */
+  .md-sidebar--secondary {
+    position: relative !important;
+    top: auto !important;
+    height: auto !important;
+    max-height: none !important;
+    align-self: stretch !important;
+    padding-top: 0;
+    overflow: visible;
+  }
+
+  .md-sidebar--secondary .md-sidebar__scrollwrap {
+    margin: 0;
+    padding-top: 0.9rem;
+    box-sizing: border-box;
+    background: var(--hc-bg);
+  }
+}
+
 @media screen and (min-width: 76.25em) {
   .md-main__inner {
+    position: relative;
     margin-top: 0;
   }
 
-  /* Sticky columns start right below the chrome */
   .md-sidebar {
-    top: var(--hc-chrome-h);
+    position: relative !important;
+    top: auto !important;
+    height: auto !important;
+    max-height: none !important;
+    align-self: stretch !important;
+    padding-top: 0;
+    overflow: visible;
+  }
+
+  .md-sidebar__scrollwrap {
+    position: static;
+    margin: 0;
     padding-top: 0.9rem;
+    box-sizing: border-box;
   }
 
-  /* Make the content row fill the main area so short pages still reach the footer
-     (otherwise the rail stops early and leaves a floating box above the footer) */
-  .md-main {
-    display: flex;
-    flex-direction: column;
-  }
-
-  .md-main__inner {
-    flex: 1 0 auto;
-  }
-
-  /* Continuous dark rail behind the primary sidebar: a pseudo-element that spans the
-     full content height so the rail always reaches the footer, no floating box. The
-     sidebar nav stays sticky on top of it. Uses logical inset so it flips in RTL. */
-  .md-main__inner {
-    position: relative;
-  }
-
+  /* Continuous dark rail behind the primary sidebar (logical inset for RTL). */
   .md-main__inner::before {
     content: "";
     position: absolute;
@@ -537,7 +562,7 @@ body,
   }
 
   .md-sidebar--primary .md-sidebar__scrollwrap {
-    background: transparent;
+    background: var(--hc-sidebar);
   }
 }
 
