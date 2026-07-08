@@ -81,14 +81,14 @@ In the Console, open an object’s **Properties** tab and copy the **SO URI** (`
 
 ### Live output (default)
 
+Progress is **byte-based** for uploads and downloads: one shared bar shows transferred size, speed, ETA, and file count. Workers update a thread-safe byte counter; the UI refreshes at 10 Hz (workers never touch Rich directly). Per-file lines still show `upload`, `download`, `skip`, or `delete`.
+
 ```
 scan  57 local, 12 remote, 57 operations
-sync → so://my-website/  ━━━━━━━━━━━━━━━━━━━━ 100%
+sync → so://my-website/  |  3/57 files  |  index.html  ━━━━━━━━  42%  12.3 MB/s  0:01:20  120/280 MB
 
 upload  index.html
 upload  assets/app.js
-upload  favicon.ico
-delete  old-bundle.js
 ```
 
 With `--skip`, unchanged same-size files show as `skip` instead of `upload`/`download`.

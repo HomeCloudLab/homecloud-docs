@@ -81,14 +81,14 @@ homecloud so cp ./build.zip so://media/releases/build.zip
 
 ### פלט חי (ברירת מחדל)
 
+ההתקדמות **לפי בתים** בהעלאה ובהורדה: סרגל משותף עם נפח, מהירות, ETA ומונה קבצים. ה-workers מעדכנים מונה thread-safe; ה-UI מתרענן ב-10Hz (בלי גישה ישירה ל-Rich מה-workers). שורות `upload` / `download` / `skip` / `delete` נשארות.
+
 ```
 scan  57 local, 12 remote, 57 operations
-sync → so://my-website/  ━━━━━━━━━━━━━━━━━━━━ 100%
+sync → so://my-website/  |  3/57 files  |  index.html  ━━━━━━━━  42%  12.3 MB/s  0:01:20  120/280 MB
 
 upload  index.html
 upload  assets/app.js
-upload  favicon.ico
-delete  old-bundle.js
 ```
 
 עם `--skip`, קבצים באותו גודל מוצגים כ-`skip` במקום `upload`/`download`.
