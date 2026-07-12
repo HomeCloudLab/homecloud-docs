@@ -94,7 +94,7 @@ POST /api/v1/platform/impersonation/exit
 Authorization: Bearer <impersonation_token>
 ```
 
-The Console shows an amber banner while impersonation is active and returns to **Platform accounts** after exit.
+In the Console, click **Enter account** on a platform account row (or its detail page). When MFA is enabled, the Console prompts for your TOTP or backup code before entering. An amber banner shows while impersonation is active and returns to **Platform accounts** after exit.
 
 ## Legacy homelab inventory
 
