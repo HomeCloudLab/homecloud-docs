@@ -1,31 +1,20 @@
 # אבטחת פלטפורמה — MFA ו-impersonation
 
-Phase 1b מוסיף **TOTP MFA** למנהלי פלטפורמה ו-**impersonation** לחשבונות tenant לצורכי תמיכה.
+Phase 1b מוסיף **אימות רב-שלבי** למנהלי פלטפורמה ו-**impersonation** לחשבונות tenant.
 
-## MFA למנהל פלטפורמה
+## MFA — Console + API
 
-מנהלי פלטפורמה (`platform_role=platform_admin`) יכולים להירשם ל-TOTP דרך ה-API:
+פתח **אבטחה** מתפריט המשתמש (`/console/iam/security`).
 
-```http
-POST /api/v1/auth/mfa/enroll
-Authorization: Bearer <access_token>
-```
+| שיטה | תיאור |
+|------|--------|
+| **TOTP** | Google Authenticator, 1Password, Authy |
+| **Passkey (WebAuthn)** | מפתח בדפדפן/מכשיר (Touch ID, Windows Hello) |
+| **Backup codes** | קודי חירום חד-פעמיים |
 
-אישור ההרשמה:
+נדרש `mfa_code` **או** `mfa_webauthn` ב-login, יצירת tenant ו-enter account.
 
-```http
-POST /api/v1/auth/mfa/confirm
-Authorization: Bearer <access_token>
-Content-Type: application/json
-
-{"code": "123456"}
-```
-
-כש-MFA מופעל, נדרש `mfa_code` תקף ב:
-
-- התחברות (`POST /api/v1/auth/login`)
-- יצירת חשבון tenant (`POST /api/v1/platform/accounts`)
-- כניסה ל-impersonation (`POST /api/v1/platform/impersonation/accounts/{account_id}/enter`)
+Passkeys משתמשים ב-RP ID מה-hostname של `CONSOLE_PUBLIC_URL` (למשל `console.holab.abrdns.com`).
 
 ## Impersonation
 

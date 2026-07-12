@@ -1,23 +1,29 @@
 # Platform security — MFA and impersonation
 
-Phase 1b adds **TOTP MFA** for platform administrators and **account impersonation** for support workflows.
+Phase 1b adds **multi-factor authentication** for platform administrators and **account impersonation** for support workflows.
 
-## Platform admin MFA
+## Platform admin MFA (Console)
 
-Platform admins (`platform_role=platform_admin`) can enroll TOTP from the API:
+Open **Security** from the user menu (`/console/iam/security`) or enroll via API.
+
+Supported second factors:
+
+| Method | Description |
+|--------|-------------|
+| **TOTP** | Google Authenticator, 1Password, Authy — scan `provisioning_uri` or enter secret |
+| **Passkey (WebAuthn)** | Browser/device passkey (Touch ID, Windows Hello, security key) |
+| **Backup codes** | One-time codes generated when TOTP is confirmed |
+
+At least one of TOTP or passkey must be active when MFA is enabled.
+
+### TOTP enrollment (API)
 
 ```http
 POST /api/v1/auth/mfa/enroll
 Authorization: Bearer <access_token>
 ```
 
-Response includes:
-
-- `secret` — base32 TOTP secret (show once)
-- `provisioning_uri` — `otpauth://` URI for authenticator apps
-- `backup_codes` — one-time recovery codes (show once)
-
-Confirm enrollment:
+Confirm:
 
 ```http
 POST /api/v1/auth/mfa/confirm
@@ -27,11 +33,32 @@ Content-Type: application/json
 {"code": "123456"}
 ```
 
-When MFA is enabled, these actions require a valid `mfa_code` (TOTP or unused backup code):
+### Passkey enrollment (API)
 
-- Login (`POST /api/v1/auth/login` with `mfa_code`)
-- Create tenant account (`POST /api/v1/platform/accounts`)
-- Enter account impersonation (`POST /api/v1/platform/impersonation/accounts/{account_id}/enter`)
+```http
+POST /api/v1/auth/mfa/webauthn/register/options
+Authorization: Bearer <access_token>
+```
+
+```http
+POST /api/v1/auth/mfa/webauthn/register/verify
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+{"credential": { ... PublicKeyCredential JSON ... }, "nickname": "MacBook"}
+```
+
+Passkeys use `WEBAUTHN_RP_ID` (defaults to the hostname of `CONSOLE_PUBLIC_URL`, e.g. `console.holab.abrdns.com`).
+
+### When MFA is required
+
+Login, create tenant, and enter-account impersonation accept **either** `mfa_code` (TOTP/backup) **or** `mfa_webauthn` (assertion JSON):
+
+- `POST /api/v1/auth/login`
+- `POST /api/v1/platform/accounts`
+- `POST /api/v1/platform/impersonation/accounts/{account_id}/enter`
+
+Login without a second factor returns `403` with `{"code":"MFA_REQUIRED",...}` when MFA is enabled.
 
 Check status:
 
@@ -39,7 +66,9 @@ Check status:
 GET /api/v1/auth/mfa/status
 ```
 
-Disable MFA (requires current TOTP):
+Returns `totp_configured`, `passkeys_count`, and registered passkey metadata.
+
+Disable MFA (TOTP code or passkey):
 
 ```http
 POST /api/v1/auth/mfa/disable
@@ -47,6 +76,8 @@ Content-Type: application/json
 
 {"code": "123456"}
 ```
+
+Or `{"mfa_webauthn": { ... }}`.
 
 ### PowerShell example — login with MFA
 
@@ -87,6 +118,8 @@ Content-Type: application/json
 {"mfa_code": "123456"}
 ```
 
+Or `{"mfa_webauthn": { ... }}`.
+
 Exit impersonation:
 
 ```http
@@ -94,7 +127,7 @@ POST /api/v1/platform/impersonation/exit
 Authorization: Bearer <impersonation_token>
 ```
 
-In the Console, click **Enter account** on a platform account row (or its detail page). When MFA is enabled, the Console prompts for your TOTP or backup code before entering. An amber banner shows while impersonation is active and returns to **Platform accounts** after exit.
+In the Console, click **Enter account** on a platform account row. When MFA is enabled, choose **authenticator code** or **Use passkey**. An amber banner shows while impersonation is active.
 
 ## Legacy homelab inventory
 
