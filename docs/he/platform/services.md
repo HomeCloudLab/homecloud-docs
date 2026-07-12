@@ -27,5 +27,6 @@
 ## Console
 
 - ממשק React לכל פעולות ה-control-plane
+- **Kubernetes** — ממשק מבוסס namespaces (כמו buckets ב-SO / תורים ב-MQ): tenants רואים את `acc-{shortId}`; platform admin רואה גם namespaces מערכת (`homecloud`, `so`, `mq`, `mdb`, `kube-system`, …) ואת namespace החשבון שלו — לא namespaces של tenants אחרים
 - **פוטר סטטוס** — שורה דקה וסטיקית בתחתית ה-shell: בריאות API (שמאל), הקשר נוכחי (מרכז), פעילויות ברקע (ימין). העלאות SO נפתחות בפוטר (לא toast חוסם); לחיצה על הצ'יפ מרחיבה התקדמות (קבצים, מהירות, bytes). מזעור ב-↓; סגירה ב-**X** — העלאה פעילה מציגה אישור ומבטלת חלקי multipart דרך בקר ההעלאה.
 - IAM: משתמשים, תפקידים, מפתחות גישה, מדיניות — ראו [מודל אבטחה — Access Keys](access-keys-security.md)
