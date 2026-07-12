@@ -100,6 +100,7 @@ nav:
       - platform/architecture.md
       - platform/services.md
       - platform/access-keys-security.md
+      - platform/security.md
   - Operations:
       - operations/docs-site.md
 
