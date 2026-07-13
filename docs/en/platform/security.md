@@ -4,14 +4,27 @@ Phase 1b adds **multi-factor authentication** for platform administrators and **
 
 ## Platform admin MFA (Console)
 
-Open **Security** from the sidebar under **Account** (`/console/iam/security`), the **Account** overview (`/console/account`), or the user menu.
+Open **Account** from the sidebar (`/console/account`) — one page with tabs:
+
+| Tab | Purpose |
+|-----|---------|
+| **Profile & account** | Signed-in user + tenant account settings and quotas |
+| **Security** | MFA, TOTP (QR), passkeys (unlimited, deletable), sessions |
+| **Members** | Who can access **this tenant account** and their roles |
+| **Platform users** | Global HomeCloud identities (root only) |
+| **Access keys** | API keys for the signed-in user |
+| **Audit log** | Account activity (when permitted) |
+
+**Members vs platform users:** Members are people in the **current account** (`acc-*`). Platform users are **global** identities before or beyond any single account.
+
+Legacy URLs (`/console/account/settings`, `/console/iam`, `/console/iam/security`) redirect to the matching tab.
 
 Supported second factors:
 
 | Method | Description |
 |--------|-------------|
 | **TOTP** | Google Authenticator, 1Password, Authy — scan `provisioning_uri` or enter secret |
-| **Passkey (WebAuthn)** | Browser/device passkey (Touch ID, Windows Hello, security key) |
+| **Passkey (WebAuthn)** | Browser/device passkey (Touch ID, Windows Hello, security key) — **unlimited per user**, each removable |
 | **Backup codes** | One-time codes generated when TOTP is confirmed |
 
 At least one of TOTP or passkey must be active when MFA is enabled.
@@ -62,6 +75,7 @@ Login without a second factor returns `403` with `MFA_REQUIRED`. The response in
 
 - `mfa_token` — short-lived token (5 minutes) from the password step; use it for passkey options and the MFA completion login **without re-sending the password**
 - `methods` — configured factors for this user, e.g. `["passkey"]`, `["totp"]`, or both
+- `passkeys` — registered passkey labels (for display before the user clicks **Continue with passkey**)
 
 ```json
 {
@@ -70,7 +84,8 @@ Login without a second factor returns `403` with `MFA_REQUIRED`. The response in
     "message": "Second factor required",
     "details": {
       "mfa_token": "<token>",
-      "methods": ["passkey", "totp"]
+      "methods": ["passkey", "totp"],
+      "passkeys": [{"id": "…", "nickname": "MacBook Touch ID"}]
     }
   }
 }
@@ -94,7 +109,9 @@ Content-Type: application/json
 {"mfa_token": "<token>", "mfa_webauthn": { ... assertion JSON ... }}
 ```
 
-The Console login card transitions inline to step 2 (no popup) when MFA is required. It shows available methods (`passkey`, `totp`) and auto-opens the browser passkey picker when applicable.
+The Console login card transitions inline to step 2 (no popup) when MFA is required. It shows available methods and registered passkey names; the user clicks **Continue with passkey** to open the browser picker (no automatic prompt).
+
+TOTP enrollment shows a **QR code** by default; the manual secret is hidden under “Can't scan?”.
 
 Check status:
 
