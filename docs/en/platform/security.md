@@ -4,7 +4,7 @@ Phase 1b adds **multi-factor authentication** for platform administrators and **
 
 ## Platform admin MFA (Console)
 
-Open **Security** from the user menu (`/console/iam/security`) or enroll via API.
+Open **Security** from the sidebar under **Account** (`/console/iam/security`), the **Account** overview (`/console/account`), or the user menu.
 
 Supported second factors:
 
@@ -58,7 +58,43 @@ Login, create tenant, and enter-account impersonation accept **either** `mfa_cod
 - `POST /api/v1/platform/accounts`
 - `POST /api/v1/platform/impersonation/accounts/{account_id}/enter`
 
-Login without a second factor returns `403` with `{"code":"MFA_REQUIRED",...}` when MFA is enabled.
+Login without a second factor returns `403` with `MFA_REQUIRED`. The response includes:
+
+- `mfa_token` — short-lived token (5 minutes) from the password step; use it for passkey options and the MFA completion login **without re-sending the password**
+- `methods` — configured factors for this user, e.g. `["passkey"]`, `["totp"]`, or both
+
+```json
+{
+  "error": {
+    "code": "MFA_REQUIRED",
+    "message": "Second factor required",
+    "details": {
+      "mfa_token": "<token>",
+      "methods": ["passkey", "totp"]
+    }
+  }
+}
+```
+
+Passkey login options (no password when `mfa_token` is present):
+
+```http
+POST /api/v1/auth/mfa/webauthn/login/options
+Content-Type: application/json
+
+{"mfa_token": "<token from MFA_REQUIRED>"}
+```
+
+Complete login with passkey:
+
+```http
+POST /api/v1/auth/login
+Content-Type: application/json
+
+{"mfa_token": "<token>", "mfa_webauthn": { ... assertion JSON ... }}
+```
+
+The Console login card transitions inline to step 2 (no popup) when MFA is required. It shows available methods (`passkey`, `totp`) and auto-opens the browser passkey picker when applicable.
 
 Check status:
 
