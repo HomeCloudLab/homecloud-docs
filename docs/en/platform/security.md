@@ -109,9 +109,11 @@ Content-Type: application/json
 {"mfa_token": "<token>", "mfa_webauthn": { ... assertion JSON ... }}
 ```
 
-The Console login card transitions inline to step 2 (no popup) when MFA is required. It shows available methods and registered passkey names; the user clicks **Continue with passkey** to open the browser picker (no automatic prompt).
+The Console login card transitions inline to step 2 (no popup) when MFA is required. It shows available methods and registered passkey names; the user **selects a passkey**, confirms on a review card, then clicks **Continue** to open the browser WebAuthn prompt (no automatic prompt).
 
-TOTP enrollment shows a **QR code** by default; the manual secret is hidden under “Can't scan?”.
+TOTP and backup codes use a **6-digit OTP input** (individual boxes, paste-friendly). Backup codes can be entered via “Use backup code”.
+
+TOTP enrollment shows a **QR code** by default; the manual secret is hidden under “Can't scan?”. Passkey registration also shows a confirmation card with the chosen label before the browser prompt.
 
 Check status:
 
