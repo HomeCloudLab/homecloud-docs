@@ -19,7 +19,7 @@ Same pattern as SO / Queues: **list → resource detail**.
 
 1. **`/console/mail`** — mailbox table (primary), **Create mailbox** button, and a collapsible **Service status & DNS** panel (engine health, domain/hostname/IP, transport, DNS records read-only).
 2. **`/console/mail/{mailboxId}`** — 3-pane email client:
-   - **Sidebar** — Inbox, Sent, Drafts, Trash, Archive, Search, and Compose button with unread counts
+   - **Sidebar** — Inbox, Sent, Drafts, Trash, Archive, Search, Settings, and Compose button with unread counts
    - **Message list** — sender avatars, subject, preview, relative dates, unread dot, attachment indicator
    - **Message view** — sanitized HTML rendering (DOMPurify), plain text fallback, attachment downloads, action toolbar
 
@@ -30,9 +30,11 @@ The service status section is collapsed by default so mailboxes stay front and c
 
 ### Compose
 - **Rich text editor** (Tiptap) with toolbar: bold, italic, underline, strikethrough, headings, lists, blockquote, links, text alignment, undo/redo
-- To, CC, BCC fields (CC/BCC collapsible)
+- **Gmail-style email chips** for To, CC, BCC — tokenize on space, comma, Enter; remove with backspace or X button
 - HTML body (`body_html`) and plain text (`body_text`) sent to API
-- Attachment drop zone (UI prepared for sending; received attachments downloadable)
+- **Attachment support** — paperclip button opens file picker, drag-and-drop anywhere on compose form; files encoded as base64 and sent with the message
+- Upload progress indicator during send with attachments
+- Ctrl+Enter keyboard shortcut to send
 
 ### Reply / Reply All / Forward
 - **Reply** — prefills To = original sender, Subject = `Re: {subject}`, original body as blockquote
@@ -57,10 +59,11 @@ The service status section is collapsed by default so mailboxes stay front and c
 
 ### Attachments
 - Received attachment metadata extracted from IMAP MIME parts
-- Attachment download directly from Stalwart via API endpoint
-- Attachment list displayed in message view with filename, size, and download link
+- Attachment download via authenticated blob request (not bare links)
+- Attachment list displayed in message view with filename, size, and download button
 - Attachment indicator (paperclip icon) in message list
-- Compose: attachment drop zone UI (sending attachments support planned)
+- Compose: file picker + drag-and-drop, base64 encoding, sent as part of the message
+- Inline `cid:` images rewritten to download URLs for proper rendering
 
 ### Search
 - Search box in sidebar triggers IMAP SEARCH via Stalwart
@@ -82,6 +85,12 @@ The service status section is collapsed by default so mailboxes stay front and c
 - Inbox, Sent, Drafts, Trash, Archive — all backed by Stalwart IMAP folders
 - Folder creation handled automatically by IMAP operations
 
+### Mailbox settings
+- **Display name** — shown as the sender name in outgoing emails (From header)
+- **Signature** — rich text signature appended automatically to every outgoing message
+- **Forwarding** — forward incoming emails to another address (stored in DB, forwarding setup planned)
+- Settings accessible from the sidebar "Settings" tab inside each mailbox
+
 ## Phase 1 scope
 
 - One **platform** mail domain seeded from `MAIL_DOMAIN` (DB row, not hardcoded)
@@ -92,17 +101,20 @@ The service status section is collapsed by default so mailboxes stay front and c
 - CC/BCC support in compose
 - Conversation threading via In-Reply-To/References headers
 - Read/unread tracking with visual indicators and badge counts
-- Attachment download from Stalwart
+- Attachment download and upload (base64 encoding)
+- Inline cid: image rendering
 - Sent folder with full message bodies from IMAP
 - Search across messages
 - Permanent delete from Trash
+- Mailbox profile: display name, signature, forwarding
+- Gmail-style email chips for recipients
 - DNS hints on the list-page metadata card (MX, A, SPF, DKIM placeholder, DMARC)
 
 ## Not in Phase 1 (follow-ups)
 
-- **HBS send templates** and reusable compose components / fixed signatures
+- **HBS send templates** and reusable compose components
 - Moving mail DNS management under **Account → Domains**
-- File attachment **upload** in compose (download works, upload pending)
+- Active forwarding via Stalwart sieve rules (UI stores `forward_to`, sieve setup pending)
 - Spam/AV, automation, tenant-owned domains
 - Access Key gateway (future SES-like API)
 - Event/webhook inbound (Phase 1 uses pull; events later)
@@ -169,6 +181,15 @@ curl -sS "https://console.example.com/api/v1/accounts/$ACCOUNT_ID/mail/messages?
 curl -sS -o attachment.pdf \
   "https://console.example.com/api/v1/accounts/$ACCOUNT_ID/mail/messages/$MESSAGE_ID/attachments/0" \
   -H "Authorization: Bearer $TOKEN"
+```
+
+### Bash — update mailbox profile (display name, signature, forwarding)
+
+```bash
+curl -sS -X PATCH "https://console.example.com/api/v1/accounts/$ACCOUNT_ID/mail/mailboxes/$MAILBOX_ID" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"display_name":"Support Team","signature_html":"<p>Best regards,<br/>Support</p>","forward_to":"backup@example.com"}'
 ```
 
 ### Bash — trash / restore / permanent delete
