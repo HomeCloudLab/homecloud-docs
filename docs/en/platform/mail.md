@@ -17,13 +17,14 @@ Bodies and attachments are **not** stored in Postgres.
 
 Same pattern as SO / Queues: **list → resource detail**.
 
-1. **`/console/mail`** — all mailboxes, **Create mailbox**, one **status & settings** card (engine health, domain/hostname/IP, transport, DNS records read-only).
+1. **`/console/mail`** — mailbox table (primary), **Create mailbox** button, and a collapsible **Service status & DNS** panel (engine health, domain/hostname/IP, transport, DNS records read-only).
 2. **`/console/mail/{mailboxId}`** — open a mailbox:
    - **Inbox** — IMAP pull sync on list (`direction=INBOUND`)
    - **Sent** — messages sent via Compose (`direction=OUTBOUND`, CP metadata; not an IMAP Sent folder yet)
    - **Compose** — send from **that** mailbox only (no global compose)
 
 There is no separate global Messages / Domains / Settings tab on the list page.
+The service status section is collapsed by default so mailboxes stay front and centre.
 
 ## Phase 1 scope
 
@@ -57,6 +58,13 @@ STALWART_ADMIN_PASSWORD=...
 ```
 
 Router: forward TCP **25 / 465 / 587** to the K3s node. Do **not** expose management port `18080` publicly.
+
+!!! note "Stalwart 0.16 listeners"
+    Stalwart 0.16 stores listener config inside the data store, not `config.json`.
+    Plain-text IMAP (143) and submission (587) listeners are **not** created by default.
+    Create them via the JMAP management API (`x:NetworkListener/set`) or the Stalwart WebUI,
+    then restart the pod. The Helm chart exposes `hostPort: 143` and `hostPort: 993` so the
+    API container on the host can reach IMAP.
 
 ## API examples
 

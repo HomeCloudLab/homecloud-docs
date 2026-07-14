@@ -17,13 +17,14 @@ HomeCloud Mail הוא שירות דואר ב-control plane מעל מנוע **Sta
 
 אותו דפוס כמו SO / Queues: **רשימה → פרטי משאב**.
 
-1. **`/console/mail`** — כל התיבות, **צור תיבה**, כרטיס **סטטוס והגדרות** אחד (בריאות מנוע, דומיין/hostname/IP, transport, DNS לקריאה בלבד).
+1. **`/console/mail`** — טבלת תיבות (תוכן ראשי), כפתור **צור תיבה**, ופאנל מתקפל **סטטוס שירות ו-DNS** (בריאות מנוע, דומיין/hostname/IP, transport, DNS לקריאה בלבד).
 2. **`/console/mail/{mailboxId}`** — כניסה לתיבה:
    - **Inbox** — סנכרון pull מ-IMAP (`direction=INBOUND`)
    - **Sent** — הודעות שנשלחו מ-Compose (`direction=OUTBOUND`, metadata ב-CP; עדיין לא תיקיית Sent ב-IMAP)
    - **Compose** — שליחה **מתוך אותה תיבה בלבד**
 
 אין טאבים גלובליים של Messages / Domains / Settings בעמוד הרשימה.
+חלק הסטטוס מקופל כברירת מחדל כדי שהתיבות יישארו במרכז.
 
 ## Phase 1
 
@@ -46,3 +47,9 @@ HomeCloud Mail הוא שירות דואר ב-control plane מעל מנוע **Sta
 ## Config
 
 ראה את עמוד ה-EN לפרטי env ודוגמאות API. פתחו בראוטר **25 / 465 / 587**; אל תחשפו את פורט הניהול הציבורי.
+
+!!! note "Stalwart 0.16 — listeners"
+    ב-Stalwart 0.16 הגדרות listeners נשמרות ב-data store ולא ב-`config.json`.
+    IMAP (143) ו-submission (587) **לא** נוצרים בברירת מחדל — יש ליצור אותם
+    דרך JMAP (`x:NetworkListener/set`) או WebUI ולהפעיל מחדש את ה-pod.
+    ה-Helm chart חושף `hostPort: 143` ו-`hostPort: 993` כדי שה-API על ה-host יגיע ל-IMAP.
