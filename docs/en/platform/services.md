@@ -24,6 +24,13 @@
 
 - Per-account secret store with Access Key auth
 
+## Mail
+
+- Stalwart engine on K3s (HDD path); Console + API in control plane
+- Postgres stores **message metadata only**; bodies live in Stalwart
+- Phase 1: platform domain from config, mailboxes, send/receive, DNS panel
+- See [Mail](mail.md)
+
 ## Console
 
 - React UI for all control-plane operations

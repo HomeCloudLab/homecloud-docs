@@ -24,6 +24,13 @@
 
 - מאגר סודות לכל חשבון עם אימות Access Key
 
+## Mail
+
+- מנוע Stalwart ב-K3s (HDD); Console + API ב-control plane
+- Postgres שומר **metadata בלבד**; גופים ב-Stalwart
+- Phase 1: דומיין פלטפורמה, תיבות, שליחה/קבלה, לוח DNS
+- ראו [דואר](mail.md)
+
 ## Console
 
 - ממשק React לכל פעולות ה-control-plane
