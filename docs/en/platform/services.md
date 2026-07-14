@@ -28,7 +28,8 @@
 
 - Stalwart engine on K3s (HDD path); Console + API in control plane
 - Postgres stores **message metadata only**; bodies live in Stalwart
-- Phase 1: platform domain from config, mailboxes, send/receive, DNS panel
+- Console: mailbox list → per-mailbox Inbox / Sent / Compose (same pattern as SO / Queues)
+- Phase 1: platform domain from config, mailboxes, send/receive, DNS hints on the service card
 - See [Mail](mail.md)
 
 ## Console

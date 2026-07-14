@@ -6,23 +6,42 @@ HomeCloud Mail הוא שירות דואר ב-control plane מעל מנוע **Sta
 
 | שכבה | תפקיד |
 |------|--------|
-| Console `/console/mail` | דומיינים, תיבות, שליחה, רשימת הודעות |
+| Console `/console/mail` | רשימת תיבות + כרטיס מטא-דאטה של השירות |
+| Console `/console/mail/{mailboxId}` | Inbox / Sent / Compose לתיבה |
 | `homecloud-api` `/accounts/{id}/mail/*` | JWT + metadata ב-Postgres |
 | Stalwart (K3s) | SMTP/IMAP + תוכן ההודעה (מקור האמת) |
 
 גופים וקבצים מצורפים **לא** נשמרים ב-Postgres.
 
+## ניווט בקונסול
+
+אותו דפוס כמו SO / Queues: **רשימה → פרטי משאב**.
+
+1. **`/console/mail`** — כל התיבות, **צור תיבה**, כרטיס **סטטוס והגדרות** אחד (בריאות מנוע, דומיין/hostname/IP, transport, DNS לקריאה בלבד).
+2. **`/console/mail/{mailboxId}`** — כניסה לתיבה:
+   - **Inbox** — סנכרון pull מ-IMAP (`direction=INBOUND`)
+   - **Sent** — הודעות שנשלחו מ-Compose (`direction=OUTBOUND`, metadata ב-CP; עדיין לא תיקיית Sent ב-IMAP)
+   - **Compose** — שליחה **מתוך אותה תיבה בלבד**
+
+אין טאבים גלובליים של Messages / Domains / Settings בעמוד הרשימה.
+
 ## Phase 1
 
 - דומיין **פלטפורמה** אחד מ-`MAIL_DOMAIN` (שורה ב-DB)
 - יצירה/מחיקת תיבות בחשבון Platform Mail
-- שליחה + קבלה (pull ב-IMAP)
-- לוח DNS
+- שליחה מתוך תיבה + קבלה (pull ב-IMAP ב-Inbox)
+- רמזי DNS בכרטיס המטא-דאטה ברשימה
 - גיבוי: hook בלבד — יעד יוגדר בהמשך
 
-## לא ב-Phase 1
+## לא ב-Phase 1 (בהמשך)
 
-Webmail, spam, אוטומציה, דומיינים ל-tenant, Access Key gateway, webhook inbound, מעבר OTP ל-`noreply@`.
+- **תבניות שליחה HBS** ורכיבים/חתימות מותאמים
+- העברת ניהול DNS של הדואר ל-**Account → Domains**
+- תיקיית Sent ב-IMAP / webmail מלא
+- spam, אוטומציה, דומיינים ל-tenant
+- Access Key gateway
+- webhook inbound
+- מעבר OTP/invites ל-`noreply@`
 
 ## Config
 

@@ -28,7 +28,8 @@
 
 - מנוע Stalwart ב-K3s (HDD); Console + API ב-control plane
 - Postgres שומר **metadata בלבד**; גופים ב-Stalwart
-- Phase 1: דומיין פלטפורמה, תיבות, שליחה/קבלה, לוח DNS
+- קונסול: רשימת תיבות → Inbox / Sent / Compose לכל תיבה (כמו SO / Queues)
+- Phase 1: דומיין פלטפורמה, תיבות, שליחה/קבלה, רמזי DNS בכרטיס השירות
 - ראו [דואר](mail.md)
 
 ## Console

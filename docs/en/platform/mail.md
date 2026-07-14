@@ -6,26 +6,42 @@ HomeCloud Mail is a control-plane mail product on top of the **Stalwart** engine
 
 | Layer | Role |
 |-------|------|
-| Console `/console/mail` | Domains, mailboxes, compose, message list |
+| Console `/console/mail` | Mailbox list + service metadata card |
+| Console `/console/mail/{mailboxId}` | Per-mailbox Inbox / Sent / Compose |
 | `homecloud-api` `/accounts/{id}/mail/*` | JWT APIs, Postgres **metadata** |
 | Stalwart (K3s) | SMTP/IMAP + message content (source of truth) |
 
 Bodies and attachments are **not** stored in Postgres.
 
+## Console navigation
+
+Same pattern as SO / Queues: **list → resource detail**.
+
+1. **`/console/mail`** — all mailboxes, **Create mailbox**, one **status & settings** card (engine health, domain/hostname/IP, transport, DNS records read-only).
+2. **`/console/mail/{mailboxId}`** — open a mailbox:
+   - **Inbox** — IMAP pull sync on list (`direction=INBOUND`)
+   - **Sent** — messages sent via Compose (`direction=OUTBOUND`, CP metadata; not an IMAP Sent folder yet)
+   - **Compose** — send from **that** mailbox only (no global compose)
+
+There is no separate global Messages / Domains / Settings tab on the list page.
+
 ## Phase 1 scope
 
 - One **platform** mail domain seeded from `MAIL_DOMAIN` (DB row, not hardcoded)
 - Create / delete mailboxes on the Platform Mail Account
-- Send (Compose) + receive (IMAP pull on list)
-- DNS panel: MX, A, SPF, DKIM placeholder, DMARC
+- Send (Compose inside a mailbox) + receive (IMAP pull on Inbox)
+- DNS hints on the list-page metadata card (MX, A, SPF, DKIM placeholder, DMARC)
 - Backup: placeholder only (`backup.enabled=false`) — target TBD later
 
-## Not in Phase 1
+## Not in Phase 1 (follow-ups)
 
-- Webmail, spam/AV, automation, tenant-owned domains product
+- **HBS send templates** and reusable compose components / fixed signatures
+- Moving mail DNS management under **Account → Domains**
+- IMAP Sent folder / full webmail
+- Spam/AV, automation, tenant-owned domains
 - Access Key gateway (future SES-like API)
 - Event/webhook inbound (Phase 1 uses pull; events later)
-- Cutover of OTP/invites to `noreply@` (follow-up after send works)
+- Cutover of OTP/invites to `noreply@` (after send is stable)
 
 ## Configuration (examples)
 
@@ -52,7 +68,14 @@ Invoke-RestMethod -Headers $headers `
   -Uri "https://console.example.com/api/v1/accounts/$ACCOUNT_ID/mail/mailboxes"
 ```
 
-### Bash — compose send
+### Bash — list inbox for a mailbox
+
+```bash
+curl -sS "https://console.example.com/api/v1/accounts/$ACCOUNT_ID/mail/messages?mailbox_id=$MAILBOX_ID&direction=INBOUND" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### Bash — compose send (from a specific mailbox)
 
 ```bash
 curl -sS -X POST "https://console.example.com/api/v1/accounts/$ACCOUNT_ID/mail/messages" \
