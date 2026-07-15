@@ -82,12 +82,12 @@ The service status section is collapsed by default so mailboxes stay front and c
 - Unread count badge on Inbox in sidebar
 
 ### HTML email rendering
-- Inbound HTML emails sanitized with DOMPurify and rendered visually
-- Styled blockquotes for quoted replies, proper table rendering, responsive images
+- Inbound HTML emails sanitized with DOMPurify and rendered in a sandboxed iframe
+- **Presentation preserved** — HTML profile allow-list keeps layout tags (`center`, tables, `font`, author `style`/`align`); only active/dangerous tags are stripped (`script`, forms, iframes, …)
 - Plain text fallback with `whitespace-pre-wrap`
-- Scoped CSS container (`prose`) for safe display
-- **Dark themes (Homelab / Midnight)** — the message body iframe is fully transparent (card chrome shows through) with soft light text; common forced-white / black-text wrappers from HTML mail are neutralized; no extra inner padding beyond the card header alignment
-- **HTML layout direction** — the reader document defaults to `dir="ltr"` (like Gmail) so centered table layouts stay centered; Hebrew still renders via Unicode bidi. Explicit `dir` in the email HTML is honored; outbound compose still wraps with UI direction
+- Outer reader chrome uses card padding; the iframe body itself has no inner padding so author layout controls spacing
+- **Dark themes (Homelab / Midnight)** — transparent iframe (card shows through) with soft default text for unstyled mail; forced-white canvases / near-black text softened for readability without rewriting layout
+- Outbound compose still wraps with UI `dir` so Hebrew stays correct in external clients
 
 ### Folders
 - Inbox, Sent, Drafts, Trash, Archive — all backed by Stalwart IMAP folders
