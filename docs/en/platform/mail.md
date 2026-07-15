@@ -20,7 +20,7 @@ Same pattern as SO / Queues: **list → resource detail**.
 1. **`/console/mail`** — mailbox table (primary), **Create mailbox** button, and a collapsible **Service status & DNS** panel (engine health, domain/hostname/IP, transport, DNS records read-only).
 2. **`/console/mail/{mailboxId}`** — email client:
    - **Desktop / tablet** — 3-pane layout: folders sidebar, message list, reader/compose
-   - **Mobile** — single-screen stack (list → reader → compose/settings) with slide-in navigation; folders open from ☰ or the folder title (drawer); FAB for new message; edge-to-edge list (no side margins); long recipient lines truncate (`name +N`); list scrolls clear of the FAB and status footer
+   - **Mobile** — single-screen stack (list → reader → compose/settings) with slide-in navigation; folders open from ☰ or the folder title (drawer); FAB for new message; true edge-to-edge (console shell padding removed on the mail client); long recipient lines truncate (`name +N`); list scrolls clear of the FAB and status footer
    - **Sidebar** — Inbox, Sent, Drafts, Trash, Archive, Search, Settings, and Compose (desktop)
    - **Message list** — sender avatars, subject, preview, relative dates, unread dot, attachment indicator
    - **Message view** — sanitized HTML rendering (DOMPurify), plain text fallback, attachment downloads, action toolbar
