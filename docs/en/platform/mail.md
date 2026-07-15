@@ -18,8 +18,10 @@ Bodies, attachments, and folders are **not** stored in Postgres — Stalwart is 
 Same pattern as SO / Queues: **list → resource detail**.
 
 1. **`/console/mail`** — mailbox table (primary), **Create mailbox** button, and a collapsible **Service status & DNS** panel (engine health, domain/hostname/IP, transport, DNS records read-only).
-2. **`/console/mail/{mailboxId}`** — 3-pane email client:
-   - **Sidebar** — Inbox, Sent, Drafts, Trash, Archive, Search, Settings, and Compose button with unread counts
+2. **`/console/mail/{mailboxId}`** — email client:
+   - **Desktop / tablet** — 3-pane layout: folders sidebar, message list, reader/compose
+   - **Mobile** — single-screen stack (list → reader → compose/settings) with slide-in navigation; folders open from ☰ or the folder title (drawer); FAB for new message; compact chrome
+   - **Sidebar** — Inbox, Sent, Drafts, Trash, Archive, Search, Settings, and Compose (desktop)
    - **Message list** — sender avatars, subject, preview, relative dates, unread dot, attachment indicator
    - **Message view** — sanitized HTML rendering (DOMPurify), plain text fallback, attachment downloads, action toolbar
 
