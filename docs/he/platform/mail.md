@@ -113,6 +113,23 @@ HomeCloud Mail הוא שירות דואר ב-control plane מעל מנוע **Sta
 - webhook inbound
 - מעבר OTP/invites ל-`noreply@`
 
+## הקשחת מסירה (Deliverability)
+
+בקונסול: **סטטוס → מסירה** — בדיקות חיות ו־**Fix** ל-CloudNS כשמחובר.
+
+| פריט | מומלץ | הערה |
+|------|--------|------|
+| SPF | `v=spf1 mx -all` | בלי `ip4:` — מתאים ל-IP דינמי בבית |
+| DKIM | TXT מ-Stalwart | Fix DKIM מפרסם + מסנכרן zone |
+| DMARC | `p=quarantine` + rua/ruf | צור תיבה לדוחות |
+| TLS-RPT | `_smtp._tls` | דוחות כשלי TLS |
+| MTA-STS | TXT + מדיניות HTTPS | `mta-sts.<domain>/.well-known/mta-sts.txt` |
+| PTR | `mail.<domain>` | **רק אצל ספק ה-IP** (בסלקום ביתי לרוב אי אפשר) |
+| BIMI | בהמשך | אחרי DMARC enforcement |
+| ARC | Stalwart | בעיקר לשרשראות העברה |
+
+סקריפט רענון DNS: `setup-mail-dns-homelab.sh`. פרטים מלאים בעמוד ה-EN.
+
 ## Config
 
 ראה את עמוד ה-EN לפרטי env ודוגמאות API. פתחו בראוטר **25 / 465 / 587**; אל תחשפו את פורט הניהול הציבורי.

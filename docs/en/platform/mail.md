@@ -120,6 +120,29 @@ The service status section is collapsed by default so mailboxes stay front and c
 - Event/webhook inbound (Phase 1 uses pull; events later)
 - Cutover of OTP/invites to `noreply@` (after send is stable)
 
+## Deliverability hardening
+
+Console **Status → Deliverability** runs live checks and can **Fix** safe CloudNS records when `CLOUDNS_*` is configured on the API.
+
+| Item | Recommended | Notes |
+|------|-------------|-------|
+| SPF | `v=spf1 mx -all` | Use **mx** (not `ip4:`) so a home/dynamic IP stays valid when you update the `mail` A record |
+| DKIM | TXT from Stalwart | **Fix DKIM** publishes the key + forces CloudNS zone sync |
+| DMARC | `p=quarantine` + `rua`/`ruf` | Create a mailbox for reports (e.g. `dmarc-reports@`) |
+| TLS-RPT | `_smtp._tls` TXT | Aggregate TLS failure reports |
+| MTA-STS | `_mta-sts` TXT + HTTPS policy | Policy served at `https://mta-sts.<domain>/.well-known/mta-sts.txt` (`mode: testing` until SMTP certs are solid) |
+| PTR / rDNS | `mail.<domain>` | **ISP only** — residential (e.g. Cellcom/Netvision `bb.*`) usually cannot set PTR |
+| BIMI | later | Needs DMARC quarantine/reject + SVG (+ VMC for Gmail logos) |
+| ARC | Stalwart-native | Useful mainly for forwarding chains; not required for direct SMTP |
+
+Bootstrap / refresh forward DNS on the homelab host:
+
+```bash
+bash homecloud-data-plane/services/mail/scripts/setup-mail-dns-homelab.sh
+```
+
+Then add Traefik route `Host(mta-sts.<domain>)` → API (see `homecloud-infra/platform/traefik/dynamic/console-host.yml.example`).
+
 ## Configuration (examples)
 
 ```bash
@@ -131,6 +154,11 @@ MAIL_PLATFORM_ACCOUNT_SHORT_ID=abc123def456
 STALWART_ADMIN_URL=http://127.0.0.1:18080
 STALWART_ADMIN_USER=admin
 STALWART_ADMIN_PASSWORD=...
+CLOUDNS_AUTH_ID=...
+CLOUDNS_AUTH_PASSWORD=...
+CLOUDNS_ZONE=example.com
+# Optional after Traefik mta-sts route exists:
+# MAIL_MTA_STS_POLICY_URL=https://mta-sts.example.com/.well-known/mta-sts.txt
 ```
 
 Router: forward TCP **25 / 465 / 587** to the K3s node. Do **not** expose management port `18080` publicly.
