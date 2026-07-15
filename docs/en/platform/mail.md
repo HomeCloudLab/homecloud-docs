@@ -15,7 +15,7 @@ Bodies, attachments, and folders are **not** stored in Postgres — Stalwart is 
 
 ## Console navigation
 
-Same pattern as SO / Queues: **list → resource detail**.
+Same pattern as SO / Queues: **list → resource detail**. Opening a mailbox keeps the mail chrome visible while data loads (no full-page skeleton flash); console shell padding stays stable across the Mail section.
 
 1. **`/console/mail`** — mailbox table (primary), **Create mailbox** button, and a collapsible **Service status & DNS** panel (engine health, domain/hostname/IP, transport, DNS records read-only).
 2. **`/console/mail/{mailboxId}`** — email client:
