@@ -92,7 +92,7 @@ The service status section is collapsed by default so mailboxes stay front and c
 
 ### Mailbox settings
 - **Display name** — shown as the sender name in outgoing emails (From header)
-- **Signature** — rich text signature appended automatically to every outgoing message
+- **Signature** — seeded into the compose editor (after `--`) so you can edit or remove it before send; not appended silently by the API
 - **Forwarding** — forward incoming emails to another address (stored in DB, forwarding setup planned)
 - Settings accessible from the sidebar "Settings" tab inside each mailbox
 - Settings (and Compose) use the full content pane — the empty message list is hidden; the form scrolls with a sticky Save bar
