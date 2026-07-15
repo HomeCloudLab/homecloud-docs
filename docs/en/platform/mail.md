@@ -19,7 +19,7 @@ Same pattern as SO / Queues: **list → resource detail**. Opening a mailbox kee
 
 1. **`/console/mail`** — mailbox table (primary), **Create mailbox** button, and a collapsible **Service status & DNS** panel (engine health, domain/hostname/IP, transport, DNS records read-only).
 2. **`/console/mail/{mailboxId}`** — email client:
-   - **Desktop / tablet** — 3-pane layout: folders sidebar, message list, reader/compose
+   - **Desktop / tablet** — 3-pane layout: folders sidebar, message list, reader/compose; mailbox shown as a Gmail-like identity chip (avatar + display name + bold email); **New message** and **Full screen** sit in a toolbar under that chip (fullscreen exit bar shows the same identity)
    - **Mobile** — single-screen stack (list → reader → compose/settings) with slide-in navigation; folders open from ☰ or the folder title (drawer); FAB for new message; true edge-to-edge (console shell padding removed on the mail client); long recipient lines truncate (`name +N`); list scrolls clear of the FAB and status footer
    - **Sidebar** — Inbox, Sent, Drafts, Trash, Archive, Search, Settings, and Compose (desktop)
    - **Message list** — sender avatars, subject, preview, relative dates, unread dot, attachment indicator
