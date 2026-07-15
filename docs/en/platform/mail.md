@@ -56,6 +56,9 @@ The service status section is collapsed by default so mailboxes stay front and c
 ### Sent folder
 - Sent messages pulled from Stalwart IMAP Sent folder (not just control-plane metadata)
 - Full body and headers available when viewing sent messages
+- **Send result** — success means Stalwart **accepted** the message for outbound delivery (not a guarantee the remote inbox accepted it)
+- Immediate SMTP rejections surface as status `failed` with the server reason in the UI
+- Async failures (e.g. Gmail bounce after accept) appear as Delivery Status / bounce mail in Inbox; when the bounce references a sent `Message-ID`, that outbound row is marked `failed`
 
 ### Attachments
 - Received attachment metadata extracted from IMAP MIME parts
@@ -90,6 +93,7 @@ The service status section is collapsed by default so mailboxes stay front and c
 - **Signature** — rich text signature appended automatically to every outgoing message
 - **Forwarding** — forward incoming emails to another address (stored in DB, forwarding setup planned)
 - Settings accessible from the sidebar "Settings" tab inside each mailbox
+- Settings (and Compose) use the full content pane — the empty message list is hidden; the form scrolls with a sticky Save bar
 
 ## Phase 1 scope
 
