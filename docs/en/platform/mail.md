@@ -86,6 +86,8 @@ The service status section is collapsed by default so mailboxes stay front and c
 - Styled blockquotes for quoted replies, proper table rendering, responsive images
 - Plain text fallback with `whitespace-pre-wrap`
 - Scoped CSS container (`prose`) for safe display
+- **Dark themes (Homelab / Midnight)** — the message body iframe is fully transparent (card chrome shows through) with soft light text; common forced-white / black-text wrappers from HTML mail are neutralized; no extra inner padding beyond the card header alignment
+- **HTML layout direction** — the reader document defaults to `dir="ltr"` (like Gmail) so centered table layouts stay centered; Hebrew still renders via Unicode bidi. Explicit `dir` in the email HTML is honored; outbound compose still wraps with UI direction
 
 ### Folders
 - Inbox, Sent, Drafts, Trash, Archive — all backed by Stalwart IMAP folders
