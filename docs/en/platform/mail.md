@@ -20,7 +20,7 @@ Same pattern as SO / Queues: **list → resource detail**.
 1. **`/console/mail`** — mailbox table (primary), **Create mailbox** button, and a collapsible **Service status & DNS** panel (engine health, domain/hostname/IP, transport, DNS records read-only).
 2. **`/console/mail/{mailboxId}`** — email client:
    - **Desktop / tablet** — 3-pane layout: folders sidebar, message list, reader/compose
-   - **Mobile** — single-screen stack (list → reader → compose/settings) with slide-in navigation; folders open from ☰ or the folder title (drawer); FAB for new message; compact chrome
+   - **Mobile** — single-screen stack (list → reader → compose/settings) with slide-in navigation; folders open from ☰ or the folder title (drawer); FAB for new message; edge-to-edge list (no side margins)
    - **Sidebar** — Inbox, Sent, Drafts, Trash, Archive, Search, Settings, and Compose (desktop)
    - **Message list** — sender avatars, subject, preview, relative dates, unread dot, attachment indicator
    - **Message view** — sanitized HTML rendering (DOMPurify), plain text fallback, attachment downloads, action toolbar
@@ -31,8 +31,9 @@ The service status section is collapsed by default so mailboxes stay front and c
 ## Email client features
 
 ### Compose
-- **Rich text editor** (Tiptap) with toolbar: bold, italic, underline, strikethrough, headings, lists, blockquote, links, text alignment, undo/redo
-- **Gmail-style email chips** for To, CC, BCC — tokenize on space, comma, Enter; remove with backspace or X button
+- **Rich text editor** (Tiptap) with toolbar: bold, italic, underline, strikethrough, font size, headings, lists, blockquote, links (dialog for URL + optional label; uses selection when text is highlighted), **inline images/logos** (toolbar, paste, or drop; sent as `cid:` multipart/related so Gmail shows them), text alignment, clear formatting, undo/redo — active marks/blocks are highlighted in the toolbar; lists and quotes use visible styles (bullets/numbers/border)
+- **Text direction** — compose wraps HTML with `dir="rtl"` (or `ltr`) from UI language / Hebrew-Arabic content so Gmail and other clients keep the same direction as the editor
+- **Gmail-style email chips** for To, CC, BCC — tokenize on space, comma, Enter; click a chip to edit the address; remove with backspace or X
 - HTML body (`body_html`) and plain text (`body_text`) sent to API
 - **Attachment support** — paperclip button opens file picker, drag-and-drop anywhere on compose form; files encoded as base64 and sent with the message
 - Upload progress indicator during send with attachments
