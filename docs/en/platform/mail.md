@@ -23,7 +23,7 @@ Same pattern as SO / Queues: **list → resource detail**. Opening a mailbox kee
    - **Mobile** — single-screen stack (list → reader → compose/settings) with slide-in navigation; folders open from ☰ or the folder title (drawer); FAB for new message; true edge-to-edge (console shell padding removed on the mail client); long recipient lines truncate (`name +N`); list scrolls clear of the FAB and status footer
    - **Sidebar** — Inbox, Sent, Drafts, Trash, Archive, Search, Settings, and Compose (desktop)
    - **Message list** — sender avatars, subject, preview, relative dates, unread dot, attachment indicator
-   - **Message view** — sanitized HTML rendering (DOMPurify), plain text fallback, attachment downloads, action toolbar
+   - **Message view** — sanitized HTML rendering (DOMPurify) in a sandboxed iframe; fixed-width marketing shells (e.g. 600px Brevo tables) soft-fit to the reader width; horizontal scroll when content still overflows (zoom / rigid layouts); plain text fallback; attachment downloads; action toolbar
 
 There is no separate global Messages / Domains / Settings tab on the list page.
 The service status section is collapsed by default so mailboxes stay front and centre.
@@ -33,15 +33,17 @@ The service status section is collapsed by default so mailboxes stay front and c
 ### Compose
 - **Rich text editor** (Tiptap) with toolbar: bold, italic, underline, strikethrough, font size, headings, lists, blockquote, links (dialog for URL + optional label; uses selection when text is highlighted), **inline images/logos** (toolbar, paste, or drop; sent as `cid:` multipart/related so Gmail shows them), text alignment, clear formatting, undo/redo — active marks/blocks are highlighted in the toolbar; lists and quotes use visible styles (bullets/numbers/border)
 - **Text direction** — compose wraps HTML with `dir="rtl"` (or `ltr`) from UI language / Hebrew-Arabic content so Gmail and other clients keep the same direction as the editor
-- **Gmail-style email chips** for To, CC, BCC — tokenize on space, comma, Enter; click a chip to edit the address; remove with backspace or X
+- **Gmail-style email chips** for To, CC, BCC — tokenize on space, comma, Enter; click a chip to edit the address; remove with backspace or X; bidi/zero-width junk stripped; send blocked if any chip is invalid
+- **Recipient addresses** — invisible / bidirectional Unicode marks (common when pasting from RTL Gmail UI) are stripped on compose chips and on send; invalid addresses are rejected before SMTP
 - HTML body (`body_html`) and plain text (`body_text`) sent to API
 - **Attachment support** — paperclip button opens file picker, drag-and-drop anywhere on compose form; files encoded as base64 and sent with the message
+- Empty 0-byte bounce/DSN placeholder parts are hidden from the attachment list
 - Upload progress indicator during send with attachments
 - Ctrl+Enter keyboard shortcut to send
 
 ### Reply / Reply All / Forward
-- **Reply** — prefills To = original sender, Subject = `Re: {subject}`, original body as blockquote
-- **Reply All** — prefills all recipients minus self
+- **Reply** — prefills To = original sender (bare email), Subject = `Re: {subject}`, original body as blockquote
+- **Reply All** — prefills all recipients minus self (sanitized bare emails)
 - **Forward** — prefills Subject = `Fwd: {subject}`, includes forwarded message header
 - Replies set `In-Reply-To` and `References` SMTP headers for proper conversation threading
 
@@ -62,6 +64,10 @@ The service status section is collapsed by default so mailboxes stay front and c
 - **Send result** — success means Stalwart **accepted** the message for outbound delivery (not a guarantee the remote inbox accepted it)
 - Immediate SMTP rejections surface as status `failed` with the server reason in the UI
 - Async failures (e.g. Gmail bounce after accept) appear as Delivery Status / bounce mail in Inbox; when the bounce references a sent `Message-ID`, that outbound row is marked `failed`
+
+### Gmail / major providers — delivery notes
+- Gmail rejects direct submission from residential / unauthorized IPs (`550 5.7.1 The IP you're using to send mail is not authorized…`). Outbound must leave from a mail server IP with proper **PTR + SPF + DKIM** (Stalwart on your public mail host), not a home ISP IP. If you see this bounce, check `MAIL_PUBLIC_IP`, DNS, and that Stalwart is the egress MTA — do not expect Gmail to accept DIY SMTP from a dynamic client IP.
+- Addresses contaminated with RTL bidi marks (e.g. `user@gmail.com` + U+202C/U+200F) cause `DNS resolution error: Malformed label` — fixed by address sanitization on compose/send.
 
 ### Attachments
 - Received attachment metadata extracted from IMAP MIME parts
