@@ -154,6 +154,35 @@ curl -sS -X POST "http://127.0.0.1:8000/api/v1/platform/accounts" \
   -d '{"name":"Acme","slug":"acme","owner_email":"owner@example.com","mfa_code":"123456"}'
 ```
 
+## CLI authentication with MFA
+
+The `homecloud` CLI supports the same MFA factors as the Console.
+
+### Terminal (TOTP / backup)
+
+```bash
+homecloud login --username alice
+# → Verification code: …
+homecloud login --username alice --password '…' --mfa-code 123456
+```
+
+On `403 MFA_REQUIRED` with `mfa_token`, the CLI completes `POST /auth/login` with `{mfa_token, mfa_code}`. The same central handler injects `mfa_code` for step-up calls (create account, impersonation, etc.).
+
+### Browser (passkeys / security keys)
+
+```bash
+homecloud login --browser
+```
+
+| Step | API |
+|------|-----|
+| Start | `POST /api/v1/auth/cli/session` → `verification_uri` |
+| Browser page | `/auth/cli?session=…` — full Console login including WebAuthn |
+| Approve | `POST /api/v1/auth/cli/session/{id}/approve` (Bearer JWT) |
+| Poll | `GET /api/v1/auth/cli/session/{id}` → one-time `access_token` |
+
+Sessions live ~10 minutes in Redis, are single-use, and never persist `mfa_token` or codes on disk.
+
 ## Account impersonation
 
 Platform admins can act inside a tenant account for support. Impersonation:

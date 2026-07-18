@@ -15,6 +15,22 @@ homecloud login --username alice --password '...'
 !!! important
     ההתחברות משתמשת ב-**username**, לא ב-email. השדה ב-console API הוא `username`.
 
+### MFA
+
+מנהלי פלטפורמה עם MFA חייבים להשלים גורם שני:
+
+| שיטה | איך |
+|------|-----|
+| TOTP / קוד גיבוי | בקשה בטרמינל, או `--mfa-code` |
+| Passkey / מפתח אבטחה | `homecloud login --browser` |
+
+```bash
+homecloud login --username alice --mfa-code 123456
+homecloud login --browser
+```
+
+כל קריאת console שמחזירה `MFA_REQUIRED` מטופלת על ידי מנגנון MFA מרכזי ב-CLI (אתגר login או step-up) — הפקודות עצמן לא מממשות MFA.
+
 ה-session נשמר ב-`~/.homecloud/session` לכל פרופיל.
 
 ## Access Key (data plane)
@@ -35,6 +51,8 @@ homecloud \
 ```
 
 אין צורך ב-`account_id` — הוא מזוהה דרך `/access-key/whoami` בשער ה-SO.
+
+Access Keys לא דורשים MFA בכל בקשה. יוצרים אותם פעם אחת בקונסול כשכבר מחוברים (כולל MFA).
 
 ## פרופילים
 

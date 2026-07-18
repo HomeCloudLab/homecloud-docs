@@ -42,6 +42,33 @@ POST /api/v1/platform/impersonation/exit
 Authorization: Bearer <impersonation_token>
 ```
 
+## CLI עם MFA
+
+ה-CLI תומך באותם גורמי MFA כמו הקונסול.
+
+### טרמינל (TOTP / גיבוי)
+
+```bash
+homecloud login --username alice
+# → Verification code: …
+homecloud login --username alice --password '…' --mfa-code 123456
+```
+
+### דפדפן (passkeys / מפתחות אבטחה)
+
+```bash
+homecloud login --browser
+```
+
+| שלב | API |
+|------|-----|
+| התחלה | `POST /api/v1/auth/cli/session` |
+| דף | `/auth/cli?session=…` |
+| אישור | `POST /api/v1/auth/cli/session/{id}/approve` |
+| סקר | `GET /api/v1/auth/cli/session/{id}` → JWT חד-פעמי |
+
+סשנים חיים כ־10 דקות ב-Redis, חד-פעמיים, ולא שומרים `mfa_token` או קודים בדיסק.
+
 ## מלאי homelab ישן
 
 לאחר migration, משאבי homelab מלפני multi-tenant נמצאים בחשבון platform admin (`settings.legacy_homelab=true`). tenants חדשים מתחילים ריקים.
