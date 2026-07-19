@@ -2,7 +2,7 @@
 
 Python SDK for HomeCloud — programmatic access with Access Keys (no interactive MFA).
 
-**Repo:** [homecloud-sdk](https://github.com/HomeCloudLab/homecloud-sdk) · **Version:** 0.3.2
+**Repo:** [homecloud-sdk](https://github.com/HomeCloudLab/homecloud-sdk) · **Version:** 0.4.0
 
 ## Install
 
@@ -21,7 +21,7 @@ pip install -e ../homecloud-sdk
 ## Quick start
 
 ```python
-from homecloud_sdk import HomeCloud
+from homecloud import HomeCloud
 
 # CI / servers — Access Key only
 client = HomeCloud(
@@ -39,6 +39,18 @@ client.so.upload("my-bucket", "./file.txt", key="docs/file.txt")
 meta = client.so.head_object("my-bucket", "docs/file.txt")  # metadata only
 client.mq.send("orders", {"id": 1})
 ```
+
+### Async
+
+```python
+from homecloud import AsyncHomeCloud
+
+async with AsyncHomeCloud.from_env() as client:
+    meta = await client.so.head_object("my-bucket", "docs/file.txt")
+    await client.mq.send("orders", {"id": 1})
+```
+
+`from homecloud_sdk import …` still works for compatibility; prefer `from homecloud import …`.
 
 ## Auth model
 
@@ -61,7 +73,7 @@ See also: [CLI authentication](../cli/authentication.md).
 | `so.list_buckets` / `create_bucket` | Console JWT | Management helper |
 | `queues.list` / `apps.list` / `accounts.*` | Console JWT | Management helper |
 
-Interactive helpers (`login`, `login_browser`) exist for tools/CLI only — not for unattended jobs.
+Interactive helpers (`login`, `login_browser`) exist for tools/CLI only — not for unattended jobs. Async client supports the same helpers without blocking MFA prompts (pass `mfa_code` if needed).
 
 ## Profiles and environment
 
