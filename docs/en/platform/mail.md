@@ -18,8 +18,8 @@ Bodies, attachments, and folders are **not** stored in Postgres — Stalwart is 
 Same pattern as SO / Queues: **list → resource detail**. Opening a mailbox keeps the mail chrome visible while data loads (no full-page skeleton flash); console shell padding stays stable across the Mail section.
 
 1. **`/console/mail`** — mailbox table (primary), **Create mailbox** button, **Templates** link, and a collapsible **Service status & DNS** panel (engine health, domain/hostname/IP, transport, DNS records read-only).
-2. **`/console/mail/templates`** — account-scoped HBS email template library (create from blank / Welcome / Notification starters).
-3. **`/console/mail/templates/{id}`** — block editor (header, text, button, image, divider, spacer, footer), merge-tag chips, live HTML preview.
+2. **`/console/mail/templates`** — account-scoped HBS email template library (blank / Welcome / Notification / Announcement / Promo / Invoice).
+3. **`/console/mail/templates/{id}`** — shared visual designer (palette, outline tree, inspector, live preview; click preview to select blocks).
 4. **`/console/mail/{mailboxId}`** — email client:
    - **Desktop / tablet** — 3-pane layout: folders sidebar, message list, reader/compose; mailbox shown as a Gmail-like identity chip (avatar + display name + bold email); **New message** and **Full screen** sit in a toolbar under that chip (fullscreen exit bar shows the same identity)
    - **Mobile** — single-screen stack (list → reader → compose/settings) with slide-in navigation; folders open from ☰ or the folder title (drawer); FAB for new message; true edge-to-edge (console shell padding removed on the mail client); long recipient lines truncate (`name +N`); list scrolls clear of the FAB and status footer
@@ -34,7 +34,7 @@ The service status section is collapsed by default so mailboxes stay front and c
 
 ### Compose
 - **Rich text editor** (Tiptap) with toolbar: bold, italic, underline, strikethrough, font size, headings, lists, blockquote, links (dialog for URL + optional label; uses selection when text is highlighted), **inline images/logos** (toolbar, paste, or drop; sent as `cid:` multipart/related so Gmail shows them), text alignment, clear formatting, undo/redo — active marks/blocks are highlighted in the toolbar; lists and quotes use visible styles (bullets/numbers/border)
-- **Insert template** — pick an account template to fill subject + HTML body (merge tags rendered with sample/default variables; edit before send)
+- **Insert template** — opens **template mode**: shared visual designer + live preview inside compose (subject + merge tags). Send compiles document JSON to HTML. **Switch to free text edit** compiles once into TipTap (block structure is lost). **Clear template** exits template mode.
 - **Text direction** — compose wraps HTML with `dir="rtl"` (or `ltr`) from UI language / Hebrew-Arabic content so Gmail and other clients keep the same direction as the editor
 - **Gmail-style email chips** for To, CC, BCC — tokenize on space, comma, Enter; click a chip to edit the address; remove with backspace or X; bidi/zero-width junk stripped; send blocked if any chip is invalid
 - **Recipient addresses** — invisible / bidirectional Unicode marks (common when pasting from RTL Gmail UI) are stripped on compose chips and on send; invalid addresses are rejected before SMTP
@@ -112,16 +112,26 @@ The service status section is collapsed by default so mailboxes stay front and c
 
 ## Email templates (HBS)
 
-Account-scoped reusable layouts:
+Account-scoped reusable layouts owned as JSON blocks, compiled to email-safe HTML tables (no Unlayer lock-in).
 
 | Surface | Path |
 |---------|------|
 | Library | `/console/mail/templates` |
 | Editor | `/console/mail/templates/{id}` |
-| API | `GET/POST /accounts/{id}/mail/templates`, `PATCH/DELETE …/{template_id}`, `POST …/{template_id}/render`, `POST …/{template_id}/duplicate` |
-| Send | `POST …/messages` with optional `template_id` + `template_variables` |
+| API | `GET/POST /accounts/{id}/mail/templates`, `PATCH/DELETE …/{template_id}`, `POST …/preview`, `POST …/{template_id}/render`, `POST …/{template_id}/duplicate` |
+| Send | Compose template mode, or `POST …/messages` with optional `template_id` + `template_variables` |
 
-Document model is JSON blocks compiled server-side to email-safe Handlebars (allowlisted helpers: `if`, `each`). Merge tags include `{{user_name}}`, `{{company_name}}`, `{{cta_url}}`, `{{portal_url}}`, and related identity fields.
+### Document model
+- Flat and nested blocks: `header`, `text`, `button`, `image`, **`section`** (children, depth ≤ 3), `columns`, `list`, `code`, `divider`, `spacer`, `footer`
+- `section` is the “frame” for nesting image + text + button
+- Live preview: `POST …/templates/preview` (no save). Canvas click selects via `data-hc-block-id`
+- Merge tags: `{{user_name}}`, `{{company_name}}`, `{{cta_url}}`, `{{portal_url}}`, and related identity fields
+- Starters: blank, welcome, notification, announcement (section skeleton), promo, invoice
+
+### Compose template mode
+1. FileText → pick template → designer embeds in compose
+2. Edit blocks / subject live; send compiles via preview
+3. Optional: switch to free TipTap edit (HTML only after that)
 
 ## Phase 1 scope
 
