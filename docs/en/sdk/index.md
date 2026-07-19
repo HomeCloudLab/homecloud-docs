@@ -2,7 +2,7 @@
 
 Python SDK for HomeCloud — programmatic access with Access Keys (no interactive MFA).
 
-**Repo:** [homecloud-sdk](https://github.com/HomeCloudLab/homecloud-sdk) · **Version:** 0.4.1
+**Repo:** [homecloud-sdk](https://github.com/HomeCloudLab/homecloud-sdk) · **Version:** 0.4.2
 
 ## Install
 
@@ -51,6 +51,21 @@ async with AsyncHomeCloud.from_env() as client:
 ```
 
 `from homecloud_sdk import …` still works for compatibility; prefer `from homecloud import …`.
+
+### Errors
+
+Catch typed errors (or base `HomeCloudError`):
+
+```python
+from homecloud import HomeCloud, NotFoundError, HomeCloudError
+
+try:
+    HomeCloud().so.head_object("docs", "missing.txt")
+except NotFoundError as exc:
+    print(exc.resource_type, exc.resource)  # object, docs/missing.txt
+except HomeCloudError as exc:
+    print(exc.status_code, exc)
+```
 
 ## Auth model
 

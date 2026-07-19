@@ -2,7 +2,7 @@
 
 SDK של HomeCloud ל-Python — גישה תכנותית עם Access Keys (בלי MFA אינטראקטיבי).
 
-**מאגר:** [homecloud-sdk](https://github.com/HomeCloudLab/homecloud-sdk) · **גרסה:** 0.4.1
+**מאגר:** [homecloud-sdk](https://github.com/HomeCloudLab/homecloud-sdk) · **גרסה:** 0.4.2
 
 ## התקנה
 
@@ -51,6 +51,21 @@ async with AsyncHomeCloud.from_env() as client:
 ```
 
 `from homecloud_sdk import …` עדיין עובד לתאימות; מומלץ `from homecloud import …`.
+
+### שגיאות
+
+תפסו טיפוסים ספציפיים (או את הבסיס `HomeCloudError`):
+
+```python
+from homecloud import HomeCloud, NotFoundError, HomeCloudError
+
+try:
+    HomeCloud().so.head_object("docs", "missing.txt")
+except NotFoundError as exc:
+    print(exc.resource_type, exc.resource)  # object, docs/missing.txt
+except HomeCloudError as exc:
+    print(exc.status_code, exc)
+```
 
 ## מודל אימות
 
