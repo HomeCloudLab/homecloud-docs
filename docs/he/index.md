@@ -21,7 +21,7 @@ HomeCloud הוא control plane לענן מותאם homelab, הכולל:
 - [התחלה](getting-started/overview.md)
 - [התקנת CLI](cli/install.md)
 - [פקודות CLI](cli/commands/index.md)
-- [SDK](sdk/index.md) *(בקרוב)*
+- [SDK](sdk/index.md)
 
 ## מאגרים
 
@@ -31,4 +31,5 @@ HomeCloud הוא control plane לענן מותאם homelab, הכולל:
 | [homecloud-ui](https://github.com/HomeCloudLab/homecloud-ui) | קונסולת ווב |
 | [homecloud-cli](https://github.com/HomeCloudLab/homecloud-cli) | ממשק שורת פקודה |
 | [homecloud-data-plane](https://github.com/HomeCloudLab/homecloud-data-plane) | שערי SO, MQ, MDB, Secrets |
+| [homecloud-sdk](https://github.com/HomeCloudLab/homecloud-sdk) | SDK ל-Python |
 | [homecloud-docs](https://github.com/HomeCloudLab/homecloud-docs) | אתר התיעוד הזה |

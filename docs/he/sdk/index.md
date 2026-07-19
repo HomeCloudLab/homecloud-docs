@@ -1,25 +1,80 @@
 # SDK
 
-!!! info "בקרוב"
-    ה-SDK של HomeCloud ל-Python (`homecloud-sdk`) מובנה כיום בתוך `homecloud-cli`. חבילת SDK עצמאית ועיון API מלא יפורסמו כאן.
+SDK של HomeCloud ל-Python — גישה תכנותית עם Access Keys (בלי MFA אינטראקטיבי).
 
-## חלקים מתוכננים
+**מאגר:** [homecloud-sdk](https://github.com/HomeCloudLab/homecloud-sdk) · **גרסה:** 0.3.2
 
-- התקנה (`pip install homecloud-sdk`)
-- סקירת `HomeCloudClient`
-- ‏APIs של שירותים: `storage`, `mq`, `queues`, `accounts`, `secrets`
-- אימות ופרופילים
-- ניהול גרסאות ויומן שינויים
+## התקנה
 
-## שימוש נוכחי (דרך חבילת ה-CLI)
-
-```python
-from homecloud_sdk import HomeCloudClient
-
-client = HomeCloudClient()
-client.configure(access_key_id="HCAK...", secret_access_key="...")
-client.so.sync_local_to_bucket("./dist", "my-bucket", delete=True)  # דורס כברירת מחדל
-client.so.sync_local_to_bucket("./dist", "my-bucket", skip=True)  # דילוג לפי גודל
+```bash
+pip install homecloud-sdk
 ```
 
-לעיון ב-API העדכני ביותר, ראו את קוד המקור של [homecloud-cli](https://github.com/HomeCloudLab/homecloud-cli).
+עד הפרסום ב-PyPI, התקנה מ-GitHub (מאגר פרטי דורש טוקן):
+
+```bash
+pip install "git+https://github.com/HomeCloudLab/homecloud-sdk.git"
+# או checkout מקומי:
+pip install -e ../homecloud-sdk
+```
+
+## התחלה מהירה
+
+```python
+from homecloud_sdk import HomeCloud
+
+# CI / שרתים — Access Key בלבד
+client = HomeCloud(
+    access_key="HCAK...",
+    secret_key="...",
+)
+
+# או סביבה: HC_ACCESS_KEY_ID / HC_SECRET_ACCESS_KEY
+# client = HomeCloud.from_env()
+
+# או ~/.homecloud/credentials (+ אופציונלי HC_PROFILE)
+# client = HomeCloud()
+
+client.so.upload("my-bucket", "./file.txt", key="docs/file.txt")
+meta = client.so.head_object("my-bucket", "docs/file.txt")  # מטא־דאטה בלבד
+client.mq.send("orders", {"id": 1})
+```
+
+## מודל אימות
+
+| מי | איך | MFA |
+|----|-----|-----|
+| **SDK / אוטומציה** | Access Key + Secret (SigV1 data plane) | לא בבקשות |
+| **CLI / משתמשים** | `homecloud login` → JWT | בזמן login / step-up |
+
+יוצרים Access Keys פעם אחת בקונסולה (IAM). קריאות SDK בזמן ריצה לא מבקשות MFA.
+
+ראו גם: [אימות CLI](../cli/authentication.md).
+
+## פעולות לפי מישור
+
+| API | אימות | הערות |
+|-----|--------|--------|
+| `so.upload` / `download` / `sync_*` / `list_objects` / `delete` / `head_object` | Access Key | נתיב ראשי |
+| `mq.send` / `receive` | Access Key | נתיב ראשי |
+| `account_id()` | Access Key whoami | בלי JWT |
+| `so.list_buckets` / `create_bucket` | Console JWT | ניהול |
+| `queues.list` / `apps.list` / `accounts.*` | Console JWT | ניהול |
+
+עוזרי login אינטראקטיביים (`login`, `login_browser`) מיועדים ל-CLI/כלים — לא לאוטומציה.
+
+## פרופילים וסביבה
+
+| משתנה | קיצור | השפעה |
+|--------|--------|--------|
+| `HOMECLOUD_PROFILE` | `HC_PROFILE` | פרופיל פעיל |
+| `HOMECLOUD_ACCESS_KEY_ID` | `HC_ACCESS_KEY_ID` | מפתח |
+| `HOMECLOUD_SECRET_ACCESS_KEY` | `HC_SECRET_ACCESS_KEY` | סוד |
+| `HOMECLOUD_ACCOUNT_ID` | `HC_ACCOUNT_ID` | חשבון אופציונלי |
+| `HOMECLOUD_APEX` | `HC_APEX` | דומיין פלטפורמה |
+
+קובץ credentials: `~/.homecloud/credentials` (JSON multi-profile).
+
+## קשר ל-CLI
+
+[`homecloud-cli`](https://github.com/HomeCloudLab/homecloud-cli) הוא מעטפת Typer/Rich ש**תלויה** ב-`homecloud-sdk`. אין יותר העתקת מקור של ה-SDK בתוך ה-CLI.

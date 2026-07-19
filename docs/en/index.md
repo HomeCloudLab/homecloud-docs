@@ -21,7 +21,7 @@ HomeCloud is a homelab-first cloud control plane with:
 - [Getting started](getting-started/overview.md)
 - [CLI install](cli/install.md)
 - [CLI commands](cli/commands/index.md)
-- [SDK](sdk/index.md) *(coming soon)*
+- [SDK](sdk/index.md)
 
 ## Repositories
 
@@ -31,4 +31,5 @@ HomeCloud is a homelab-first cloud control plane with:
 | [homecloud-ui](https://github.com/HomeCloudLab/homecloud-ui) | Web console |
 | [homecloud-cli](https://github.com/HomeCloudLab/homecloud-cli) | Command-line interface |
 | [homecloud-data-plane](https://github.com/HomeCloudLab/homecloud-data-plane) | SO, MQ, MDB, Secrets gateways |
+| [homecloud-sdk](https://github.com/HomeCloudLab/homecloud-sdk) | Python SDK |
 | [homecloud-docs](https://github.com/HomeCloudLab/homecloud-docs) | This documentation site |

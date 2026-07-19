@@ -1,25 +1,80 @@
 # SDK
 
-!!! info "Coming soon"
-    The HomeCloud Python SDK (`homecloud-sdk`) is vendored inside `homecloud-cli` today. A standalone SDK package and full API reference will be published here.
+Python SDK for HomeCloud — programmatic access with Access Keys (no interactive MFA).
 
-## Planned sections
+**Repo:** [homecloud-sdk](https://github.com/HomeCloudLab/homecloud-sdk) · **Version:** 0.3.2
 
-- Installation (`pip install homecloud-sdk`)
-- `HomeCloudClient` overview
-- Service APIs: `storage`, `mq`, `queues`, `accounts`, `secrets`
-- Authentication and profiles
-- Versioning and changelog
+## Install
 
-## Current usage (via CLI package)
-
-```python
-from homecloud_sdk import HomeCloudClient
-
-client = HomeCloudClient()
-client.configure(access_key_id="HCAK...", secret_access_key="...")
-client.so.sync_local_to_bucket("./dist", "my-bucket", delete=True)  # overwrites by default
-client.so.sync_local_to_bucket("./dist", "my-bucket", skip=True)  # same-size skip
+```bash
+pip install homecloud-sdk
 ```
 
-See [homecloud-cli](https://github.com/HomeCloudLab/homecloud-cli) source for the latest API.
+Until the package is on PyPI, install from GitHub (private repo needs a token):
+
+```bash
+pip install "git+https://github.com/HomeCloudLab/homecloud-sdk.git"
+# or editable sibling checkout:
+pip install -e ../homecloud-sdk
+```
+
+## Quick start
+
+```python
+from homecloud_sdk import HomeCloud
+
+# CI / servers — Access Key only
+client = HomeCloud(
+    access_key="HCAK...",
+    secret_key="...",
+)
+
+# Or environment: HC_ACCESS_KEY_ID / HC_SECRET_ACCESS_KEY
+# client = HomeCloud.from_env()
+
+# Or ~/.homecloud/credentials (+ optional HC_PROFILE)
+# client = HomeCloud()
+
+client.so.upload("my-bucket", "./file.txt", key="docs/file.txt")
+meta = client.so.head_object("my-bucket", "docs/file.txt")  # metadata only
+client.mq.send("orders", {"id": 1})
+```
+
+## Auth model
+
+| Who | How | MFA |
+|-----|-----|-----|
+| **SDK / automation** | Access Key + Secret (SigV1 data plane) | Never on requests |
+| **CLI / humans** | `homecloud login` → console JWT | At login / step-up only |
+
+Create Access Keys once in the Console (IAM). Runtime SDK calls do not prompt for MFA.
+
+See also: [CLI authentication](../cli/authentication.md).
+
+## Operations by plane
+
+| API | Auth | Notes |
+|-----|------|-------|
+| `so.upload` / `download` / `sync_*` / `list_objects` / `delete` / `head_object` | Access Key | Primary path |
+| `mq.send` / `receive` | Access Key | Primary path |
+| `account_id()` | Access Key whoami | No JWT |
+| `so.list_buckets` / `create_bucket` | Console JWT | Management helper |
+| `queues.list` / `apps.list` / `accounts.*` | Console JWT | Management helper |
+
+Interactive helpers (`login`, `login_browser`) exist for tools/CLI only — not for unattended jobs.
+
+## Profiles and environment
+
+| Variable | Short | Effect |
+|----------|-------|--------|
+| `HOMECLOUD_PROFILE` | `HC_PROFILE` | Active profile |
+| `HOMECLOUD_ACCESS_KEY_ID` | `HC_ACCESS_KEY_ID` | Access key |
+| `HOMECLOUD_SECRET_ACCESS_KEY` | `HC_SECRET_ACCESS_KEY` | Secret |
+| `HOMECLOUD_ACCOUNT_ID` | `HC_ACCOUNT_ID` | Optional account |
+| `HOMECLOUD_APEX` | `HC_APEX` | Platform domain |
+
+Credentials file: `~/.homecloud/credentials` (JSON multi-profile).
+
+## Relation to the CLI
+
+[`homecloud-cli`](https://github.com/HomeCloudLab/homecloud-cli) is a thin Typer/Rich wrapper that **depends on** `homecloud-sdk`. It does not vendor the SDK source.

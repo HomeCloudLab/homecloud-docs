@@ -42,7 +42,7 @@ docs/
   index.md                 # Home
   getting-started/         # Platform onboarding
   cli/                     # CLI reference
-  sdk/                     # SDK (coming soon)
+  sdk/                     # Python SDK
   platform/                # Architecture
   operations/              # Runbooks (this site, etc.)
 ```
