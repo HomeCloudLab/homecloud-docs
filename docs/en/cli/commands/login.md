@@ -20,7 +20,28 @@ homecloud login --username daivid
 homecloud login --username daivid.aba@gmail.com
 ```
 
+## Interactive menus
+
+On a real terminal (TTY), `homecloud login` asks how to sign in with arrow keys:
+
+```text
+? How do you want to sign in?
+❯ Terminal  — username, password, authenticator / backup code
+  Browser   — passkeys & security keys (recommended if you use a passkey)
+```
+
+If MFA offers both authenticator and passkey:
+
+```text
+? Choose second factor
+❯ Authenticator app or backup code
+  Passkey / security key (YubiKey) — opens browser
+```
+
+Flags skip the menus: `--browser`, `--mfa-code`, `--username` / `--password`.
+
 ## MFA (TOTP / backup codes)
+
 
 If MFA is enabled for your platform admin user, the CLI prompts for a verification code after password:
 

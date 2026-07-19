@@ -20,7 +20,28 @@ homecloud login --username daivid
 homecloud login --username daivid.aba@gmail.com
 ```
 
+## תפריטים אינטראקטיביים
+
+בטרמינל אמיתי (TTY), `homecloud login` שואל איך להתחבר עם חיצים:
+
+```text
+? How do you want to sign in?
+❯ Terminal  — username, password, authenticator / backup code
+  Browser   — passkeys & security keys (recommended if you use a passkey)
+```
+
+אם MFA מציע גם authenticator וגם passkey:
+
+```text
+? Choose second factor
+❯ Authenticator app or backup code
+  Passkey / security key (YubiKey) — opens browser
+```
+
+Flags מדלגים על התפריטים: `--browser`, `--mfa-code`, `--username` / `--password`.
+
 ## MFA (TOTP / קודי גיבוי)
+
 
 אם MFA מופעל למשתמש platform admin, ה-CLI מבקש קוד אימות אחרי הסיסמה:
 
