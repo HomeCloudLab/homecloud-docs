@@ -17,15 +17,21 @@ Bodies, attachments, and folders are **not** stored in Postgres — Stalwart is 
 
 Same pattern as SO / Queues: **list → resource detail**. Opening a mailbox keeps the mail chrome visible while data loads (no full-page skeleton flash); console shell padding stays stable across the Mail section.
 
-1. **`/console/mail`** — mailbox table (primary), **Create mailbox** button, **Templates** link, and a collapsible **Service status & DNS** panel (engine health, domain/hostname/IP, transport, DNS records read-only).
+1. **`/console/mail`** — mailbox table (primary), **Create mailbox**, **Templates**, **Contacts**, and a collapsible **Service status & DNS** panel.
 2. **`/console/mail/templates`** — account-scoped HBS email template library (blank / Welcome / Notification / Announcement / Promo / Invoice).
 3. **`/console/mail/templates/{id}`** — shared visual designer (palette, outline tree, inspector, live preview; click preview to select blocks).
-4. **`/console/mail/{mailboxId}`** — email client:
+4. **`/console/mail/contacts`** — address book with search, multi-select, and bulk delete.
+5. **`/console/mail/{mailboxId}`** — email client:
    - **Desktop / tablet** — 3-pane layout: folders sidebar, message list, reader/compose; mailbox shown as a Gmail-like identity chip (avatar + display name + bold email); **New message** and **Full screen** sit in a toolbar under that chip (fullscreen exit bar shows the same identity)
    - **Mobile** — single-screen stack (list → reader → compose/settings) with slide-in navigation; folders open from ☰ or the folder title (drawer); FAB for new message; true edge-to-edge (console shell padding removed on the mail client); long recipient lines truncate (`name +N`); list scrolls clear of the FAB and status footer
    - **Sidebar** — Inbox, Sent, Drafts, Trash, Archive, Search, Settings, and Compose (desktop)
-   - **Message list** — sender avatars, subject, preview, relative dates, unread dot, attachment indicator
+   - **Message list** — sender avatars, subject, preview, relative dates, unread dot, attachment indicator; multi-select checkboxes with bulk trash (and permanent delete in Trash)
    - **Message view** — sanitized HTML rendering (DOMPurify) in a sandboxed iframe; fixed-width marketing shells (e.g. 600px Brevo tables) soft-fit to the reader width; horizontal scroll when content still overflows (zoom / rigid layouts); plain text fallback; attachment downloads; action toolbar
+
+### Contacts & bulk
+- **Contacts** — `/console/mail/contacts` account address book; multi-select + bulk delete
+- **Compose** — pick contacts into To (one message to many recipients)
+- **API** — `GET/POST /contacts`, `POST /contacts/bulk-delete`, `POST /messages/bulk-trash`, `POST /messages/bulk-delete`
 
 There is no separate global Messages / Domains / Settings tab on the list page.
 The service status section is collapsed by default so mailboxes stay front and centre.
