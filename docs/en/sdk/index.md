@@ -2,7 +2,7 @@
 
 Python SDK for HomeCloud — programmatic access with Access Keys (no interactive MFA).
 
-**Repo:** [homecloud-sdk](https://github.com/HomeCloudLab/homecloud-sdk) · **Version:** 0.4.0
+**Repo:** [homecloud-sdk](https://github.com/HomeCloudLab/homecloud-sdk) · **Version:** 0.4.1
 
 ## Install
 
@@ -68,6 +68,7 @@ See also: [CLI authentication](../cli/authentication.md).
 | API | Auth | Notes |
 |-----|------|-------|
 | `so.upload` / `download` / `sync_*` / `list_objects` / `delete` / `head_object` | Access Key | Primary path |
+| `so.get_object_uri` / `generate_presigned_url` | Access Key | Public URI or time-limited URL |
 | `mq.send` / `receive` | Access Key | Primary path |
 | `account_id()` | Access Key whoami | No JWT |
 | `so.list_buckets` / `create_bucket` | Console JWT | Management helper |

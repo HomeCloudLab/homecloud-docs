@@ -2,7 +2,7 @@
 
 SDK של HomeCloud ל-Python — גישה תכנותית עם Access Keys (בלי MFA אינטראקטיבי).
 
-**מאגר:** [homecloud-sdk](https://github.com/HomeCloudLab/homecloud-sdk) · **גרסה:** 0.4.0
+**מאגר:** [homecloud-sdk](https://github.com/HomeCloudLab/homecloud-sdk) · **גרסה:** 0.4.1
 
 ## התקנה
 
@@ -68,6 +68,7 @@ async with AsyncHomeCloud.from_env() as client:
 | API | אימות | הערות |
 |-----|--------|--------|
 | `so.upload` / `download` / `sync_*` / `list_objects` / `delete` / `head_object` | Access Key | נתיב ראשי |
+| `so.get_object_uri` / `generate_presigned_url` | Access Key | URI ציבורי או URL מוגבל בזמן |
 | `mq.send` / `receive` | Access Key | נתיב ראשי |
 | `account_id()` | Access Key whoami | בלי JWT |
 | `so.list_buckets` / `create_bucket` | Console JWT | ניהול |
