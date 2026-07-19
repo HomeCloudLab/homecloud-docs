@@ -72,7 +72,7 @@ Flow:
 
 1. CLI starts a short-lived session and opens the Console
 2. You sign in in the browser (password, TOTP, backup code, or passkey)
-3. Click **Authorize CLI**
+3. After successful sign-in the CLI is authorized automatically
 4. CLI receives a one-time JWT and exits
 
 ```text
