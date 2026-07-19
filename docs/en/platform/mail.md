@@ -17,8 +17,10 @@ Bodies, attachments, and folders are **not** stored in Postgres — Stalwart is 
 
 Same pattern as SO / Queues: **list → resource detail**. Opening a mailbox keeps the mail chrome visible while data loads (no full-page skeleton flash); console shell padding stays stable across the Mail section.
 
-1. **`/console/mail`** — mailbox table (primary), **Create mailbox** button, and a collapsible **Service status & DNS** panel (engine health, domain/hostname/IP, transport, DNS records read-only).
-2. **`/console/mail/{mailboxId}`** — email client:
+1. **`/console/mail`** — mailbox table (primary), **Create mailbox** button, **Templates** link, and a collapsible **Service status & DNS** panel (engine health, domain/hostname/IP, transport, DNS records read-only).
+2. **`/console/mail/templates`** — account-scoped HBS email template library (create from blank / Welcome / Notification starters).
+3. **`/console/mail/templates/{id}`** — block editor (header, text, button, image, divider, spacer, footer), merge-tag chips, live HTML preview.
+4. **`/console/mail/{mailboxId}`** — email client:
    - **Desktop / tablet** — 3-pane layout: folders sidebar, message list, reader/compose; mailbox shown as a Gmail-like identity chip (avatar + display name + bold email); **New message** and **Full screen** sit in a toolbar under that chip (fullscreen exit bar shows the same identity)
    - **Mobile** — single-screen stack (list → reader → compose/settings) with slide-in navigation; folders open from ☰ or the folder title (drawer); FAB for new message; true edge-to-edge (console shell padding removed on the mail client); long recipient lines truncate (`name +N`); list scrolls clear of the FAB and status footer
    - **Sidebar** — Inbox, Sent, Drafts, Trash, Archive, Search, Settings, and Compose (desktop)
@@ -32,6 +34,7 @@ The service status section is collapsed by default so mailboxes stay front and c
 
 ### Compose
 - **Rich text editor** (Tiptap) with toolbar: bold, italic, underline, strikethrough, font size, headings, lists, blockquote, links (dialog for URL + optional label; uses selection when text is highlighted), **inline images/logos** (toolbar, paste, or drop; sent as `cid:` multipart/related so Gmail shows them), text alignment, clear formatting, undo/redo — active marks/blocks are highlighted in the toolbar; lists and quotes use visible styles (bullets/numbers/border)
+- **Insert template** — pick an account template to fill subject + HTML body (merge tags rendered with sample/default variables; edit before send)
 - **Text direction** — compose wraps HTML with `dir="rtl"` (or `ltr`) from UI language / Hebrew-Arabic content so Gmail and other clients keep the same direction as the editor
 - **Gmail-style email chips** for To, CC, BCC — tokenize on space, comma, Enter; click a chip to edit the address; remove with backspace or X; bidi/zero-width junk stripped; send blocked if any chip is invalid
 - **Recipient addresses** — invisible / bidirectional Unicode marks (common when pasting from RTL Gmail UI) are stripped on compose chips and on send; invalid addresses are rejected before SMTP
@@ -106,6 +109,19 @@ The service status section is collapsed by default so mailboxes stay front and c
 - Settings accessible from the sidebar "Settings" tab inside each mailbox
 - Settings (and Compose) use the full content pane — the empty message list is hidden; the form scrolls with a sticky Save bar
 
+## Email templates (HBS)
+
+Account-scoped reusable layouts:
+
+| Surface | Path |
+|---------|------|
+| Library | `/console/mail/templates` |
+| Editor | `/console/mail/templates/{id}` |
+| API | `GET/POST /accounts/{id}/mail/templates`, `PATCH/DELETE …/{template_id}`, `POST …/{template_id}/render`, `POST …/{template_id}/duplicate` |
+| Send | `POST …/messages` with optional `template_id` + `template_variables` |
+
+Document model is JSON blocks compiled server-side to email-safe Handlebars (allowlisted helpers: `if`, `each`). Merge tags include `{{user_name}}`, `{{company_name}}`, `{{cta_url}}`, `{{portal_url}}`, and related identity fields.
+
 ## Phase 1 scope
 
 - One **platform** mail domain seeded from `MAIL_DOMAIN` (DB row, not hardcoded)
@@ -127,7 +143,6 @@ The service status section is collapsed by default so mailboxes stay front and c
 
 ## Not in Phase 1 (follow-ups)
 
-- **HBS send templates** and reusable compose components
 - Moving mail DNS management under **Account → Domains**
 - Active forwarding via Stalwart sieve rules (UI stores `forward_to`, sieve setup pending)
 - Spam/AV, automation, tenant-owned domains
