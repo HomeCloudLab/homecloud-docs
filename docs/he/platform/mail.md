@@ -99,7 +99,8 @@ HomeCloud Mail הוא שירות דואר ב-control plane מעל מנוע **Sta
 ### הגדרות תיבה
 - **שם תצוגה** — מוצג כשם השולח בהודעות יוצאות (כותרת From)
 - **חתימה** — מוזרעת לעורך הכתיבה (אחרי `--`) כדי שאפשר לערוך או למחוק לפני שליחה; ה-API לא מוסיף אותה בשקט
-- **העברה** — העברת הודעות נכנסות לכתובת אחרת (שמור ב-DB, הגדרת forwarding בהמשך)
+- **העברה** — `forward_to` נשמר ומוחל על Stalwart דרך Sieve (`redirect :copy` שומר עותק מקומי)
+- **כללי אוטומציה** — אם/אז (מאת/אל/נושא/גוף/קובץ מצורף → העברה, תיקייה, discard וכו') שמקומפלים לאותו סקריפט Sieve
 - ההגדרות נגישות מלשונית "הגדרות" בסרגל הצד בכל תיבה
 - הגדרות (וכתיבה) תופסות את כל חלק התוכן — רשימת ההודעות הריקה מוסתרת; הטופס נגלל עם שורת שמירה קבועה למטה
 
@@ -130,13 +131,15 @@ HomeCloud Mail הוא שירות דואר ב-control plane מעל מנוע **Sta
 |------|------|
 | ספרייה | `/console/mail/templates` |
 | עורך | `/console/mail/templates/{id}` |
-| API | `GET/POST /accounts/{id}/mail/templates`, `PATCH/DELETE …/{template_id}`, `POST …/render`, `POST …/duplicate` |
+| API | `GET/POST /accounts/{id}/mail/templates`, `PATCH/DELETE …/{template_id}`, `POST …/{template_id}/render`, `POST …/{template_id}/duplicate` |
 | שליחה | `POST …/messages` עם `template_id` + `template_variables` אופציונליים |
 
 ## לא ב-Phase 1 (בהמשך)
 
 - העברת ניהול DNS של הדואר תחת **Account → Domains**
-- העברה פעילה דרך Stalwart sieve (ה-UI שומר `forward_to`, ההתקנה ממתינה)
+- העברה פעילה וכללי אוטומציה דרך Stalwart Sieve (מומש)
+- Spam/AV, דומיינים של דייר
+- שערי Access Key (API דמוי SES בעתיד)
 - Spam/AV, אוטומציה, דומיינים של tenant
 - Access Key gateway (API בסגנון SES בעתיד)
 - Event/webhook (Phase 1 משתמש ב-pull; אירועים בהמשך)

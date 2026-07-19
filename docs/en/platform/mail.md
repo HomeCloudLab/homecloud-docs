@@ -105,7 +105,8 @@ The service status section is collapsed by default so mailboxes stay front and c
 ### Mailbox settings
 - **Display name** — shown as the sender name in outgoing emails (From header)
 - **Signature** — seeded into the compose editor (after `--`) so you can edit or remove it before send; not appended silently by the API
-- **Forwarding** — forward incoming emails to another address (stored in DB, forwarding setup planned)
+- **Forwarding** — `forward_to` is saved and **applied to Stalwart via Sieve** (`redirect :copy` keeps a local copy)
+- **Automation rules** — if/then filters (from/to/subject/body/has attachment → forward, fileinto, discard, keep, stop); compiled to the same active Sieve script as forwarding
 - Settings accessible from the sidebar "Settings" tab inside each mailbox
 - Settings (and Compose) use the full content pane — the empty message list is hidden; the form scrolls with a sticky Save bar
 
@@ -144,11 +145,11 @@ Document model is JSON blocks compiled server-side to email-safe Handlebars (all
 ## Not in Phase 1 (follow-ups)
 
 - Moving mail DNS management under **Account → Domains**
-- Active forwarding via Stalwart sieve rules (UI stores `forward_to`, sieve setup pending)
-- Spam/AV, automation, tenant-owned domains
+- Spam/AV, tenant-owned domains
 - Access Key gateway (future SES-like API)
 - Event/webhook inbound (Phase 1 uses pull; events later)
 - Cutover of OTP/invites to `noreply@` (after send is stable)
+- True fuzzy “similar” matching beyond Sieve `:matches` / `:contains`
 
 ## Deliverability hardening
 
@@ -231,6 +232,15 @@ curl -sS -X POST "https://console.example.com/api/v1/accounts/$ACCOUNT_ID/mail/m
 ```bash
 curl -sS "https://console.example.com/api/v1/accounts/$ACCOUNT_ID/mail/messages?mailbox_id=$MAILBOX_ID&search=invoice" \
   -H "Authorization: Bearer $TOKEN"
+```
+
+### Bash — create an automation rule
+
+```bash
+curl -sS -X POST "https://console.example.com/api/v1/accounts/$ACCOUNT_ID/mail/mailboxes/$MAILBOX_ID/rules" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"name":"Invoices","match":"all","conditions":[{"field":"from","op":"is","value":["billing@acme.com"]},{"field":"has_attachment","op":"is","value":true}],"actions":[{"type":"fileinto","mailbox":"Invoices"}]}'
 ```
 
 ### Bash — download attachment
