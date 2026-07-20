@@ -135,18 +135,15 @@ Account-scoped reusable layouts owned as JSON blocks, compiled to email-safe HTM
 - Starters: blank, welcome, notification, announcement (section skeleton), promo, invoice
 
 ### Canvas designer
-- **Canvas-first** layout: Layers + block palette (left), email canvas (center ≈60–70%), Inspector (right)
-- Device frames for preview only: Desktop **600** / Tablet **480** / Mobile **360**
-- Dark preview toggle (chrome + optional contrast; does not change saved document colors)
-- Undo / Redo of `document_json` in memory (Ctrl+Z / Ctrl+Y) — no server version history yet
-- Drag blocks from the palette onto the canvas; drag layers to reorder siblings; nest into a selected `section`
-- Double-click text / button / header / footer on the canvas to edit content (maps to block props)
-- **Developer** tab shows compiled HTML source (drawer), not a permanent third column
+- **Template Studio** (library `/console/mail/templates/{id}`): canvas-first builder — Layers, Insert, Inspector, device/dark preview, undo, Developer HTML. Authors mark blocks **Editable in compose** with typed fields.
+- **Mail Composer template mode** (insert template while composing): **not** Studio — locked layout + typed slot form + live preview (ADR-029). Advanced → free HTML with detach warning.
+- Starters ship with subject slot + common editable fields; **Apply suggested slots** migrates legacy templates.
 
 ### Compose template mode
-1. FileText → pick template → designer embeds in compose
-2. Edit blocks / subject live; send compiles via preview
-3. Optional: switch to free TipTap edit (HTML only after that)
+1. Insert template → Composer enters template-locked mode
+2. Edit subject (if allowed) + editable fields; preview updates live
+3. Send compiles with slot overlays (stored template unchanged)
+4. Optional: free text escape / Advanced HTML (detaches from template structure)
 
 ## Phase 1 scope
 
