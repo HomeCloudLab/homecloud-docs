@@ -18,8 +18,8 @@ Bodies, attachments, and folders are **not** stored in Postgres — Stalwart is 
 Same pattern as SO / Queues: **list → resource detail**. Opening a mailbox keeps the mail chrome visible while data loads (no full-page skeleton flash); console shell padding stays stable across the Mail section.
 
 1. **`/console/mail`** — mailbox table (primary), **Create mailbox**, **Templates**, **Contacts**, and a collapsible **Service status & DNS** panel.
-2. **`/console/mail/templates`** — account-scoped HBS email template library (blank / Welcome / Notification / Announcement / Promo / Invoice).
-3. **`/console/mail/templates/{id}`** — canvas-first designer (Layers, Inspector, device/dark preview, undo, Developer HTML tab).
+2. **`/console/mail/templates`** — visual Template Studio gallery (**My templates** preview cards + **Ready-made** starters).
+3. **`/console/mail/templates/{id}`** — Template Studio Pro (Design | Preview | Code).
 4. **`/console/mail/contacts`** — address book with search, multi-select, and bulk delete.
 5. **`/console/mail/{mailboxId}`** — email client:
    - **Desktop / tablet** — 3-pane layout: folders sidebar, message list, reader/compose; mailbox shown as a Gmail-like identity chip (avatar + display name + bold email); **New message** and **Full screen** sit in a toolbar under that chip (fullscreen exit bar shows the same identity)
@@ -116,23 +116,34 @@ The service status section is collapsed by default so mailboxes stay front and c
 - Settings accessible from the sidebar "Settings" tab inside each mailbox
 - Settings (and Compose) use the full content pane — the empty message list is hidden; the form scrolls with a sticky Save bar
 
-## Email templates (HBS)
+## Email templates (Template Studio Pro)
 
-Account-scoped reusable layouts owned as JSON blocks, compiled to email-safe HTML tables (no Unlayer lock-in).
+Account-scoped reusable layouts owned as JSON blocks (`document_json`), compiled to email-safe HTML tables via `mail_hbs` (no Unlayer lock-in; HTML is not the source of truth).
 
 | Surface | Path |
 |---------|------|
-| Library | `/console/mail/templates` |
-| Editor | `/console/mail/templates/{id}` |
-| API | `GET/POST /accounts/{id}/mail/templates`, `PATCH/DELETE …/{template_id}`, `POST …/preview`, `POST …/{template_id}/render`, `POST …/{template_id}/duplicate` |
-| Send | Compose template mode, or `POST …/messages` with optional `template_id` + `template_variables` |
+| Gallery | `/console/mail/templates` — My templates + ready-made starter cards with live thumbnails |
+| Studio | `/console/mail/templates/{id}` — Design \| Preview \| Code |
+| API | `GET/POST /accounts/{id}/mail/templates`, `GET …/templates/starters`, `POST …/templates/lint`, `POST …/preview`, `POST …/{id}/render`, `POST …/{id}/duplicate` |
+| Send | Compose injects full HTML, or `POST …/messages` with optional `template_id` + `template_variables` |
+
+### Visual gallery
+- **My templates** — card grid with scaled iframe thumbnails from `POST …/templates/preview`
+- **Ready-made** — starter catalog from `GET …/templates/starters` (includes `preview_html`)
+- Actions: open, duplicate, delete; one **New template** (blank); search by name
 
 ### Document model
-- Flat and nested blocks: `header`, `text`, `button`, `image`, **`section`** (children, depth ≤ 3), `columns`, `list`, `code`, `divider`, `spacer`, `footer`
-- `section` is the “frame” for nesting image + text + button
-- Live preview: `POST …/templates/preview` (no save). Canvas click selects via `data-hc-block-id`
-- Merge tags: `{{user_name}}`, `{{company_name}}`, `{{cta_url}}`, `{{portal_url}}`, and related identity fields (type `{{` in the subject field for autocomplete)
-- Starters: blank, welcome, notification, announcement (section skeleton), promo, invoice
+- Blocks: `header`, `text`, `button`, `image`, **`section`** (children, depth ≤ 3), `columns`, `list`, `code`, `divider`, `spacer`, `footer`, **`preheader`**, **`hero`**, **`logo_row`**, **`product_card`**
+- Buttons support pill radius + `hoverBg`
+- Merge tags: `{{user_name}}`, `{{company_name}}`, `{{cta_url}}`, `{{portal_url}}`, digest/product/notice fields, etc.
+- Starters: blank, welcome, notification, announcement, promo, invoice, plus inspired layouts **`network_digest`**, **`promo_grid`**, **`system_notice`** (pattern-inspired; no brand assets)
+
+### Template Studio Pro modes
+| Mode | Behavior |
+|------|----------|
+| **Design** | Canvas-first; categorized palette (Layout / Content / Media / Commerce); collapsible Layers; Inspector; floating toolbar; double-click inline edit |
+| **Preview** | Full-width device frames (Desktop / Tablet / Mobile) + dark preview; same compiled HTML |
+| **Code** | Monaco split (compiled HTML + Format) \| live preview; Issues panel from `POST …/templates/lint` |
 
 ### Responsive Email Engine (renderer-owned)
 Every compile produces **email-safe table HTML** that is responsive by default (ADR-030). Responsive behavior is defined at **component level** and **enforced by `mail_hbs`** — templates do not invent ad-hoc CSS.
@@ -146,18 +157,16 @@ Every compile produces **email-safe table HTML** that is responsive by default (
 | Columns | Stack on mobile by default (`mobile: "side-by-side"` or `stack: false` to keep row) |
 | Intent | Optional `responsive.mobile` / shorthand `mobile: "stack"` on blocks; unknown keys ignored |
 
-Studio Desktop | Mobile | Tablet preview uses the **same** preview/compile API; viewport width (&gt;600 desktop / ≤600 mobile) activates the renderer media query — not a separate HTML path.
-
-### Canvas designer
-- **Template Studio** (library `/console/mail/templates/{id}`): canvas-first builder — Layers, Insert, Inspector (including responsive intent for button/columns), device/dark preview, undo, Developer HTML.
-- **Mail Compose insert:** compiles the template and **injects HTML into the existing TipTap composer** for free editing (same UI as a normal draft). Studio is not mounted inside compose.
-- Starters and slot authoring remain Studio-side; compose does not use a locked slot form.
+### Compatibility validator
+`POST …/templates/lint` checks compiled HTML + document for Outlook/Gmail pitfalls (scripts, flex/grid, missing alt, oversized payloads, weak button hrefs). Studio shows results in the Issues panel.
 
 ### Compose template insert
-1. Insert template → compiles via preview API → **full email HTML kept** (tables/styles) in a contentEditable body — **not** TipTap (TipTap strips email layout)
-2. Subject filled from the template; body text is freely editable inside the preserved layout
+1. Insert template → compiles via preview API → **full email HTML kept** (tables/styles) in `MailHtmlBodyEditor` — **not** TipTap (TipTap strips email layout)
+2. Subject filled from the template; body is freely editable
 3. Autosave / send use that HTML like any other message
 4. Optional chip: “Inserted from template …” (dismissible)
+
+Studio is the only full builder. Compose does **not** use a locked slot form.
 
 ## Phase 1 scope
 
