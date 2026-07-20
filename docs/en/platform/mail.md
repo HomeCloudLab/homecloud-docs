@@ -19,7 +19,7 @@ Same pattern as SO / Queues: **list → resource detail**. Opening a mailbox kee
 
 1. **`/console/mail`** — mailbox table (primary), **Create mailbox**, **Templates**, **Contacts**, and a collapsible **Service status & DNS** panel.
 2. **`/console/mail/templates`** — account-scoped HBS email template library (blank / Welcome / Notification / Announcement / Promo / Invoice).
-3. **`/console/mail/templates/{id}`** — shared visual designer (palette, outline tree, inspector, live preview; click preview to select blocks).
+3. **`/console/mail/templates/{id}`** — canvas-first designer (Layers, Inspector, device/dark preview, undo, Developer HTML tab).
 4. **`/console/mail/contacts`** — address book with search, multi-select, and bulk delete.
 5. **`/console/mail/{mailboxId}`** — email client:
    - **Desktop / tablet** — 3-pane layout: folders sidebar, message list, reader/compose; mailbox shown as a Gmail-like identity chip (avatar + display name + bold email); **New message** and **Full screen** sit in a toolbar under that chip (fullscreen exit bar shows the same identity)
@@ -112,7 +112,7 @@ The service status section is collapsed by default so mailboxes stay front and c
 - **Display name** — shown as the sender name in outgoing emails (From header)
 - **Signature** — seeded into the compose editor (after `--`) so you can edit or remove it before send; not appended silently by the API
 - **Forwarding** — `forward_to` is saved and **applied to Stalwart via Sieve** (`redirect :copy` keeps a local copy)
-- **Automation rules** — if/then filters (from/to/subject/body/has attachment → forward, fileinto, discard, keep, stop); compiled to the same active Sieve script as forwarding
+- **Automation builder** — collapsible **When… Then…** rule cards with a live summary; multiple conditions (all of / any of) and multiple actions; drag to reorder priority; duplicate / enable / export–import JSON; client-side test against a sample message + Sieve preview. Compiled to the same active Sieve script as forwarding. Atomic reorder: `POST …/mailboxes/{id}/rules/reorder` with `{ "ids": [...] }`
 - Settings accessible from the sidebar "Settings" tab inside each mailbox
 - Settings (and Compose) use the full content pane — the empty message list is hidden; the form scrolls with a sticky Save bar
 
@@ -131,8 +131,17 @@ Account-scoped reusable layouts owned as JSON blocks, compiled to email-safe HTM
 - Flat and nested blocks: `header`, `text`, `button`, `image`, **`section`** (children, depth ≤ 3), `columns`, `list`, `code`, `divider`, `spacer`, `footer`
 - `section` is the “frame” for nesting image + text + button
 - Live preview: `POST …/templates/preview` (no save). Canvas click selects via `data-hc-block-id`
-- Merge tags: `{{user_name}}`, `{{company_name}}`, `{{cta_url}}`, `{{portal_url}}`, and related identity fields
+- Merge tags: `{{user_name}}`, `{{company_name}}`, `{{cta_url}}`, `{{portal_url}}`, and related identity fields (type `{{` in the subject field for autocomplete)
 - Starters: blank, welcome, notification, announcement (section skeleton), promo, invoice
+
+### Canvas designer
+- **Canvas-first** layout: Layers + block palette (left), email canvas (center ≈60–70%), Inspector (right)
+- Device frames for preview only: Desktop **600** / Tablet **480** / Mobile **360**
+- Dark preview toggle (chrome + optional contrast; does not change saved document colors)
+- Undo / Redo of `document_json` in memory (Ctrl+Z / Ctrl+Y) — no server version history yet
+- Drag blocks from the palette onto the canvas; drag layers to reorder siblings; nest into a selected `section`
+- Double-click text / button / header / footer on the canvas to edit content (maps to block props)
+- **Developer** tab shows compiled HTML source (drawer), not a permanent third column
 
 ### Compose template mode
 1. FileText → pick template → designer embeds in compose
@@ -257,6 +266,15 @@ curl -sS -X POST "https://console.example.com/api/v1/accounts/$ACCOUNT_ID/mail/m
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"name":"Invoices","match":"all","conditions":[{"field":"from","op":"is","value":["billing@acme.com"]},{"field":"has_attachment","op":"is","value":true}],"actions":[{"type":"fileinto","mailbox":"Invoices"}]}'
+```
+
+### Bash — reorder automation rules
+
+```bash
+curl -sS -X POST "https://console.example.com/api/v1/accounts/$ACCOUNT_ID/mail/mailboxes/$MAILBOX_ID/rules/reorder" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"ids":["RULE_UUID_1","RULE_UUID_2","RULE_UUID_3"]}'
 ```
 
 ### Bash — download attachment
