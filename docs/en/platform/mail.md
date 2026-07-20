@@ -141,7 +141,7 @@ Account-scoped reusable layouts owned as JSON blocks (`document_json`), compiled
 ### Template Studio Pro modes
 | Mode | Behavior |
 |------|----------|
-| **Design** | Canvas-first; categorized palette (Layout / Content / Media / Commerce); collapsible Layers; Inspector; floating toolbar; double-click inline edit |
+| **Design** | Preview-first canvas (click to select blocks); left panel **Components \| Layers**; right **Inspector** (Content / Style / Advanced); selection toolbar (move, duplicate, delete); template settings when nothing selected |
 | **Preview** | Full-width device frames (Desktop / Tablet / Mobile) + dark preview; same compiled HTML |
 | **Code** | Monaco split (compiled HTML + Format) \| live preview; Issues panel from `POST …/templates/lint` |
 
