@@ -134,8 +134,22 @@ Account-scoped reusable layouts owned as JSON blocks, compiled to email-safe HTM
 - Merge tags: `{{user_name}}`, `{{company_name}}`, `{{cta_url}}`, `{{portal_url}}`, and related identity fields (type `{{` in the subject field for autocomplete)
 - Starters: blank, welcome, notification, announcement (section skeleton), promo, invoice
 
+### Responsive Email Engine (renderer-owned)
+Every compile produces **email-safe table HTML** that is responsive by default (ADR-030). Responsive behavior is defined at **component level** and **enforced by `mail_hbs`** — templates do not invent ad-hoc CSS.
+
+| Rule | Behavior |
+|------|----------|
+| Shell | Desktop max-width ≈600px; fluid `width:100%` + outer padding on mobile |
+| Breakpoint | `@media only screen and (max-width:600px)` |
+| Images | `width` attr + `max-width:100%;height:auto` |
+| Buttons | Full-width tap target on mobile (opt out via `responsive.mobile.fullWidth: false`) |
+| Columns | Stack on mobile by default (`mobile: "side-by-side"` or `stack: false` to keep row) |
+| Intent | Optional `responsive.mobile` / shorthand `mobile: "stack"` on blocks; unknown keys ignored |
+
+Studio Desktop | Mobile | Tablet preview uses the **same** preview/compile API; viewport width (&gt;600 desktop / ≤600 mobile) activates the renderer media query — not a separate HTML path.
+
 ### Canvas designer
-- **Template Studio** (library `/console/mail/templates/{id}`): canvas-first builder — Layers, Insert, Inspector, device/dark preview, undo, Developer HTML. Authors mark blocks **Editable in compose** with typed fields.
+- **Template Studio** (library `/console/mail/templates/{id}`): canvas-first builder — Layers, Insert, Inspector (including responsive intent for button/columns), device/dark preview, undo, Developer HTML. Authors mark blocks **Editable in compose** with typed fields.
 - **Mail Composer template mode** (insert template while composing): **not** Studio — locked layout + typed slot form + live preview (ADR-029). Advanced → free HTML with detach warning.
 - Starters ship with subject slot + common editable fields; **Apply suggested slots** migrates legacy templates.
 
