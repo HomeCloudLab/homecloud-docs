@@ -40,7 +40,7 @@ The service status section is collapsed by default so mailboxes stay front and c
 
 ### Compose
 - **Rich text editor** (Tiptap) with toolbar: bold, italic, underline, strikethrough, font size, headings, lists, blockquote, links (dialog for URL + optional label; uses selection when text is highlighted), **inline images/logos** (toolbar, paste, or drop; sent as `cid:` multipart/related so Gmail shows them), text alignment, clear formatting, undo/redo — active marks/blocks are highlighted in the toolbar; lists and quotes use visible styles (bullets/numbers/border)
-- **Insert template** — compiles the template and **injects HTML into the existing TipTap composer** for free editing (same compose UI as a normal draft). No locked form / slot panel in compose.
+- **Insert template** — compiles the template and keeps **full email HTML** (tables/styles) for free text edits — TipTap is not used for template bodies (it would strip layout).
 - **Text direction** — compose wraps HTML with `dir="rtl"` (or `ltr`) from UI language / Hebrew-Arabic content so Gmail and other clients keep the same direction as the editor
 - **Gmail-style email chips** for To, CC, BCC — tokenize on space, comma, Enter; click a chip to edit the address; remove with backspace or X; bidi/zero-width junk stripped; send blocked if any chip is invalid
 - **Recipient addresses** — invisible / bidirectional Unicode marks (common when pasting from RTL Gmail UI) are stripped on compose chips and on send; invalid addresses are rejected before SMTP
@@ -154,9 +154,9 @@ Studio Desktop | Mobile | Tablet preview uses the **same** preview/compile API; 
 - Starters and slot authoring remain Studio-side; compose does not use a locked slot form.
 
 ### Compose template insert
-1. Insert template → compiles via preview API → **HTML injected into the existing TipTap composer**
-2. Subject filled from the template; body is **fully free-edit** (same compose chrome as a normal draft)
-3. Autosave / send use the editor HTML like any other message (no locked form / slot panel)
+1. Insert template → compiles via preview API → **full email HTML kept** (tables/styles) in a contentEditable body — **not** TipTap (TipTap strips email layout)
+2. Subject filled from the template; body text is freely editable inside the preserved layout
+3. Autosave / send use that HTML like any other message
 4. Optional chip: “Inserted from template …” (dismissible)
 
 ## Phase 1 scope
