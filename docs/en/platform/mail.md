@@ -40,7 +40,7 @@ The service status section is collapsed by default so mailboxes stay front and c
 
 ### Compose
 - **Rich text editor** (Tiptap) with toolbar: bold, italic, underline, strikethrough, font size, headings, lists, blockquote, links (dialog for URL + optional label; uses selection when text is highlighted), **inline images/logos** (toolbar, paste, or drop; sent as `cid:` multipart/related so Gmail shows them), text alignment, clear formatting, undo/redo — active marks/blocks are highlighted in the toolbar; lists and quotes use visible styles (bullets/numbers/border)
-- **Insert template** — opens **template mode**: shared visual designer + live preview inside compose (subject + merge tags). Send compiles document JSON to HTML. **Switch to free text edit** compiles once into TipTap (block structure is lost). **Clear template** exits template mode.
+- **Insert template** — compiles the template and **injects HTML into the existing TipTap composer** for free editing (same compose UI as a normal draft). No locked form / slot panel in compose.
 - **Text direction** — compose wraps HTML with `dir="rtl"` (or `ltr`) from UI language / Hebrew-Arabic content so Gmail and other clients keep the same direction as the editor
 - **Gmail-style email chips** for To, CC, BCC — tokenize on space, comma, Enter; click a chip to edit the address; remove with backspace or X; bidi/zero-width junk stripped; send blocked if any chip is invalid
 - **Recipient addresses** — invisible / bidirectional Unicode marks (common when pasting from RTL Gmail UI) are stripped on compose chips and on send; invalid addresses are rejected before SMTP
@@ -149,15 +149,15 @@ Every compile produces **email-safe table HTML** that is responsive by default (
 Studio Desktop | Mobile | Tablet preview uses the **same** preview/compile API; viewport width (&gt;600 desktop / ≤600 mobile) activates the renderer media query — not a separate HTML path.
 
 ### Canvas designer
-- **Template Studio** (library `/console/mail/templates/{id}`): canvas-first builder — Layers, Insert, Inspector (including responsive intent for button/columns), device/dark preview, undo, Developer HTML. Authors mark blocks **Editable in compose** with typed fields.
-- **Mail Composer template mode** (insert template while composing): **not** Studio — locked layout + typed slot form + live preview (ADR-029). Advanced → free HTML with detach warning.
-- Starters ship with subject slot + common editable fields; **Apply suggested slots** migrates legacy templates.
+- **Template Studio** (library `/console/mail/templates/{id}`): canvas-first builder — Layers, Insert, Inspector (including responsive intent for button/columns), device/dark preview, undo, Developer HTML.
+- **Mail Compose insert:** compiles the template and **injects HTML into the existing TipTap composer** for free editing (same UI as a normal draft). Studio is not mounted inside compose.
+- Starters and slot authoring remain Studio-side; compose does not use a locked slot form.
 
-### Compose template mode
-1. Insert template → Composer enters template-locked mode
-2. Edit subject (if allowed) + editable fields; preview updates live
-3. Send compiles with slot overlays (stored template unchanged)
-4. Optional: free text escape / Advanced HTML (detaches from template structure)
+### Compose template insert
+1. Insert template → compiles via preview API → **HTML injected into the existing TipTap composer**
+2. Subject filled from the template; body is **fully free-edit** (same compose chrome as a normal draft)
+3. Autosave / send use the editor HTML like any other message (no locked form / slot panel)
+4. Optional chip: “Inserted from template …” (dismissible)
 
 ## Phase 1 scope
 
