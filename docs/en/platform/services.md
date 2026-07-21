@@ -24,6 +24,12 @@
 
 - Per-account secret store with Access Key auth
 
+## Functions
+
+- Warm Python 3.12 functions with multi-file workspace, deploy versions, layers, and triggers (HTTP / MQ / cron / manual)
+- Control-plane invoke (`POST …/functions/{name}/invoke`); local or remote runtime via `functions_runtime_mode`
+- See [Functions](functions.md)
+
 ## Mail
 
 - Stalwart engine on K3s (HDD path); Console + API in control plane
@@ -31,6 +37,14 @@
 - Console: mailbox list → per-mailbox Inbox / Sent / Compose (same pattern as SO / Queues)
 - Phase 1: platform domain from config, mailboxes, send/receive, DNS hints on the service card
 - See [Mail](mail.md)
+
+## Functions
+
+- Managed Python 3.12 serverless functions (Lambda-class) with a VS Code–style console workspace
+- Deploy immutable versions; artifacts use `so://` URIs when Object Storage is available
+- Invoke via console/API; triggers: HTTP, MQ, cron, manual; optional dependency layers
+- Data plane: `homecloud-fn` at `fn.holab.abrdns.com`
+- See [Functions](functions.md)
 
 ## Console
 

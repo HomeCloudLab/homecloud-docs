@@ -24,6 +24,12 @@
 
 - מאגר סודות לכל חשבון עם אימות Access Key
 
+## Functions
+
+- פונקציות Python 3.12 חמות עם workspace מרובה-קבצים, גרסאות, layers ו-triggers (HTTP / MQ / cron / manual)
+- Invoke ב-control plane (`POST …/functions/{name}/invoke`); runtime מקומי או מרוחק דרך `functions_runtime_mode`
+- ראו [Functions](functions.md)
+
 ## Mail
 
 - מנוע Stalwart ב-K3s (HDD); Console + API ב-control plane
@@ -31,6 +37,14 @@
 - קונסול: רשימת תיבות → Inbox / Sent / Compose לכל תיבה (כמו SO / Queues)
 - Phase 1: דומיין פלטפורמה, תיבות, שליחה/קבלה, רמזי DNS בכרטיס השירות
 - ראו [דואר](mail.md)
+
+## Functions
+
+- פונקציות Python 3.12 serverless מנוהלות (בסגנון Lambda) עם סביבת קונסול בסגנון VS Code
+- פריסת גרסאות בלתי משתנות; ארטיפקטים ב-`so://` כש-Object Storage זמין
+- Invoke מקונסול/API; triggers: HTTP, MQ, cron, ידני; layers אופציונליים
+- Data plane: `homecloud-fn` ב-`fn.holab.abrdns.com`
+- ראו [פונקציות](functions.md)
 
 ## Console
 

@@ -99,6 +99,7 @@ nav:
   - Platform:
       - platform/architecture.md
       - platform/services.md
+      - platform/functions.md
       - platform/mail.md
       - platform/access-keys-security.md
       - platform/security.md
