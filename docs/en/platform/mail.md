@@ -124,7 +124,7 @@ Account-scoped reusable layouts owned as JSON blocks (`document_json`), compiled
 |---------|------|
 | Gallery | `/console/mail/templates` — My templates + ready-made starter cards with live thumbnails |
 | Studio | `/console/mail/templates/{id}` — Design \| Preview \| Code |
-| API | `GET/POST /accounts/{id}/mail/templates`, `GET …/templates/starters`, `POST …/templates/lint`, `POST …/preview`, `POST …/{id}/render`, `POST …/{id}/duplicate` |
+| API | `GET/POST /accounts/{id}/mail/templates`, `GET …/templates/starters`, `POST …/templates/lint`, `POST …/preview`, `POST …/{id}/render`, `POST …/{id}/duplicate`, `GET/POST …/mail/assets`, `POST …/mail/assets/upload`, `POST …/mail/assets/from-object` |
 | Send | Compose injects full HTML, or `POST …/messages` with optional `template_id` + `template_variables` |
 
 ### Visual gallery
@@ -141,9 +141,24 @@ Account-scoped reusable layouts owned as JSON blocks (`document_json`), compiled
 ### Template Studio Pro modes
 | Mode | Behavior |
 |------|----------|
-| **Design** | Unified top bar (Back, editable name, autosave status, Undo/Redo, device frames, Design/Preview/Code); preview-first canvas (click deepest block, or section padding to select the section); left **Components \| Layers** (+ Ready presets); right **Inspector** with merge-tag autocomplete and **SO image picker** (stores public HTTPS URLs); leave warning when dirty; selection toolbar (move, duplicate, delete) |
+| **Design** | Unified top bar (Back, editable name, autosave status, icon Undo/Redo, device frames, Design/Preview/Code, dark preview); preview-first canvas; left **Components \| Layers** (+ Ready presets); right **Inspector** with merge-tag autocomplete and **mail image assets** (upload / recent / my files → managed `assetId` + HTTPS `src` for canvas); **Preview variables** when no block is selected (`document_json.previewVariables`); leave warning when dirty; icon selection toolbar (move, duplicate, delete) |
 | **Preview** | Full-width device frames (Desktop / Tablet / Mobile) + dark preview; same compiled HTML |
 | **Code** | Monaco split (compiled HTML + Format) \| live preview; Issues panel from `POST …/templates/lint` |
+
+### Mail template images
+Images in Studio are **mail assets**, not raw private bucket URLs:
+
+| Action | API | Stored on block props |
+|--------|-----|------------------------|
+| Upload from device | `POST …/mail/assets/upload` | `assetId` (UUID) + `src` (public HTTPS for immediate preview) |
+| Recent | `GET …/mail/assets` | same |
+| My files | `POST …/mail/assets/from-object` `{ bucket, key }` | copies into mail-assets, then same |
+| Paste link | — | `src` only (merge tags / external HTTPS); clears `assetId` |
+
+Header logos use `logoUrl` (+ optional `assetId`). Logo rows store `assetId`/`src` per logo entry. Renderer modes: `contain` \| `full` \| `fixed` \| `original` (`fixedWidth` when fixed).
+
+### Preview variables
+`document_json.previewVariables` is a string map merged **over** sample defaults on preview/render. Edit in the Inspector when no block is selected; **Reset to defaults** clears overrides back to samples.
 
 ### Responsive Email Engine (renderer-owned)
 Every compile produces **email-safe table HTML** that is responsive by default (ADR-030). Responsive behavior is defined at **component level** and **enforced by `mail_hbs`** — templates do not invent ad-hoc CSS.
