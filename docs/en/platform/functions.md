@@ -14,17 +14,29 @@ Permissions: `function.create` (falls back to `resources.create` in the console 
 
 The **Code** tab is a multi-file editor:
 
-- Left file tree (folders expandable)
-- Multi-tab Monaco editor with the VS Code dark theme (`vs-dark`)
-- New file / new folder / rename / delete
-- Dirty indicator on unsaved tabs; **Save** writes the active file
+- Left file tree with VS-style file icons and role badges (Entrypoint / Runs / Asset / Edit only)
+- Multi-tab Monaco editor (Dark+/Light+ themes; optional theme override)
+- New file / new folder / rename / delete, autosave, Format, Outline, Problems, Search
 - Language mode follows extension (`.py` → Python, `.json` → JSON, `.md` → Markdown)
 
 Working-tree files are stored per function until you deploy.
 
+## Build & Deploy Preview
+
+Open **Build & Deploy Preview** in the Code toolbar before deploying:
+
+- **Runtime** and **Handler** come from function configuration (source of truth)
+- **Entrypoint** is derived from the handler (`main.handler` → `main.py`)
+- File list shows included vs excluded paths with package size and warnings
+- Packaging excludes Markdown docs, `.env` secrets, and Python caches — the same rules Deploy uses
+- Deploy is blocked when validation fails (missing entrypoint or handler callable)
+- `requirements.txt` may appear as **declared only** (not installed in the package yet)
+
+Pipeline: Workspace → Validate → Build Preview → Package → Deploy → Invoke.
+
 ## Deploy
 
-**Deploy version** zips the current workspace into a new immutable `function_version` and updates `$LATEST`.
+**Deploy version** packages the workspace with the shared packager into a new immutable `function_version` and updates `$LATEST`.
 
 - When Object Storage (SO) is available, the packaged artifact is referenced with an `so://` URI (for example `so://functions/{account}/{name}/v{n}.zip`).
 - In local/dev mode the zip may be stored on the version row until SO is configured.

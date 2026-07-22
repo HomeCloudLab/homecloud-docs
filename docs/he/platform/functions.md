@@ -10,7 +10,11 @@ HomeCloud Functions הן יחידות compute serverless מנוהלות — המ
 
 ## סביבת קוד
 
-לשונית **Code**: עץ קבצים, עורך Monaco עם לשוניות (`vs-dark`), שמירה ופריסת גרסה.
+לשונית **Code**: עץ קבצים עם אייקונים ותגי תפקיד, עורך Monaco עם לשוניות, שמירה, Format, Outline ו-Problems.
+
+## תצוגת Build ו-Deploy
+
+לפני Deploy אפשר לפתוח **Build & Deploy Preview**: Runtime, Entrypoint (נגזר מ-handler), Handler, רשימת קבצים בחבילה, גודל ואזהרות. אותם כללי אריזה כמו Deploy; Deploy נחסם כשיש שגיאות אימות.
 
 ## Deploy / Invoke / Triggers / Layers
 
