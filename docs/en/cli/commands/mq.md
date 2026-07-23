@@ -7,6 +7,9 @@ Message queue commands (data plane).
 ```bash
 homecloud mq send my-queue --body '{"hello":"world"}'
 homecloud mq send my-queue --body-file message.json
+# Batch (1–10 messages) — JSON array
+homecloud mq send my-queue --body '[{"id":1},{"id":2}]'
+homecloud mq send my-queue --body-file messages.json
 ```
 
 === "PowerShell"

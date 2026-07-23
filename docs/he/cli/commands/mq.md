@@ -7,6 +7,9 @@
 ```bash
 homecloud mq send my-queue --body '{"hello":"world"}'
 homecloud mq send my-queue --body-file message.json
+# אצווה (1–10 הודעות) — מערך JSON
+homecloud mq send my-queue --body '[{"id":1},{"id":2}]'
+homecloud mq send my-queue --body-file messages.json
 ```
 
 === "PowerShell"
