@@ -27,9 +27,12 @@ homecloud mq send my-queue --body-file messages.json
 ```bash
 homecloud mq receive my-queue
 homecloud mq receive my-queue --max-messages 5 --wait-seconds 10
+# Fast consume: ack/delete immediately (no visibility / no separate delete)
+homecloud mq receive my-queue --max-messages 10 --delete
 ```
 
 Received items include `created_at` (when the message was stored in the queue) so you can measure wait time.
+With `--delete`, `status` is `deleted` and messages are removed in the same call.
 
 ## delete / purge
 

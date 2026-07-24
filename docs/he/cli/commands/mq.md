@@ -27,9 +27,12 @@ homecloud mq send my-queue --body-file messages.json
 ```bash
 homecloud mq receive my-queue
 homecloud mq receive my-queue --max-messages 5 --wait-seconds 10
+# צריכה מהירה: ack/מחיקה מיידית (בלי visibility / בלי delete נפרד)
+homecloud mq receive my-queue --max-messages 10 --delete
 ```
 
 פריטים שהתקבלו כוללים `created_at` (מתי ההודעה נשמרה בתור) כדי למדוד זמן המתנה.
+עם `--delete`, ה-`status` הוא `deleted` וההודעות מוסרות באותה קריאה.
 
 ## delete / purge
 
