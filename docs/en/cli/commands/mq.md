@@ -29,12 +29,40 @@ homecloud mq receive my-queue
 homecloud mq receive my-queue --max-messages 5 --wait-seconds 10
 ```
 
+Received items include `created_at` (when the message was stored in the queue) so you can measure wait time.
+
+## delete / purge
+
+```bash
+homecloud mq delete my-queue 42
+homecloud mq purge my-queue
+```
+
+## DLQ
+
+```bash
+homecloud mq receive-dlq my-queue --max-messages 5
+homecloud mq delete-dlq my-queue 7
+homecloud mq purge-dlq my-queue
+```
+
+## queues (console JWT)
+
+```bash
+homecloud queues list
+homecloud queues list --live
+homecloud queues get my-queue
+```
+
+`--live` / `get` include depth (`messages`), `inflight`, and `dlq_messages`.
+
 ## Prerequisites
 
-- Access Key with `mq:*` or `*`
+- Access Key with `mq:*` or `*` (for `mq *`)
+- Console login for `queues list` / `queues get`
 - Queue must exist (create in Console → Queues)
 
 ```bash
 homecloud login --username alice
-homecloud queues list
+homecloud queues list --live
 ```
