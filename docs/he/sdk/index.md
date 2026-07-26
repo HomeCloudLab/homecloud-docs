@@ -2,7 +2,7 @@
 
 SDK של HomeCloud ל-Python — גישה תכנותית עם Access Keys (בלי MFA אינטראקטיבי).
 
-**מאגר:** [homecloud-sdk](https://github.com/HomeCloudLab/homecloud-sdk) · **גרסה:** 0.4.2
+**מאגר:** [homecloud-sdk](https://github.com/HomeCloudLab/homecloud-sdk) · **גרסה:** 0.5.4
 
 ## התקנה
 
@@ -36,6 +36,12 @@ client = HomeCloud(
 # client = HomeCloud()
 
 client.so.upload("my-bucket", "./file.txt", key="docs/file.txt")
+client.so.upload(
+    "my-bucket",
+    body=b"...",
+    key="videos/clip.mp4",
+    content_type="video/mp4",
+)
 meta = client.so.head_object("my-bucket", "docs/file.txt")  # מטא־דאטה בלבד
 client.mq.send("orders", {"id": 1})
 ```

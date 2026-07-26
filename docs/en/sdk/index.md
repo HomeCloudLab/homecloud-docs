@@ -2,7 +2,7 @@
 
 Python SDK for HomeCloud — programmatic access with Access Keys (no interactive MFA).
 
-**Repo:** [homecloud-sdk](https://github.com/HomeCloudLab/homecloud-sdk) · **Version:** 0.4.2
+**Repo:** [homecloud-sdk](https://github.com/HomeCloudLab/homecloud-sdk) · **Version:** 0.5.4
 
 ## Install
 
@@ -36,6 +36,12 @@ client = HomeCloud(
 # client = HomeCloud()
 
 client.so.upload("my-bucket", "./file.txt", key="docs/file.txt")
+client.so.upload(
+    "my-bucket",
+    body=b"...",
+    key="videos/clip.mp4",
+    content_type="video/mp4",
+)
 meta = client.so.head_object("my-bucket", "docs/file.txt")  # metadata only
 client.mq.send("orders", {"id": 1})
 ```
