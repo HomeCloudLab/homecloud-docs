@@ -6,6 +6,8 @@
 - Static websites at `https://{bucket}.web.{apex}`
 - Console: create buckets, policies, website config, versioning
 - Console object detail: copyable `so://bucket/key` URI for CLI/SDK (use quotes in PowerShell when the key contains spaces)
+- **Listing:** continuation-token pages (no fake “page X of Y”). List page sizes **100 / 200 / 500**; grid/preview **25 / 50 / 100**. API `page_size` max **500**.
+- **Multi-file upload:** concurrency-limited queue (**1 / 5 / 10**, default 5) with Auto Retry, Pause/Resume, and continue-after-reconnect. Large single files still use **multipart** parts — that path is unchanged.
 - Lifecycle: abort incomplete multipart uploads after N days (MinIO ILM — enforced on a schedule, not instantly). After save, the API merges the submitted rule into the GET response when MinIO omits `abort_incomplete_multipart_days` on read-back, so the console shows the value you set.
 - Uploads in progress: browser warns on tab close; in-app navigation prompts to cancel and abort uploaded parts
 

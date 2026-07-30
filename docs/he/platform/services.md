@@ -6,6 +6,8 @@
 - אתרים סטטיים בכתובת `https://{bucket}.web.{apex}`
 - Console: יצירת buckets, מדיניות, הגדרת אתר, ניהול גרסאות
 - פרטי object ב-Console: URI להעתקה בפורמט `so://bucket/key` ל-CLI/SDK (ב-PowerShell עטפו במירכאות אם יש רווחים במפתח)
+- **רשימה:** עמודים לפי continuation token (בלי "עמוד X מתוך Y" מזויף). List: **100 / 200 / 500**; Grid: **25 / 50 / 100**. מקסימום API `page_size` = **500**.
+- **העלאה מרובה:** תור מקביליות (**1 / 5 / 10**, ברירת מחדל 5) עם Auto Retry, Pause/Resume והמשך אחרי reconnect. קובץ גדול בודד עדיין ב־**multipart** — לא נשבר.
 - Lifecycle: ביטול העלאות multipart לא שלמות אחרי N ימים (MinIO ILM — לפי לוח זמנים, לא מיידי). אחרי שמירה, ה-API ממזג את הכלל שנשלח לתשובת GET כש-MinIO לא מחזיר `abort_incomplete_multipart_days` ב-read-back, כך שהממשק מציג את הערך שהגדרת.
 - העלאה פעילה: אזהרה בסגירת טאב; ניווט פנימי מציע לבטל ולמחוק חלקים שכבר הועלו
 

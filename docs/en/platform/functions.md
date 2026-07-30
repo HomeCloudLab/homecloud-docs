@@ -21,6 +21,19 @@ The **Code** tab is a multi-file editor:
 
 Working-tree files are stored per function until you deploy.
 
+## Language intelligence (IDE)
+
+The Code editor uses a **VS Code–class** split:
+
+| Surface | Path | When |
+|---------|------|------|
+| **LSP (BasedPyright)** | WebSocket → Language Host on the API | Interactive editing — hover, completion, diagnostics, semantic tokens |
+| **HTTP `/language/analyze`** | Control-plane analyze | **Build Preview**, **Deploy Strict**, SDK / CI automation |
+
+While LSP is connected, the console does **not** call HTTP analyze on every autosave. Monaco keeps a stable `file:///workspace/…` model identity when LSP connects (no editor remount / flicker). Switching away from the Code tab keeps the workspace mounted so the Language Host session is reused.
+
+Attached function layers are extracted into a **shared language cache** on the API (keyed by layer version) instead of unzipping into every edit-session temp directory.
+
 ## Build & Deploy Preview
 
 Open **Build & Deploy Preview** in the Code toolbar before deploying:

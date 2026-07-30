@@ -12,6 +12,13 @@ HomeCloud Functions הן יחידות compute serverless מנוהלות — המ
 
 לשונית **Code**: עץ קבצים עם אייקונים ותגי תפקיד, עורך Monaco עם לשוניות, שמירה, Format, Outline ו-Problems.
 
+### אינטליגנציית שפה
+
+- **LSP (BasedPyright)** — עריכה אינטראקטיבית (hover, השלמה, אבחנות)
+- **HTTP `/language/analyze`** — רק ל־**Build Preview**, **Deploy Strict**, SDK/CI
+- בזמן ש־LSP מחובר אין analyze אחרי כל שמירה; מודל Monaco נשאר יציב (בלי remount); מעבר בין טאבים שומר את סשן ה־Language Host
+- Layers לחילוץ שפה נשמרים ב־cache משותף בשרת לפי גרסת layer
+
 ## תצוגת Build ו-Deploy
 
 לפני Deploy אפשר לפתוח **Build & Deploy Preview**: Runtime, Entrypoint (נגזר מ-handler), Handler, רשימת קבצים בחבילה, גודל ואזהרות. אותם כללי אריזה כמו Deploy; Deploy נחסם כשיש שגיאות אימות.
