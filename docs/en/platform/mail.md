@@ -202,13 +202,37 @@ Studio is the only full builder. Compose does **not** use a locked slot form.
 - Gmail-style email chips for recipients
 - DNS hints on the list-page metadata card (MX, A, SPF, DKIM placeholder, DMARC)
 
+## System Mail Identities (ADR-035)
+
+OTP codes, user invites, and account invites are sent through **SystemMailService**, a
+single control-plane entry point for system mail — no more `SMTP_*`-only path:
+
+| Layer | Role |
+|-------|------|
+| Application services (auth, invites, …) | Call `system_mail.send("noreply", ...)` by **identity key**, never a hard-coded address |
+| SystemMailService | Resolves the enabled System Identity + Mailbox, decrypts credentials, delegates to the Mail Provider |
+| Mail Provider (Stalwart) | Same shared MTA as customer mail — no second system mail server |
+| `SMTP_*` (`email_delivery`) | Dev escape hatch / fallback only — used when no identity or provider is configured, not the production path |
+
+**System Identity ≠ Mailbox owner.** A System Identity (e.g. `noreply`) points at a
+Mailbox that is flagged `ownership=system`. **Platform Admin manages** that mailbox in
+the console Mail UI (Inbox/Sent/Drafts/Settings) but is **not its owner** — the System
+owns it. Non-system mailboxes are unaffected and remain Account-scoped exactly as
+before.
+
+**Migration preserves the mailbox.** If a `noreply@{MAIL_DOMAIN}` mailbox already
+existed (e.g. created earlier on the Platform Mail Account), HomeCloud does **not**
+create a second mailbox for that address. On first use it flips that same row's
+`ownership` to `system` and attaches a System Identity to it — same Mailbox ID, same
+Stalwart principal, same stored mail, same UI. System mailboxes cannot be deleted from
+the console or API (`403`); everything else about mailbox management is unchanged.
+
 ## Not in Phase 1 (follow-ups)
 
 - Moving mail DNS management under **Account → Domains**
 - Spam/AV, tenant-owned domains
 - Access Key gateway (future SES-like API)
 - Event/webhook inbound (Phase 1 uses pull; events later)
-- Cutover of OTP/invites to `noreply@` (after send is stable)
 - True fuzzy “similar” matching beyond Sieve `:matches` / `:contains`
 
 ## Deliverability hardening
