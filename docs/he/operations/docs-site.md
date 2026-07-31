@@ -94,6 +94,18 @@ mkdocs build
 homecloud so sync ./site so://docs/ --delete
 ```
 
+## מנועי חיפוש ו-LLM
+
+האתר כולל קבצי גילוי בשורש ה-bucket (מסונכרנים בכל deploy):
+
+| נתיב | מטרה |
+|------|------|
+| `/robots.txt` | אישור סריקה + הפניה ל-sitemap |
+| `/sitemap.xml` | מלאי כתובות מלא (MkDocs) |
+| `/llms.txt` | אינדקס קומפקטי לעוזרי AI ([llmstxt.org](https://llmstxt.org/)) |
+
+SO Static Website מחזיר **HTTP 404** (עם גוף `404.html`) לנתיבים חסרים — לא soft 404 עם סטטוס 200.
+
 ## תהליך CI
 
 ראו [`.github/workflows/deploy.yml`](https://github.com/HomeCloudLab/homecloud-docs/blob/main/.github/workflows/deploy.yml) — רץ בכל push ל-`main`.

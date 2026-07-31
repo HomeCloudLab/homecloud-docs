@@ -1,0 +1,46 @@
+# HomeCloud Docs — https://docs.web.holab.abrdns.com/
+# Spec: https://llmstxt.org/
+
+> HomeCloud platform documentation: console, CLI, SDK, storage (SO), queues (MQ), functions, mail, and operations.
+
+## Getting started
+
+- [Overview](https://docs.web.holab.abrdns.com/getting-started/overview/): What HomeCloud is and how the pieces fit
+- [Accounts](https://docs.web.holab.abrdns.com/getting-started/accounts/): Account number, alias, ROOT, and members
+- [Access Keys](https://docs.web.holab.abrdns.com/getting-started/access-keys/): Data-plane credentials for CLI/SDK
+
+## CLI
+
+- [CLI overview](https://docs.web.holab.abrdns.com/cli/)
+- [Install](https://docs.web.holab.abrdns.com/cli/install/)
+- [Authentication](https://docs.web.holab.abrdns.com/cli/authentication/): Login (account + username) and Access Keys
+- [login](https://docs.web.holab.abrdns.com/cli/commands/login/)
+- [configure](https://docs.web.holab.abrdns.com/cli/commands/configure/)
+- [so](https://docs.web.holab.abrdns.com/cli/commands/so/): Object storage, including `so sync` for static sites
+- [mq](https://docs.web.holab.abrdns.com/cli/commands/mq/)
+- [Releases](https://docs.web.holab.abrdns.com/cli/releases/)
+
+## SDK
+
+- [Python / JS SDK](https://docs.web.holab.abrdns.com/sdk/)
+
+## Platform
+
+- [Architecture](https://docs.web.holab.abrdns.com/platform/architecture/)
+- [Services](https://docs.web.holab.abrdns.com/platform/services/)
+- [Functions](https://docs.web.holab.abrdns.com/platform/functions/)
+- [Mail](https://docs.web.holab.abrdns.com/platform/mail/)
+- [Access Keys security](https://docs.web.holab.abrdns.com/platform/access-keys-security/)
+- [Security (MFA)](https://docs.web.holab.abrdns.com/platform/security/)
+
+## Operations
+
+- [Documentation site](https://docs.web.holab.abrdns.com/operations/docs-site/): How this site is built and deployed to SO static website hosting
+
+## Hebrew
+
+- [עברית — בית](https://docs.web.holab.abrdns.com/he/)
+
+## Optional
+
+- [Full sitemap](https://docs.web.holab.abrdns.com/sitemap.xml)

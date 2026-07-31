@@ -94,6 +94,18 @@ mkdocs build
 homecloud so sync ./site so://docs/ --delete
 ```
 
+## Crawlers and LLMs
+
+The site ships discovery files at the bucket root (synced with each deploy):
+
+| Path | Purpose |
+|------|---------|
+| `/robots.txt` | Allow crawl + point at sitemap |
+| `/sitemap.xml` | Full URL inventory (MkDocs) |
+| `/llms.txt` | Compact index for AI assistants ([llmstxt.org](https://llmstxt.org/)) |
+
+SO static website returns **HTTP 404** (with `404.html` body) for missing paths — not a soft 404 with status 200.
+
 ## CI workflow
 
 See [`.github/workflows/deploy.yml`](https://github.com/HomeCloudLab/homecloud-docs/blob/main/.github/workflows/deploy.yml) — runs on every push to `main`.

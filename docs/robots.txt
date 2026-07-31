@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://docs.web.holab.abrdns.com/sitemap.xml
