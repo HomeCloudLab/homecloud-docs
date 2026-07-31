@@ -4,7 +4,7 @@ HomeCloud CLI uses two auth modes depending on the command.
 
 ## Console login (JWT)
 
-For control-plane commands: `login`, `accounts`, `queues list`, `so ls-buckets`.
+For control-plane commands: `login`, `accounts`, `queues list`.
 
 ```bash
 homecloud login --username alice
@@ -35,7 +35,7 @@ Session is stored in `~/.homecloud/session` per profile.
 
 ## Access Key (data plane)
 
-For `mq`, `so ls/cp/sync/rm`:
+For `mq`, `so ls-buckets/ls/cp/sync/rm`:
 
 ```bash
 homecloud configure

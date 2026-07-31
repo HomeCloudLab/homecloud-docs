@@ -4,20 +4,23 @@ Console authentication (JWT). Supports password-only, MFA (TOTP / backup codes),
 
 ```bash
 homecloud login
-homecloud login --username alice --password 'secret'
+homecloud login --account 100200300400 --username alice --password 'secret'
 homecloud login --profile staging
 ```
 
-## Username vs email
+## Account, then username
 
-The API expects `username`, not email:
+Login resolves **Account → Username → Password → MFA**. `--account` takes the account
+number or the account alias, and is required for terminal login (browser login resolves
+it on the Console login page instead):
 
 ```bash
-# ✓ Correct
-homecloud login --username daivid
+# ✓ Correct — account number or alias, then username (not email)
+homecloud login --account 100200300400 --username daivid
+homecloud login --account acme-corp --username daivid
 
 # ✗ Wrong (401 or invalid credentials)
-homecloud login --username daivid.aba@gmail.com
+homecloud login --account acme-corp --username daivid.aba@gmail.com
 ```
 
 ## Interactive menus
@@ -38,15 +41,15 @@ If MFA offers both authenticator and passkey:
   Passkey / security key (YubiKey) — opens browser
 ```
 
-Flags skip the menus: `--browser`, `--mfa-code`, `--username` / `--password`.
+Flags skip the menus: `--browser`, `--mfa-code`, `--account` / `--username` / `--password`.
 
 ## MFA (TOTP / backup codes)
 
 
-If MFA is enabled for your platform admin user, the CLI prompts for a verification code after password:
+If MFA is enabled for your user, the CLI prompts for a verification code after password:
 
 ```bash
-$ homecloud login --username alice
+$ homecloud login --account 100200300400 --username alice
 Password:
 Verification code: 123456
 ✓ Logged in
@@ -55,7 +58,7 @@ Verification code: 123456
 Non-interactive / scripts:
 
 ```bash
-homecloud login --username alice --password 'secret' --mfa-code 123456
+homecloud login --account 100200300400 --username alice --password 'secret' --mfa-code 123456
 ```
 
 `mfa_token` and verification codes are never written to disk — only the resulting JWT is stored in `~/.homecloud/session`.
