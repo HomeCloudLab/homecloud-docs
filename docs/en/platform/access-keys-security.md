@@ -1,17 +1,27 @@
 # Access Keys — security model
 
-Access Keys authenticate **data plane** requests (SO, MQ, Secrets) using SigV1 HMAC. The runtime must hold the **plaintext secret** to verify signatures.
+Access Keys authenticate **data plane** requests (SO, MQ, Secrets, Mail) using SigV1 HMAC. The runtime must hold the **plaintext secret** to verify signatures.
+
+## Credentials vs authorization
+
+| Concept | Role |
+|---------|------|
+| **Access Key (HCAK)** | Long-lived **credential** bound to a User or Service Account |
+| **IAM policies** on that principal | **Authorization** (effective access). Root user → full access |
+| **STS (HCSAK)** | Temporary sessions from `sts:AssumeRole` / Function Role ARN |
+
+Do **not** put coarse `mq:*` / `so:*` scopes on the key itself for new keys — attach policies to the principal (IAM → Policies / Roles), then create the key.
 
 ## Source of truth
 
 | Store | Role |
 |-------|------|
-| **Postgres** (`access_keys`) | Authoritative metadata + `secret_encrypted` |
-| **Redis** | Disposable cache for fast auth (no persistence on homelab) |
+| **Postgres** (`access_keys`) | Authoritative metadata + `secret_encrypted` + principal link |
+| **Redis** | Disposable cache (secret + derived permissions / `iam_snapshot`) |
 
 After a Redis flush or homelab restart:
 
-1. API **rehydrates** all active keys on startup
+1. API **rehydrates** all active keys on startup (principal policies → effective access)
 2. Data plane services call `POST /internal/access-keys/{id}/ensure-cached` on cache miss (lazy rebuild)
 
 ## `secret_encrypted`
@@ -41,6 +51,11 @@ Token: `INTERNAL_ACCESS_KEY_SYNC_TOKEN` on API (defaults to `SECRET_KEY` when un
 ## STS session keys (`HCSAK…`)
 
 Short-lived STS credentials stay **Redis-only** with TTL. The ensure endpoint is never called for `HCSAK` prefixes.
+
+Console helpers:
+
+- `POST /accounts/{id}/sts/assume-role` — IAM Role AssumeRole (trust + caller + role policies)
+- `POST /accounts/{id}/sts/assume-data-plane-role` — convenience mint scoped to one resource (console RBAC)
 
 ## Pre-migration keys
 
