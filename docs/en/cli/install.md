@@ -37,7 +37,15 @@ https://homecloud-cli.so.holab.abrdns.com/releases/v0.2.10/homecloud-linux-amd64
 
 ## Update
 
-Re-run the install script — it overwrites the binary in place:
+Standalone binary:
+
+```bash
+homecloud update --check          # is a newer release available?
+homecloud update                  # install latest
+homecloud update --version 0.2.30 # install a specific release
+```
+
+Or re-run the install script (overwrites the binary in place):
 
 ```powershell
 irm https://homecloud-cli.so.holab.abrdns.com/install/install.ps1 | iex

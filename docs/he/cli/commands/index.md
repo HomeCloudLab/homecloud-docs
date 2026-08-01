@@ -2,7 +2,8 @@
 
 | פקודה | אימות | תיאור |
 |---------|------|-------------|
-| `homecloud version` | — | מידע גרסה ו-build |
+| `homecloud version` | — | מידע גרסה ו-build (`--check` לבדיקת עדכון) |
+| `homecloud update` | — | בדיקה / התקנה של גרסת CLI standalone חדשה |
 | `homecloud configure` | — | שמירת פרופיל Access Key |
 | `homecloud configure import` | — | ייבוא אישורים מ-JSON |
 | `homecloud config show` | — | הצגת התצורה הנוכחית |

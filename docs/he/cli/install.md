@@ -37,7 +37,15 @@ https://homecloud-cli.so.holab.abrdns.com/releases/v0.2.10/homecloud-linux-amd64
 
 ## עדכון
 
-הריצו מחדש את סקריפט ההתקנה — הוא דורס את הקובץ הבינארי במקום:
+בינארי standalone:
+
+```bash
+homecloud update --check          # האם יש גרסה חדשה?
+homecloud update                  # התקנת latest
+homecloud update --version 0.2.30 # התקנת גרסה ספציפית
+```
+
+או הריצו מחדש את סקריפט ההתקנה (דורס את הבינארי במקום):
 
 ```powershell
 irm https://homecloud-cli.so.holab.abrdns.com/install/install.ps1 | iex

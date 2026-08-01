@@ -15,6 +15,7 @@ https://homecloud-cli.so.holab.abrdns.com/releases/latest/homecloud-windows-amd6
 
 | Version | Highlights |
 |---------|------------|
+| v0.2.30 | Managed errors (no traceback); `homecloud update` / `version --check` |
 | v0.2.18 | Bidirectional `so cp` (download + upload); byte progress on single-file copy |
 | v0.2.17 | Unified byte-based `so sync` progress (speed, ETA) for upload and download; fix exact single-file `so://` URI sync |
 | v0.2.16 | Fix `so sync` download for keys with spaces (`Signature mismatch`) and large files (streaming) |
@@ -33,5 +34,10 @@ Full changelog: [homecloud-cli releases](https://github.com/HomeCloudLab/homeclo
 
 ```bash
 homecloud version
-# homecloud 0.2.10 (linux-x86_64, standalone)
+# homecloud 0.2.30 (linux-x86_64, standalone)
+
+homecloud version --check   # compare to latest release
+homecloud update --check
+homecloud update            # install latest (standalone only)
+homecloud update --version 0.2.30
 ```

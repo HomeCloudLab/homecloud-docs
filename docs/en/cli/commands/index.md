@@ -2,7 +2,8 @@
 
 | Command | Auth | Description |
 |---------|------|-------------|
-| `homecloud version` | — | Version and build info |
+| `homecloud version` | — | Version and build info (`--check` for updates) |
+| `homecloud update` | — | Check / install a newer standalone CLI release |
 | `homecloud configure` | — | Save Access Key profile |
 | `homecloud configure import` | — | Import credentials JSON |
 | `homecloud config show` | — | Show current config |

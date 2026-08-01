@@ -15,6 +15,7 @@ https://homecloud-cli.so.holab.abrdns.com/releases/latest/homecloud-windows-amd6
 
 | גרסה | עיקרי השינויים |
 |---------|------------|
+| v0.2.30 | שגיאות מנוהלות (בלי traceback); `homecloud update` / `version --check` |
 | v0.2.18 | ‏`so cp` דו-כיווני (הורדה + העלאה); התקדמות לפי בתים בהעתקת קובץ יחיד |
 | v0.2.17 | התקדמות `so sync` מאוחדת לפי בתים (מהירות, ETA) בהעלאה והורדה; תיקון URI מדויק לקובץ יחיד |
 | v0.2.16 | תיקון הורדה ב-`so sync`: מפתחות עם רווחים (‏`Signature mismatch`), קבצים גדולים (זרימה) |
@@ -33,5 +34,10 @@ https://homecloud-cli.so.holab.abrdns.com/releases/latest/homecloud-windows-amd6
 
 ```bash
 homecloud version
-# homecloud 0.2.10 (linux-x86_64, standalone)
+# homecloud 0.2.30 (linux-x86_64, standalone)
+
+homecloud version --check   # השוואה לגרסה האחרונה
+homecloud update --check
+homecloud update            # התקנת latest (standalone בלבד)
+homecloud update --version 0.2.30
 ```
