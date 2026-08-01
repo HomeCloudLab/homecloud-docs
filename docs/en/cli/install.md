@@ -37,13 +37,13 @@ https://homecloud-cli.so.holab.abrdns.com/releases/v0.2.10/homecloud-linux-amd64
 
 ## Update
 
-Standalone binary:
-
 ```bash
 homecloud update --check          # is a newer release available?
-homecloud update                  # install latest
-homecloud update --version 0.2.30 # install a specific release
+homecloud update                  # install latest standalone binary
+homecloud update --version 0.2.31 # install a specific release
 ```
+
+Works from both standalone and pip/source installs. Source installs write the binary to the default install directory (`%LOCALAPPDATA%\Programs\homecloud` on Windows, `~/.local/bin` on Linux/macOS) and add it to PATH.
 
 Or re-run the install script (overwrites the binary in place):
 

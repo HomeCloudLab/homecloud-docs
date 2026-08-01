@@ -37,13 +37,13 @@ https://homecloud-cli.so.holab.abrdns.com/releases/v0.2.10/homecloud-linux-amd64
 
 ## עדכון
 
-בינארי standalone:
-
 ```bash
 homecloud update --check          # האם יש גרסה חדשה?
-homecloud update                  # התקנת latest
-homecloud update --version 0.2.30 # התקנת גרסה ספציפית
+homecloud update                  # התקנת בינארי standalone אחרון
+homecloud update --version 0.2.31 # התקנת גרסה ספציפית
 ```
+
+עובד גם מ-standalone וגם מ-pip/source. מ-source הבינארי נכתב לנתיב ברירת המחדל (`%LOCALAPPDATA%\Programs\homecloud` ב-Windows, `~/.local/bin` ב-Linux/macOS) ונוסף ל-PATH.
 
 או הריצו מחדש את סקריפט ההתקנה (דורס את הבינארי במקום):
 
