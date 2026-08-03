@@ -1,7 +1,7 @@
 # HomeCloud Docs — https://docs.web.holab.abrdns.com/
 # Spec: https://llmstxt.org/
 
-> HomeCloud platform documentation: console, CLI, SDK, storage (SO), queues (MQ), functions, mail, and operations.
+> HomeCloud platform documentation: console, CLI, SDK, storage (SO), image registry (IR), queues (MQ), functions, mail, and operations.
 
 ## Getting started
 

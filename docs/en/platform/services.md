@@ -12,6 +12,16 @@
 - Lifecycle: abort incomplete multipart uploads after N days (MinIO ILM — enforced on a schedule, not instantly). After save, the API merges the submitted rule into the GET response when MinIO omits `abort_incomplete_multipart_days` on read-back, so the console shows the value you set.
 - Uploads in progress: browser warns on tab close; in-app navigation prompts to cancel and abort uploaded parts
 
+## IR — Image Registry
+
+- Private OCI registry at `https://ir.{apex}/{account_short_id}/{repository}:{tag}`
+- Control plane is source of truth for repositories, quotas, and lifecycle; Zot stores OCI content on MinIO
+- Auth: `docker login ir.{apex}` with Access Key id / secret (`ir:Push` / `ir:Pull`)
+- Console: create repositories, usage, lifecycle (keep last N + protected tags)
+- CLI: `homecloud ir login`, `homecloud ir repo list|create`, `homecloud ir usage`
+- Digests (`@sha256:…`) are immutable; prefer digests for production deploys
+- Platform GHCR remains for HomeCloud CI only — not for tenant images
+
 ## MQ — Message Queues
 
 - JetStream-backed queues per account

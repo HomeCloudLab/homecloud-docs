@@ -12,6 +12,16 @@
 - Lifecycle: ביטול העלאות multipart לא שלמות אחרי N ימים (MinIO ILM — לפי לוח זמנים, לא מיידי). אחרי שמירה, ה-API ממזג את הכלל שנשלח לתשובת GET כש-MinIO לא מחזיר `abort_incomplete_multipart_days` ב-read-back, כך שהממשק מציג את הערך שהגדרת.
 - העלאה פעילה: אזהרה בסגירת טאב; ניווט פנימי מציע לבטל ולמחוק חלקים שכבר הועלו
 
+## IR — Image Registry
+
+- Registry OCI פרטי ב-`https://ir.{apex}/{account_short_id}/{repository}:{tag}`
+- Control plane = מקור אמת ל-repos/מכסות/lifecycle; Zot שומר תוכן OCI על MinIO
+- אימות: `docker login ir.{apex}` עם Access Key / secret (`ir:Push` / `ir:Pull`)
+- Console: יצירת repositories, usage, lifecycle (keep last N + תגיות מוגנות)
+- CLI: `homecloud ir login`, `homecloud ir repo list|create`, `homecloud ir usage`
+- Digests immutable — מומלץ לפריסות production
+- GHCR של הפלטפורמה נשאר ל-CI בלבד
+
 ## MQ — תורי הודעות
 
 - תורים מגובי JetStream לכל חשבון
