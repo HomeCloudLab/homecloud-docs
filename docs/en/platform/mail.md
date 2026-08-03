@@ -231,7 +231,7 @@ the console or API (`403`); everything else about mailbox management is unchange
 
 - Moving mail DNS management under **Account → Domains**
 - Spam/AV, tenant-owned domains
-- Access Key gateway (future SES-like API)
+- Access Key gateway (future programmatic send API)
 - Event/webhook inbound (Phase 1 uses pull; events later)
 - True fuzzy “similar” matching beyond Sieve `:matches` / `:contains`
 

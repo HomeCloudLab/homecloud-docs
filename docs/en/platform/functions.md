@@ -1,6 +1,6 @@
 # Functions
 
-HomeCloud Functions are managed serverless compute units — the platform equivalent of AWS Lambda. You author Python 3.12 handlers in a VS Code–class console workspace, deploy immutable versions, and invoke them synchronously through the control plane (the warm runtime lives on the Functions data plane).
+HomeCloud Functions are managed serverless compute units. You author Python 3.12 handlers in a VS Code–class console workspace, deploy immutable versions, and invoke them synchronously through the control plane (the warm runtime lives on the Functions data plane).
 
 ## Create
 

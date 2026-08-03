@@ -1,6 +1,6 @@
 # פונקציות
 
-HomeCloud Functions הן יחידות compute serverless מנוהלות — המקבילה בפלטפורמה ל-AWS Lambda. כותבים handlers ב-Python 3.12 בסביבת קונסול בסגנון VS Code, פורסים גרסאות בלתי משתנות, ומריצים invoke סינכרוני דרך ה-control plane (ה-runtime החם נמצא ב-data plane של Functions).
+HomeCloud Functions הן יחידות compute serverless מנוהלות. כותבים handlers ב-Python 3.12 בסביבת קונסול בסגנון VS Code, פורסים גרסאות בלתי משתנות, ומריצים invoke סינכרוני דרך ה-control plane (ה-runtime החם נמצא ב-data plane של Functions).
 
 ## יצירה
 

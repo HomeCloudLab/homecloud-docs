@@ -29,7 +29,7 @@ flowchart LR
 
 === "Access Key (data plane)"
 
-    Used for SO/MQ/Secrets runtime APIs — like AWS IAM access keys.
+    Used for SO/MQ/Secrets runtime APIs — long-lived credentials for data-plane access.
 
     ```bash
     homecloud configure

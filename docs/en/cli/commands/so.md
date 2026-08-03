@@ -88,7 +88,7 @@ In the Console, open an object’s **Properties** tab and copy the **SO URI** (`
     Large files stream to disk (no full-file memory buffer). Object keys with spaces use URL-encoded paths for HTTP while signing the canonical key path.
 
 !!! warning "Breaking change (v0.2.15)"
-    Before v0.2.15, sync skipped same-size files by default (AWS S3 sync style). From v0.2.15, sync **overwrites by default**. Use `--skip` to restore the old size-based skip behavior.
+    Before v0.2.15, sync skipped same-size files by default. From v0.2.15, sync **overwrites by default**. Use `--skip` to restore the old size-based skip behavior.
 
 ### Live output (default)
 

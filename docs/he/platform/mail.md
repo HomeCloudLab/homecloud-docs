@@ -200,9 +200,9 @@ HomeCloud Mail הוא שירות דואר ב-control plane מעל מנוע **Sta
 - העברת ניהול DNS של הדואר תחת **Account → Domains**
 - העברה פעילה וכללי אוטומציה דרך Stalwart Sieve (מומש)
 - Spam/AV, דומיינים של דייר
-- שערי Access Key (API דמוי SES בעתיד)
+- שערי Access Key (API שליחה פרוגרמטי בעתיד)
 - Spam/AV, אוטומציה, דומיינים של tenant
-- Access Key gateway (API בסגנון SES בעתיד)
+- Access Key gateway (API שליחה פרוגרמטי בעתיד)
 - Event/webhook (Phase 1 משתמש ב-pull; אירועים בהמשך)
 
 ## הקשחת מסירה (Deliverability)

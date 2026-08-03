@@ -11,7 +11,7 @@ HomeCloud is a homelab-first cloud control plane with:
 | Service | Zone | Purpose |
 |---------|------|---------|
 | **Console** | `console.{apex}` | Web UI + control-plane API |
-| **SO** (Object Storage) | `so.{apex}` / `{bucket}.web.{apex}` | S3-compatible storage + static websites |
+| **SO** (Object Storage) | `so.{apex}` / `{bucket}.web.{apex}` | Object storage + static websites |
 | **MQ** | `mq.{apex}` | Message queues |
 | **MDB** | `mdb.{apex}` | Managed databases |
 | **Secrets** | `secrets.{apex}` | Secrets management |

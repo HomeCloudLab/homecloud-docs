@@ -29,7 +29,7 @@ flowchart LR
 
 === "Access Key (data plane)"
 
-    ל-API של SO/MQ/Secrets בזמן ריצה — כמו מפתחות גישה של AWS IAM.
+    ל-API של SO/MQ/Secrets בזמן ריצה — אישורים ארוכי טווח לגישה ל-data plane.
 
     ```bash
     homecloud configure

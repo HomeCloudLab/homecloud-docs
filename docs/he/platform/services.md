@@ -2,7 +2,8 @@
 
 ## SO — אחסון אובייקטים
 
-- ‏API תואם S3 בכתובת `https://so.{apex}`
+- ‏API של אחסון אובייקטים בכתובת `https://so.{apex}`
+- תואם ל-S3 Object API עבור לקוחות נפוצים
 - אתרים סטטיים בכתובת `https://{bucket}.web.{apex}`
 - Console: יצירת buckets, מדיניות, הגדרת אתר, ניהול גרסאות
 - פרטי object ב-Console: URI להעתקה בפורמט `so://bucket/key` ל-CLI/SDK (ב-PowerShell עטפו במירכאות אם יש רווחים במפתח)
@@ -42,7 +43,7 @@
 
 ## Functions
 
-- פונקציות Python 3.12 serverless מנוהלות (בסגנון Lambda) עם סביבת קונסול בסגנון VS Code
+- פונקציות Python 3.12 serverless מנוהלות עם סביבת קונסול בסגנון VS Code
 - פריסת גרסאות בלתי משתנות; ארטיפקטים ב-`so://` כש-Object Storage זמין
 - Invoke מקונסול/API; triggers: HTTP, MQ, cron, ידני; layers אופציונליים
 - Data plane: `homecloud-fn` ב-`fn.holab.abrdns.com`

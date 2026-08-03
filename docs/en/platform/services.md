@@ -2,7 +2,8 @@
 
 ## SO — Object Storage
 
-- S3-compatible API at `https://so.{apex}`
+- Object Storage API at `https://so.{apex}`
+- Compatible with the S3 Object API for common clients
 - Static websites at `https://{bucket}.web.{apex}`
 - Console: create buckets, policies, website config, versioning
 - Console object detail: copyable `so://bucket/key` URI for CLI/SDK (use quotes in PowerShell when the key contains spaces)
@@ -42,7 +43,7 @@
 
 ## Functions
 
-- Managed Python 3.12 serverless functions (Lambda-class) with a VS Code–style console workspace
+- Managed Python 3.12 serverless functions with a VS Code–style console workspace
 - Deploy immutable versions; artifacts use `so://` URIs when Object Storage is available
 - Invoke via console/API; triggers: HTTP, MQ, cron, manual; optional dependency layers
 - Data plane: `homecloud-fn` at `fn.holab.abrdns.com`

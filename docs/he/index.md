@@ -11,7 +11,7 @@ HomeCloud הוא control plane לענן מותאם homelab, הכולל:
 | שירות | Zone | מטרה |
 |-------|------|------|
 | **Console** | `console.{apex}` | ממשק ווב + API של control plane |
-| **SO** (אחסון אובייקטים) | `so.{apex}` / `{bucket}.web.{apex}` | אחסון תואם S3 + אתרים סטטיים |
+| **SO** (אחסון אובייקטים) | `so.{apex}` / `{bucket}.web.{apex}` | אחסון אובייקטים + אתרים סטטיים |
 | **MQ** | `mq.{apex}` | תורים להודעות |
 | **MDB** | `mdb.{apex}` | מסדי נתונים מנוהלים |
 | **Secrets** | `secrets.{apex}` | ניהול סודות |

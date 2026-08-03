@@ -10,7 +10,7 @@ Visitors can open a new tenant without a platform admin — same step pattern as
 2. **Email** — receive a verification code.
 3. **OTP** — enter the 6-digit code.
 4. **Credentials** — account name, username, password (+ confirm). Slug is derived from the account name.
-5. You enter the console as the **account owner**. Invite more users later under **IAM → Users** (AWS-style root account).
+5. You enter the console as the **account owner**. Invite more users later under **IAM → Users**.
 
 The public flow creates a **bare** tenant (account + owner only). Apps, projects, namespaces, and other resources are created later inside the console when you need them — not during signup.
 
