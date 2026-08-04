@@ -11,7 +11,18 @@ HomeCloud Mail הוא שירות דואר ב-control plane מעל מנוע **Sta
 | `homecloud-api` `/accounts/{id}/mail/*` | JWT + metadata ב-Postgres |
 | Stalwart (K3s) | SMTP/IMAP + תוכן ההודעה (מקור האמת) |
 
-גופים, קבצים מצורפים ותיקיות **לא** נשמרים ב-Postgres — Stalwart הוא מקור האמת היחיד.
+גופים, קבצים מצורפים ותיקיות **לא** נשמרים ב-Postgres — Stalwart הוא מקור האמת לתוכן. רשימות בקונסול קוראות metadata מ-Postgres בלבד.
+
+### קליטה מול תצוגה
+
+| מסלול | תפקיד |
+|--------|--------|
+| Worker `mail-inbound-sync` | IMAP → Postgres (API leader; מרווח `MAIL_INBOUND_SYNC_INTERVAL_SECONDS`, ברירת מחדל 60ש׳). דורש `ENABLE_BACKGROUND_WORKERS=true` על ה-leader. |
+| **סנכרן Inbox** | משיכת IMAP → Postgres ידנית לתיבה אחת |
+| Soft-poll (~45ש׳) | קורא Postgres בלבד — **בלי** IMAP |
+| `GET …/mail/sync-status` | בריאות worker + מדיניות noreply |
+
+`healthy` ברמה העליונה דורש גם קליטה תקינה וגם מדיניות noreply תקינה (אם קיימת תיבה). באנר הקונסול מבחין בין עיכוב קליטה לסטיית מדיניות.
 
 ## ניווט בקונסול
 
@@ -194,6 +205,14 @@ HomeCloud Mail הוא שירות דואר ב-control plane מעל מנוע **Sta
 הראשון המערכת הופכת את `ownership` של אותה שורה ל-`system` ומצרפת אליה זהות מערכתית —
 אותו Mailbox ID, אותו principal ב-Stalwart, אותו דואר שמור, אותו ממשק. לא ניתן למחוק
 תיבות מערכתיות מהקונסול או ה-API (`403`); כל שאר ניהול התיבות נשאר ללא שינוי.
+
+### דחיית נכנס ל-noreply
+
+`noreply@` נשארת תיבה (ארכיון Sent / audit) אבל **לא אמורה לקבל דואר נכנס**.
+
+- מצב רצוי: Postgres `accept_inbound=false`
+- מצב בפועל: Sieve `reject` פעיל ב-Stalwart (אימות ב-startup ב-`ensure_noreply_policy()` — idempotent)
+- דילוג ה-worker על תיבות `accept_inbound=false` הוא **רשת ביטחון בלבד**, לא תחליף לדחייה במנוע
 
 ## לא ב-Phase 1 (בהמשך)
 

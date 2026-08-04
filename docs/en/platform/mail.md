@@ -11,7 +11,42 @@ HomeCloud Mail is a control-plane mail product on top of the **Stalwart** engine
 | `homecloud-api` `/accounts/{id}/mail/*` | JWT APIs, Postgres **metadata** |
 | Stalwart (K3s) | SMTP/IMAP + message content (source of truth) |
 
-Bodies, attachments, and folders are **not** stored in Postgres — Stalwart is the single source of truth.
+Bodies, attachments, and folders are **not** stored in Postgres — Stalwart is the single source of truth for message content. Console **lists** read Postgres metadata only.
+
+### Ingest vs display
+
+| Path | Role |
+|------|------|
+| Background worker `mail-inbound-sync` | IMAP → Postgres (leader API; interval `MAIL_INBOUND_SYNC_INTERVAL_SECONDS`, default 60s). Requires `ENABLE_BACKGROUND_WORKERS=true` on the leader. |
+| **Sync inbox** (console button) | Explicit IMAP → Postgres escape hatch for one mailbox |
+| Soft-poll (~45s) | Re-reads Postgres only — **does not** call IMAP |
+| `GET …/mail/sync-status` | Ingest worker + noreply policy health |
+
+Example response shape:
+
+```json
+{
+  "healthy": true,
+  "ingestion": {
+    "healthy": true,
+    "last_success_at": "2026-08-04T18:20:00Z",
+    "messages_imported": 124
+  },
+  "system_mail": {
+    "noreply_policy": {
+      "desired": "reject",
+      "actual": "reject",
+      "healthy": true
+    }
+  }
+}
+```
+
+`healthy` (top-level) is true only when **both** ingestion and noreply policy are healthy (policy skipped if no noreply mailbox yet). Console banner warns on policy drift separately from delayed ingest.
+
+Console shows a healthy / delayed / policy-drift banner from sync-status. If ingest is delayed, use **Sync inbox** — do not expect soft-poll alone to pull new mail from Stalwart.
+
+Ops metrics (Prometheus): `mail_ingestion_last_success_timestamp`, `mail_ingestion_failures_total`, `mail_ingestion_duration_seconds`, `mail_policy_reconcile_failures_total`.
 
 ## Console navigation
 
@@ -226,6 +261,24 @@ create a second mailbox for that address. On first use it flips that same row's
 `ownership` to `system` and attaches a System Identity to it — same Mailbox ID, same
 Stalwart principal, same stored mail, same UI. System mailboxes cannot be deleted from
 the console or API (`403`); everything else about mailbox management is unchanged.
+
+### Noreply inbound reject
+
+`noreply@` stays a Mailbox (outbound Sent/audit) but **must not accept inbound**.
+
+- Desired state: Postgres `accept_inbound=false`
+- Actual state: Stalwart active Sieve `reject` (verified on API startup via `ensure_noreply_policy()` — idempotent reconcile; no duplicate scripts when already correct)
+- Status shape (also on `GET …/mail/status` → `noreply_policy`):
+
+```json
+{
+  "desired": { "accept_inbound": false },
+  "actual": { "stalwart_reject_rule": true },
+  "healthy": true
+}
+```
+
+Worker skip of `accept_inbound=false` mailboxes is a **safety net** only (logs `Inbound message rejected by policy guard: mailbox=… reason=accept_inbound=false`). It does not replace engine/SMTP reject for the sender.
 
 ## Not in Phase 1 (follow-ups)
 
