@@ -26,6 +26,10 @@ HomeCloud Mail הוא שירות דואר ב-control plane מעל מנוע **Sta
 
 נקודות **GET** של Mail הן metadata ב-control plane בלבד. Bootstrap זהות ו-reconcile מדיניות רצים ב-startup (DB) / leader ברקע / POST — לא ברשימה/סטטוס.
 
+**Ops — אם `leader_active=false` תמיד:** לפחות תהליך API אחד חייב עם `ENABLE_BACKGROUND_WORKERS=true`. ב-replicas אופקיים (`api-horizontal`) ה-workers כבויים על `api` — צריך את שירות `api-worker` (או API יחיד בלי horizontal). אחרת רק Sync inbox מושך IMAP→Postgres.
+
+**Ops — noreply ו-SSL:** JMAP ל-admin של Stalwart לעיתים עם cert self-signed; ה-provider מבטל verify לכתובת הזו (כמו IMAP). אם `noreply_policy` מציג `CERTIFICATE_VERIFY_FAILED` — לפרוס API עם התיקון ולהריץ `POST …/mail/system/reconcile`.
+
 ## ניווט בקונסול
 
 אותו דפוס כמו SO / Queues: **רשימה → פרטי משאב**. פתיחת תיבה משאירה את מסגרת המייל גלויה בזמן הטעינה (בלי הבהוב skeleton של כל העמוד); ה-padding של ה-console נשאר יציב בכל אזור Mail.

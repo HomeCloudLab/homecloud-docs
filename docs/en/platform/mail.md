@@ -26,6 +26,10 @@ Bodies, attachments, and folders are **not** stored in Postgres — Stalwart is 
 
 Mail **GET** endpoints are control-plane metadata only. System identity bootstrap and Stalwart policy reconcile run at startup (DB) / background leader / POST — not on list/status GETs.
 
+**Ops — if `leader_active=false` forever:** at least one API process must run with `ENABLE_BACKGROUND_WORKERS=true`. Horizontal API replicas (`docker-compose.api-horizontal.yml`) disable workers on `api`; run the dedicated `api-worker` service (or a single non-horizontal API). Otherwise Sync inbox is the only IMAP→Postgres path.
+
+**Ops — noreply SSL:** Stalwart admin/JMAP often uses a self-signed cert; the provider disables TLS verify for that admin URL (same as IMAP). If `noreply_policy` shows `CERTIFICATE_VERIFY_FAILED`, redeploy API with that fix and run `POST …/mail/system/reconcile`.
+
 Example `GET …/mail/sync-status` shape (observational; no repair side effects):
 
 ```json
