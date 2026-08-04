@@ -20,9 +20,13 @@ Bodies, attachments, and folders are **not** stored in Postgres — Stalwart is 
 | Background worker `mail-inbound-sync` | IMAP → Postgres (leader API; interval `MAIL_INBOUND_SYNC_INTERVAL_SECONDS`, default 60s). Requires `ENABLE_BACKGROUND_WORKERS=true` on the leader. |
 | **Sync inbox** (console button) | Explicit IMAP → Postgres escape hatch for one mailbox |
 | Soft-poll (~45s) | Re-reads Postgres only — **does not** call IMAP |
-| `GET …/mail/sync-status` | Ingest worker + noreply policy health |
+| `GET …/mail/sync-status` | **Read-only**: ingest snapshot + `mail_system_components` (no Stalwart repair) |
+| `POST …/mail/system/reconcile` | Explicit system repair (locked); returns **202** and records degraded state if Stalwart is down |
+| Console `/console/mail` | Progressive: mailbox table first, health/DNS second |
 
-Example response shape:
+Mail **GET** endpoints are control-plane metadata only. System identity bootstrap and Stalwart policy reconcile run at startup (DB) / background leader / POST — not on list/status GETs.
+
+Example `GET …/mail/sync-status` shape (observational; no repair side effects):
 
 ```json
 {
@@ -36,15 +40,15 @@ Example response shape:
     "noreply_policy": {
       "desired": "reject",
       "actual": "reject",
-      "healthy": true
+      "healthy": true,
+      "status": "healthy",
+      "owner": "mail-reconciler"
     }
   }
 }
 ```
 
-`healthy` (top-level) is true only when **both** ingestion and noreply policy are healthy (policy skipped if no noreply mailbox yet). Console banner warns on policy drift separately from delayed ingest.
-
-Console shows a healthy / delayed / policy-drift banner from sync-status. If ingest is delayed, use **Sync inbox** — do not expect soft-poll alone to pull new mail from Stalwart.
+`healthy` (top-level) is true only when **both** ingestion and noreply policy are healthy (policy skipped if no component row yet). Console banner warns on policy drift separately from delayed ingest. Soft-poll alone does not pull new mail from Stalwart — use the worker or **Sync inbox**.
 
 Ops metrics (Prometheus): `mail_ingestion_last_success_timestamp`, `mail_ingestion_failures_total`, `mail_ingestion_duration_seconds`, `mail_policy_reconcile_failures_total`.
 

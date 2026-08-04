@@ -20,9 +20,11 @@ HomeCloud Mail הוא שירות דואר ב-control plane מעל מנוע **Sta
 | Worker `mail-inbound-sync` | IMAP → Postgres (API leader; מרווח `MAIL_INBOUND_SYNC_INTERVAL_SECONDS`, ברירת מחדל 60ש׳). דורש `ENABLE_BACKGROUND_WORKERS=true` על ה-leader. |
 | **סנכרן Inbox** | משיכת IMAP → Postgres ידנית לתיבה אחת |
 | Soft-poll (~45ש׳) | קורא Postgres בלבד — **בלי** IMAP |
-| `GET …/mail/sync-status` | בריאות worker + מדיניות noreply |
+| `GET …/mail/sync-status` | **קריאה בלבד**: snapshot קליטה + `mail_system_components` (בלי תיקון Stalwart) |
+| `POST …/mail/system/reconcile` | תיקון מערכת מפורש (נעול); מחזיר **202** ורושם degraded אם Stalwart לא זמין |
+| Console `/console/mail` | Progressive: טבלת תיבות קודם, בריאות/DNS אחר כך |
 
-`healthy` ברמה העליונה דורש גם קליטה תקינה וגם מדיניות noreply תקינה (אם קיימת תיבה). באנר הקונסול מבחין בין עיכוב קליטה לסטיית מדיניות.
+נקודות **GET** של Mail הן metadata ב-control plane בלבד. Bootstrap זהות ו-reconcile מדיניות רצים ב-startup (DB) / leader ברקע / POST — לא ברשימה/סטטוס.
 
 ## ניווט בקונסול
 
