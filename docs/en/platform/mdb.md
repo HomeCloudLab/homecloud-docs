@@ -38,14 +38,14 @@ MySQL’s protocol is server-first, so a shared public `:3306` cannot route by h
 - Use `{db_user}__{instance_name}` — e.g. `root__mydb-sql`
 - Or the exact `routing_username` registered for the instance (default = instance name)
 - Password is the real DB user’s password (`root` / managed user)
-- Clients need cleartext plugin support: `mysql --enable-cleartext-plugin …`
 
 PowerShell example:
 
 ```powershell
-mysql -h "mydb-sql.mdb.holab.abrdns.com" -P 3306 -u "root__mydb-sql" --enable-cleartext-plugin -p
+mysql -h "mydb-sql.mdb.holab.abrdns.com" -P 3306 -u "root__mydb-sql" -p
 ```
 
+(Older cleartext mode required `--enable-cleartext-plugin`; current edge uses native AuthSwitch passthrough.)
 The Connection tab bootstrap user for MySQL is **`root`** (Secret). An `app` owner/database name in create form is the planned application DB — create it under **Databases** / **Users** if you want an `app` login.
 ## Logical databases
 

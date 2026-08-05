@@ -31,7 +31,7 @@ MDB של HomeCloud הוא שירות מנוהל ל־**PostgreSQL**, **MySQL** ו
 
 ב־`:3306` משותף אי־אפשר לנתב לפי hostname (אין SNI). ה־edge בוחר מופע לפי שם המשתמש ב־handshake:
 
-`{db_user}__{instance_name}` — למשל `root__mydb-sql` + `--enable-cleartext-plugin`.
+`{db_user}__{instance_name}` — למשל `root__mydb-sql` (בלי `--enable-cleartext-plugin`; ה־edge מעביר AuthSwitch native ל־backend).
 
 הסיסמה היא של המשתמש האמיתי (`root` / משתמש מנוהל). בטאב Connection ל־MySQL מוצג **`root`** (bootstrap). `app` בטופס יצירה הוא שם DB/owner מתוכנן — צריך ליצור ב־Databases / Users אם רוצים login בשם `app`.
 
