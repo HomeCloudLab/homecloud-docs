@@ -66,6 +66,15 @@ homecloud update --version 0.2.31 # התקנת גרסה ספציפית
 irm https://homecloud-cli.so.holab.abrdns.com/install/install.ps1 | iex
 ```
 
+## הסרה
+
+```bash
+homecloud uninstall          # עם אישור
+homecloud uninstall --yes    # בלי אישור
+```
+
+מסיר את הבינארי ה-standalone ואת רשומת ה-User PATH ב-Windows. פרטי התחברות/הגדרות תחת `~/.homecloud` נשמרים.
+
 ## מפתחים (מקוד מקור)
 
 ```bash

@@ -66,6 +66,15 @@ Or re-run the install script (overwrites the binary in place):
 irm https://homecloud-cli.so.holab.abrdns.com/install/install.ps1 | iex
 ```
 
+## Uninstall
+
+```bash
+homecloud uninstall          # confirm interactively
+homecloud uninstall --yes    # no prompt
+```
+
+Removes the standalone binary and its User PATH entry on Windows. Saved credentials/config under `~/.homecloud` are kept.
+
 ## Developers (source)
 
 ```bash
