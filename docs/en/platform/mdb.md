@@ -31,6 +31,22 @@ Reveal credentials from the instance **Connection** tab (or API `POST …/connec
 - MySQL direct TCP: `:3306` via handshake edge router
 - MongoDB direct TCP: `:27017` HostSNI + TLS when enabled
 
+### MySQL `direct_tcp` username
+
+MySQL’s protocol is server-first, so a shared public `:3306` cannot route by hostname/SNI. The edge router picks the instance from the **handshake username**:
+
+- Use `{db_user}__{instance_name}` — e.g. `root__mydb-sql`
+- Or the exact `routing_username` registered for the instance (default = instance name)
+- Password is the real DB user’s password (`root` / managed user)
+- Clients need cleartext plugin support: `mysql --enable-cleartext-plugin …`
+
+PowerShell example:
+
+```powershell
+mysql -h "mydb-sql.mdb.holab.abrdns.com" -P 3306 -u "root__mydb-sql" --enable-cleartext-plugin -p
+```
+
+The Connection tab bootstrap user for MySQL is **`root`** (Secret). An `app` owner/database name in create form is the planned application DB — create it under **Databases** / **Users** if you want an `app` login.
 ## Logical databases
 
 ```bash

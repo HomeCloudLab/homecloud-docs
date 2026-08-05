@@ -27,6 +27,14 @@ MDB של HomeCloud הוא שירות מנוהל ל־**PostgreSQL**, **MySQL** ו
 - `GET/POST …/users` ו־`POST …/users/{name}/rotate`
 - `GET/POST …/backups`
 
+### MySQL `direct_tcp` — שם משתמש
+
+ב־`:3306` משותף אי־אפשר לנתב לפי hostname (אין SNI). ה־edge בוחר מופע לפי שם המשתמש ב־handshake:
+
+`{db_user}__{instance_name}` — למשל `root__mydb-sql` + `--enable-cleartext-plugin`.
+
+הסיסמה היא של המשתמש האמיתי (`root` / משתמש מנוהל). בטאב Connection ל־MySQL מוצג **`root`** (bootstrap). `app` בטופס יצירה הוא שם DB/owner מתוכנן — צריך ליצור ב־Databases / Users אם רוצים login בשם `app`.
+
 ## MySQL Access denied עבור `monitor`
 
 אם בלוגים מופיע `Access denied for user 'monitor'`, בדקו ש־Secret `{cluster}-mysql-secrets` כולל את כל מפתחות המערכת של Percona. שינוי סיסמה ב־Secret מפעיל רוטציה אצל האופרטור. מופעים חדשים נוצרים עם סט מלא.
