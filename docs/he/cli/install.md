@@ -19,7 +19,22 @@
 | מערכת הפעלה | נתיב |
 |----|------|
 | Linux/macOS | `/usr/local/bin/homecloud` או `~/.local/bin/homecloud` |
-| Windows | `%LOCALAPPDATA%\Programs\homecloud\homecloud.exe` |
+| Windows | `%LOCALAPPDATA%\Programs\HomeCloud\homecloud.exe` |
+
+## Windows: הורדה ולחיצה כפולה
+
+1. הורידו את [`homecloud-windows-amd64.exe`](https://homecloud-cli.so.holab.abrdns.com/releases/latest/homecloud-windows-amd64.exe).
+2. לחצו פעמיים על הקובץ ב-Explorer — ה-CLI מעתיק את עצמו ל-`HomeCloud`, מוסיף ל-User PATH, ומציג את הצעדים הבאים.
+3. פתחו טרמינל **חדש** והריצו `homecloud configure` או `homecloud login`.
+
+הרצה מתוך טרמינל בלי ארגומנטים מציגה help (לא מתקינה אוטומטית). להתקנה מפורשת:
+
+```powershell
+.\homecloud-windows-amd64.exe install
+.\homecloud-windows-amd64.exe install --force
+```
+
+לביטול התקנה אוטומטית (מפתחים / CI): `HOMECLOUD_NO_AUTO_INSTALL=1` או `--no-install`.
 
 ## הורדה ישירה
 
@@ -43,7 +58,7 @@ homecloud update                  # התקנת בינארי standalone אחרו�
 homecloud update --version 0.2.31 # התקנת גרסה ספציפית
 ```
 
-עובד גם מ-standalone וגם מ-pip/source. מ-source הבינארי נכתב לנתיב ברירת המחדל (`%LOCALAPPDATA%\Programs\homecloud` ב-Windows, `~/.local/bin` ב-Linux/macOS) ונוסף ל-PATH.
+תמיד נכתב לנתיב ברירת המחדל (`%LOCALAPPDATA%\Programs\HomeCloud` ב-Windows, `~/.local/bin` ב-Linux/macOS), גם אם מריצים `update` מעותק ב-Downloads. ב-Windows מעדכן גם את ה-User PATH.
 
 או הריצו מחדש את סקריפט ההתקנה (דורס את הבינארי במקום):
 

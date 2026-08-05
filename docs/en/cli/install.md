@@ -19,7 +19,22 @@ Binaries install to:
 | OS | Path |
 |----|------|
 | Linux/macOS | `/usr/local/bin/homecloud` or `~/.local/bin/homecloud` |
-| Windows | `%LOCALAPPDATA%\Programs\homecloud\homecloud.exe` |
+| Windows | `%LOCALAPPDATA%\Programs\HomeCloud\homecloud.exe` |
+
+## Windows: download and double-click
+
+1. Download [`homecloud-windows-amd64.exe`](https://homecloud-cli.so.holab.abrdns.com/releases/latest/homecloud-windows-amd64.exe).
+2. Double-click the file in Explorer — the CLI copies itself into `HomeCloud`, adds User PATH, and shows next steps.
+3. Open a **new** terminal and run `homecloud configure` or `homecloud login`.
+
+Running the same file from a terminal with no arguments shows help (it does not auto-install). To install explicitly:
+
+```powershell
+.\homecloud-windows-amd64.exe install
+.\homecloud-windows-amd64.exe install --force
+```
+
+Disable auto-install (developers / CI): set `HOMECLOUD_NO_AUTO_INSTALL=1` or pass `--no-install`.
 
 ## Direct download
 
@@ -43,7 +58,7 @@ homecloud update                  # install latest standalone binary
 homecloud update --version 0.2.31 # install a specific release
 ```
 
-Works from both standalone and pip/source installs. Source installs write the binary to the default install directory (`%LOCALAPPDATA%\Programs\homecloud` on Windows, `~/.local/bin` on Linux/macOS) and add it to PATH.
+Always writes to the default install directory (`%LOCALAPPDATA%\Programs\HomeCloud` on Windows, `~/.local/bin` on Linux/macOS), even if you launch `update` from a Downloads copy. Adds/refreshes User PATH on Windows.
 
 Or re-run the install script (overwrites the binary in place):
 
