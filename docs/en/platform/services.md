@@ -30,8 +30,10 @@
 
 ## MDB — Managed Databases
 
-- PostgreSQL, MySQL, MongoDB via operators
-- External access via MDB gateway + TCP routes
+- PostgreSQL, MySQL, MongoDB via operators (managed day-2 APIs)
+- External access via MDB gateway + TCP routes (MySQL handshake edge router)
+- Logical databases, users, and backups across engines — see [MDB](mdb.md)
+- Development cluster: MDB pods remain visible in Kubernetes for debugging
 
 ## Secrets
 
