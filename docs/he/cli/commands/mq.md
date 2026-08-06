@@ -7,14 +7,14 @@
 ```bash
 homecloud mq send my-queue --body '{"hello":"world"}'
 homecloud mq send my-queue --body-file message.json
-# אצווה (1–10 הודעות) — מערך JSON
+# Batch (1–10 messages) — JSON array
 homecloud mq send my-queue --body '[{"id":1},{"id":2}]'
 homecloud mq send my-queue --body-file messages.json
 ```
 
 === "PowerShell"
 
-    ‏PowerShell מסיר מרכאות מ-JSON בעת קריאה לקבצי הרצה נייטיביים. כל אלה עובדים:
+    PowerShell מסיר ציטוטי JSON בקריאה לתוכנות native. כל אלה עובדים:
 
     ```powershell
     homecloud mq send q --body '{hello:world}'
@@ -27,12 +27,12 @@ homecloud mq send my-queue --body-file messages.json
 ```bash
 homecloud mq receive my-queue
 homecloud mq receive my-queue --max-messages 5 --wait-seconds 10
-# צריכה מהירה: ack/מחיקה מיידית (בלי visibility / בלי delete נפרד)
+# Fast consume: ack/delete immediately (no visibility / no separate delete)
 homecloud mq receive my-queue --max-messages 10 --delete
 ```
 
 פריטים שהתקבלו כוללים `created_at` (מתי ההודעה נשמרה בתור) כדי למדוד זמן המתנה.
-עם `--delete`, ה-`status` הוא `deleted` וההודעות מוסרות באותה קריאה.
+עם `--delete`, `status` הוא `deleted` וההודעות מוסרות באותה קריאה.
 
 ## delete / purge
 
@@ -49,7 +49,7 @@ homecloud mq delete-dlq my-queue 7
 homecloud mq purge-dlq my-queue
 ```
 
-## queues (console JWT)
+## queues (JWT קונסול)
 
 ```bash
 homecloud queues list
@@ -57,13 +57,13 @@ homecloud queues list --live
 homecloud queues get my-queue
 ```
 
-`--live` / `get` כוללים עומק (`messages`), `inflight`, ו-`dlq_messages`.
+`--live` / `get` כוללים עומק (`messages`), `inflight` ו-`dlq_messages`.
 
-## דרישות מקדימות
+## דרישות קדם
 
-- ‏Access Key עם `mq:*` או `*` (ל-`mq *`)
-- התחברות לקונסולה ל-`queues list` / `queues get`
-- התור חייב להתקיים (צרו אותו ב-Console ← Queues)
+- Access Key עם `mq:*` או `*` (עבור `mq *`)
+- התחברות לקונסול ל-`queues list` / `queues get`
+- התור חייב להתקיים (צרו ב-Console → Queues)
 
 ```bash
 homecloud login --username alice

@@ -1,6 +1,6 @@
 site_name: HomeCloud Docs
 site_url: https://docs.web.holab.abrdns.com
-site_description: HomeCloud platform, CLI, and SDK documentation
+site_description: How to use HomeCloud — console, CLI, and SDK guides for account owners and DevOps
 
 repo_name: HomeCloudLab/homecloud-docs
 repo_url: https://github.com/HomeCloudLab/homecloud-docs
@@ -52,10 +52,9 @@ plugins:
           nav_translations:
             Home: בית
             Getting started: התחלה
+            Guides: מדריכים
             CLI: CLI
             SDK: SDK
-            Platform: פלטפורמה
-            Operations: תפעול
   - tags
 
 markdown_extensions:
@@ -83,29 +82,41 @@ nav:
   - Getting started:
       - getting-started/overview.md
       - getting-started/accounts.md
+      - getting-started/console.md
       - getting-started/access-keys.md
+  - Guides:
+      - guides/index.md
+      - guides/object-storage.md
+      - guides/queues.md
+      - guides/databases.md
+      - guides/redis.md
+      - guides/functions.md
+      - guides/applications.md
+      - guides/kubernetes.md
+      - guides/registry.md
+      - guides/mail.md
+      - guides/secrets.md
+      - guides/iam.md
+      - guides/domains.md
+      - guides/ssl.md
+      - guides/account.md
   - CLI:
       - cli/index.md
       - cli/install.md
       - cli/authentication.md
       - cli/commands/index.md
       - cli/commands/configure.md
-      - cli/commands/mq.md
-      - cli/commands/so.md
       - cli/commands/login.md
+      - cli/commands/so.md
+      - cli/commands/mq.md
+      - cli/commands/fn.md
+      - cli/commands/ir.md
+      - cli/commands/mail.md
       - cli/releases.md
   - SDK:
       - sdk/index.md
-  - Platform:
-      - platform/architecture.md
-      - platform/services.md
-      - platform/mdb.md
-      - platform/functions.md
-      - platform/mail.md
-      - platform/access-keys-security.md
-      - platform/security.md
-  - Operations:
-      - operations/docs-site.md
+      - sdk/python.md
+      - sdk/nodejs.md
 
 extra_css:
   - stylesheets/homecloud.css

@@ -1,6 +1,6 @@
 # configure
 
-הגדרת אישורי Access Key עבור פרופיל.
+הגדרת אישורי Access Key לפרופיל.
 
 ```bash
 homecloud configure
@@ -18,14 +18,14 @@ homecloud configure import ./credentials.json
 }
 ```
 
-השדה `default_account_id` הוא אופציונלי — מזוהה אוטומטית מתוך ה-Access Key.
+`default_account_id` אופציונלי — נפתר אוטומטית מה-Access Key.
 
 ## קבצים
 
 | קובץ | מטרה |
-|------|---------|
-| `~/.homecloud/credentials` | מפתחות גישה לכל פרופיל |
-| `~/.homecloud/session` | אסימוני JWT + חשבון פעיל |
+|------|------|
+| `~/.homecloud/credentials` | Access Keys לפי פרופיל |
+| `~/.homecloud/session` | טוקני JWT + חשבון פעיל |
 
 דריסת נתיבים:
 

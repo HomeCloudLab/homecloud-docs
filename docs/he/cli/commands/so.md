@@ -1,10 +1,10 @@
 # so
 
-פקודות אחסון אובייקטים.
+פקודות object storage.
 
 ## ls-buckets
 
-דורש התחברות ל-console:
+דורש התחברות לקונסול:
 
 ```bash
 homecloud login --username alice
@@ -41,17 +41,17 @@ homecloud so ls media --prefix photos/ --recursive
 
 ## sync
 
-סנכרון תיקיות דו-כיווני. הכיוון נקבע לפי סדר הארגומנטים.
+סנכרון תיקייה דו־כיווני. הכיוון נקבע לפי סדר הארגומנטים.
 
-ב-Console, בכרטיסיית **Properties** של object — העתיקו את **SO URI** (`so://bucket/key`) והשתמשו בו כארגומנט `so://` למטה.
+בקונסול, פתחו לשונית **Properties** של אובייקט והעתיקו את **SO URI** (`so://bucket/key`) — השתמשו בערך הזה כארגומנט `so://` למטה.
 
-**ברירת מחדל:** דריסה של כל קובץ שקיים בצד המקור (העלאה או הורדה).
+**ברירת מחדל:** דריסת כל קובץ שקיים בצד המקור (העלאה או הורדה).
 
 | דגל | התנהגות |
-|------|----------|
-| *(ללא)* | דריסת מפתחות/קבצים תואמים |
-| `--skip` | דילוג כשהגודל ביעד כבר תואם (לפי size בלבד, לא hash) |
-| `--delete` | גם מחיקת עודפים ביעד (מצב mirror) |
+|-----|---------|
+| *(none)* | דריסת מפתחות/קבצים תואמים |
+| `--skip` | דילוג כשגודל היעד כבר תואם (גודל בלבד, לא hash תוכן) |
+| `--delete` | גם הסרת עודפים ביעד (מראה) |
 
 === "העלאה (מקומי → SO)"
 
@@ -61,7 +61,7 @@ homecloud so ls media --prefix photos/ --recursive
     homecloud so sync ./dist so://my-website/ --skip
     ```
 
-    ‏`--delete` מסיר אובייקטים מרוחקים שאינם קיימים מקומית (מצב mirror).
+    `--delete` מסיר אובייקטים מרוחקים שאינם קיימים מקומית (מצב מראה).
 
 === "הורדה (SO → מקומי)"
 
@@ -71,28 +71,28 @@ homecloud so ls media --prefix photos/ --recursive
     homecloud so sync so://docs/ ./site --skip
     ```
 
-    אובייקט יחיד (העתיקו SO URI מ-**Properties** ב-Console):
+    אובייקט בודד (העתיקו SO URI מ-**Properties** בקונסול):
 
     ```powershell
     homecloud so sync "so://my-bucket/watch/spider noir/1/file.mkv" ".\local-dir\"
     ```
 
-    ‏`--delete` מסיר קבצים מקומיים שאינם קיימים ב-bucket (מצב mirror).
+    `--delete` מסיר קבצים מקומיים שאינם קיימים ב-bucket (מצב מראה).
 
-    מפתחות עם רווחים — עטיפה במירכאות ב-PowerShell:
+    מפתחות עם רווחים חייבים להיות מצוטטים ב-PowerShell:
 
     ```powershell
     homecloud so sync "so://watch/spider noir/1/" ".\local-dir\"
     ```
 
-    קבצים גדולים נשמרים בזרימה לדיסק. מפתחות עם רווחים נשלחים ב-HTTP עם נתיב מקודד, בעוד החתימה משתמשת בנתיב הקנוני.
+    קבצים גדולים נזרמים לדיסק (בלי buffer של הקובץ המלא בזיכרון). מפתחות אובייקט עם רווחים משתמשים בנתיבים מקודדי URL ל-HTTP בזמן חתימת נתיב המפתח הקנוני.
 
-!!! warning "שינוי שובר תאימות (v0.2.15)"
-    לפני v0.2.15, sync דילג כברירת מחדל על קבצים באותו גודל. מ-v0.2.15, sync **דורס כברירת מחדל**. השתמשו ב-`--skip` להתנהגות הישנה.
+!!! warning "שינוי שובר (v0.2.15)"
+    לפני v0.2.15, sync דילג על קבצים באותו גודל כברירת מחדל. מ-v0.2.15, sync **דורס כברירת מחדל**. השתמשו ב-`--skip` כדי לשחזר את התנהגות הדילוג לפי גודל הישנה.
 
 ### פלט חי (ברירת מחדל)
 
-ההתקדמות **לפי בתים** בהעלאה ובהורדה: סרגל משותף עם נפח, מהירות, ETA ומונה קבצים. ה-workers מעדכנים מונה thread-safe; ה-UI מתרענן ב-10Hz (בלי גישה ישירה ל-Rich מה-workers). שורות `upload` / `download` / `skip` / `delete` נשארות.
+ההתקדמות **מבוססת בתים** להעלאות והורדות: סרגל משותף אחד מציג גודל שהועבר, מהירות, ETA וספירת קבצים. Workers מעדכנים מונה בתים thread-safe; הממשק מרענן ב-10 Hz (workers אף פעם לא נוגעים ב-Rich ישירות). שורות לפי קובץ עדיין מציגות `upload`, `download`, `skip` או `delete`.
 
 ```
 scan  57 local, 12 remote, 57 operations
@@ -102,13 +102,13 @@ upload  index.html
 upload  assets/app.js
 ```
 
-עם `--skip`, קבצים באותו גודל מוצגים כ-`skip` במקום `upload`/`download`.
+עם `--skip`, קבצים שלא השתנו ובאותו גודל מוצגים כ-`skip` במקום `upload`/`download`.
 
-בהורדה מוצג `sync ← so://bucket/` ושורות `download` במקום `upload`.
+הורדה מציגה `sync ← so://bucket/` ושורות `download` במקום `upload`.
 
-### העברות מקביליות
+### העברות מקבילות
 
-כברירת מחדל **10 קבצים** מועברים בו-זמנית (‏`-j` / `--workers`, מקסימום 64). שימוש חוזר בחיבורי HTTP למהירות:
+כברירת מחדל **10 קבצים** מועברים בבת אחת (`-j` / `--workers`, מקסימום 64). משתמש מחדש בחיבורי HTTP למהירות:
 
 ```bash
 homecloud so sync so://docs/ ./site -j 20
@@ -116,7 +116,7 @@ homecloud so sync ./dist so://my-website/ --delete -j 16
 homecloud so sync ./dist so://my-website/ --skip -j 16
 ```
 
-השתמשו ב-`--output json` ב-CI כדי לדכא התקדמות ולפלוט סיכום JSON.
+השתמשו ב-`--output json` ב-CI כדי לדכא התקדמות ולהפיק סיכום JSON.
 
 ### פריסת אתר סטטי (GitHub Actions)
 
@@ -139,9 +139,9 @@ homecloud so rm so://media/path/file.txt
 homecloud so rm so://media/old-site/ --recursive
 ```
 
-## כתובת האתר
+## כתובת אתר
 
-הפעילו **Static Website** על bucket ב-console, ואז:
+הפעילו **Static Website** על bucket בקונסול, ואז:
 
 ```text
 https://{bucket}.web.{apex}

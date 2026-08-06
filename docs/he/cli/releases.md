@@ -1,8 +1,8 @@
-# גרסאות CLI
+# שחרורי CLI
 
-הקבצים הבינאריים מתפרסמים ל-bucket הציבורי `homecloud-cli` בכל git tag.
+בינארים מתפרסמים ל-bucket הציבורי `homecloud-cli` בכל git tag.
 
-## האחרונה
+## האחרון
 
 ```text
 https://homecloud-cli.so.holab.abrdns.com/releases/latest/VERSION
@@ -13,31 +13,31 @@ https://homecloud-cli.so.holab.abrdns.com/releases/latest/homecloud-windows-amd6
 
 ## היסטוריית גרסאות
 
-| גרסה | עיקרי השינויים |
+| Version | Highlights |
 |---------|------------|
-| v0.2.30 | שגיאות מנוהלות (בלי traceback); `homecloud update` / `version --check` |
-| v0.2.18 | ‏`so cp` דו-כיווני (הורדה + העלאה); התקדמות לפי בתים בהעתקת קובץ יחיד |
-| v0.2.17 | התקדמות `so sync` מאוחדת לפי בתים (מהירות, ETA) בהעלאה והורדה; תיקון URI מדויק לקובץ יחיד |
-| v0.2.16 | תיקון הורדה ב-`so sync`: מפתחות עם רווחים (‏`Signature mismatch`), קבצים גדולים (זרימה) |
-| v0.2.15 | ‏`so sync` דורס כברירת מחדל; `--skip` לדילוג לפי גודל (שינוי שובר תאימות מול ברירת הדילוג הקודמת) |
-| v0.2.14 | ניסיון חוזר בשגיאות העברה זמניות, מטמון לזיהוי חשבון, הודעות שגיאה ברורות יותר |
-| v0.2.13 | ‏`so sync` / `so rm -r` מקבילי (‏`-j` workers), שימוש חוזר בחיבורי HTTP |
-| v0.2.12 | ‏`so sync` דו-כיווני (העלאה + הורדה), ‏API‏ `client.so` |
-| v0.2.11 | התקדמות חיה עבור `so sync` / `cp` / `rm` |
-| v0.2.10 | ‏`so sync`, `so rm -r`, ‏URIs‏ `so://`, אישורים בשורה |
-| v0.2.8 | תיקון גוף ב-MQ, username בהתחברות, JSON ב-PowerShell |
-| v0.2.6 | גרסה בינארית ציבורית ראשונה |
+| v0.2.30 | Managed errors (no traceback); `homecloud update` / `version --check` |
+| v0.2.18 | Bidirectional `so cp` (download + upload); byte progress on single-file copy |
+| v0.2.17 | Unified byte-based `so sync` progress (speed, ETA) for upload and download; fix exact single-file `so://` URI sync |
+| v0.2.16 | Fix `so sync` download for keys with spaces (`Signature mismatch`) and large files (streaming) |
+| v0.2.15 | `so sync` overwrites by default; `--skip` for same-size skip (breaking vs prior size-skip default) |
+| v0.2.14 | Retry transient transfer errors, cache account resolution, clearer error messages |
+| v0.2.13 | Parallel `so sync` / `so rm -r` (`-j` workers), HTTP connection reuse |
+| v0.2.12 | Bidirectional `so sync` (upload + download), `client.so` API |
+| v0.2.11 | Live progress for `so sync` / `cp` / `rm` |
+| v0.2.10 | `so sync`, `so rm -r`, `so://` URIs, inline credentials |
+| v0.2.8 | MQ body fix, login username, PowerShell JSON |
+| v0.2.6 | First public binary release |
 
-יומן שינויים מלא: [גרסאות homecloud-cli](https://github.com/HomeCloudLab/homecloud-cli/releases)
+יומן שינויים מלא: [homecloud-cli releases](https://github.com/HomeCloudLab/homecloud-cli/releases)
 
-## בדיקת הגרסה המותקנת
+## בדיקת גרסה מותקנת
 
 ```bash
 homecloud version
 # homecloud 0.2.30 (linux-x86_64, standalone)
 
-homecloud version --check   # השוואה לגרסה האחרונה
+homecloud version --check   # compare to latest release
 homecloud update --check
-homecloud update            # התקנת latest (standalone בלבד)
+homecloud update            # install latest (standalone only)
 homecloud update --version 0.2.30
 ```

@@ -1,0 +1,34 @@
+# מדריכים
+
+מדריכים שלב־אחר־שלב לכל שירות מרכזי ב-HomeCloud. כל עמוד מכסה:
+
+1. למה השירות מיועד (בשפה פשוטה)  
+2. איך להשתמש בו ב**קונסול**  
+3. איך לאוטומט עם ה-**CLI** וה-**SDK** כשרלוונטי  
+4. מלכודות נפוצות  
+
+## קטלוג
+
+| מדריך | שירות | התחילו כאן אם אתם צריכים… |
+|-------|-------|---------------------------|
+| [Object Storage (SO)](object-storage.md) | SO | לאחסן קבצים, לסנכרן תיקיות, לארח אתר סטטי |
+| [Message Queues (MQ)](queues.md) | MQ | לנתק workers, להשתמש ב-DLQ |
+| [Managed Databases (MDB)](databases.md) | MDB | להריץ PostgreSQL, MySQL או MongoDB |
+| [Redis](redis.md) | Redis | מטמון מנוהל |
+| [Functions](functions.md) | FN | handlers ב-serverless עם triggers |
+| [Applications](applications.md) | Apps | לפרוס מתבנית |
+| [Kubernetes](kubernetes.md) | K8s | לבדוק ולהגדיל עומסי חשבון |
+| [Image Registry (IR)](registry.md) | IR | תמונות Docker / OCI פרטיות |
+| [Mail](mail.md) | Mail | תיבות דואר, תבניות, אוטומציות |
+| [Secrets](secrets.md) | Secrets | לאחסן אישורים לאפליקציות ופונקציות |
+| [IAM](iam.md) | IAM | תפקידים, מדיניות, Access Keys, תפקידי קונסול |
+| [Domains & DNS](domains.md) | Domains | להביא דומיין משלכם |
+| [SSL certificates](ssl.md) | SSL | לראות תעודות שהונפקו |
+| [Account & team](account.md) | Account | חברים, ביקורת, פרויקטים, אבטחה |
+
+## תזכורת אימות
+
+- **קונסול + `homecloud login`** — יצירה והגדרה של משאבים  
+- **Access Key** — העברת נתונים וקריאה ל-APIs של זמן ריצה  
+
+צרו מפתחות ב-[Access Keys](../getting-started/access-keys.md) לפני שניסיונות דוגמאות CLI באתר הזה.

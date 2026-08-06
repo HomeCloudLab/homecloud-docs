@@ -1,0 +1,117 @@
+# Mail
+
+HomeCloud Mail נותן לחשבון **תיבות דואר**, לקוח webmail מלא, **תבניות**, **אנשי קשר** ו**אוטומציות** (העברה / כללים בסגנון Sieve). דוא״ל יוצא ונכנס מטופל על ידי מנוע הדואר של הפלטפורמה; הקונסול שומר מטא־נתונים לרשימה מהירה.
+
+| פריט | ערך |
+|------|--------|
+| Console | **Mail** → `/console/mail` |
+| Per mailbox | `/console/mail/{mailboxId}` |
+| Templates | `/console/mail/templates` |
+| Contacts | `/console/mail/contacts` |
+
+## מפת קונסול
+
+1. **רשימת תיבות** — יצירת תיבות, פתיחת Templates / Contacts, בדיקת סטטוס שירות ורמזי DNS.  
+2. **לקוח תיבה** — תיקיות (Inbox, Sent, Drafts, Trash, Archive), חיפוש, כתיבה, הגדרות.  
+3. **Template Studio** — בונה דוא״ל חזותי עם תצוגה מקדימה וקוד.  
+4. **Contacts** — פנקס כתובות לכתיבה.
+
+## יצירה ושימוש בתיבה
+
+1. פתחו **Mail** → **Create mailbox** (חלק מקומי בדומיין הדואר של הפלטפורמה, אלא אם הפלטפורמה כבר תומכת בדומיינים מותאמים).  
+2. פתחו את התיבה.  
+3. שלחו הודעת בדיקה לעצמכם; השתמשו ב-**Sync inbox** אם הודעה חדשה מתעכבת.  
+4. פתחו **Settings** בתוך התיבה לשם תצוגה, חתימה, העברה וכללי אוטומציה.
+
+### כתיבה
+
+- סרגל עשיר (מודגש, רשימות, קישורים, תמונות מוטמעות, …)  
+- שבבים בסגנון Gmail ל-To / Cc / Bcc  
+- קבצים מצורפים דרך מהדק נייר או גרירה  
+- הכנסת **תבנית** (שומרת HTML מלא של האימייל)  
+- Ctrl+Enter לשליחה  
+
+Reply / Reply all / Forward שומרים כותרות threading.
+
+### תיקיות ומחיקה
+
+| פעולה | תוצאה |
+|-------|-------|
+| Delete | מעביר ל-Trash |
+| Restore | חזרה ל-Inbox |
+| Permanent delete (מתוך Trash) | נמחק לצמיתות |
+
+### Deliverability
+
+פתחו **Status → Deliverability** (מאזור שירות הדואר) לבדיקות SPF / DKIM / DMARC. השתמשו ב-**Fix** כשהפלטפורמה יכולה לפרסם רשומות DNS בטוחות אוטומטית. deliverability טובה דורשת DNS נכון ודואר שיוצא מ-MTA של הפלטפורמה — לא מ-IP מגורים אקראי.
+
+## תבניות
+
+1. פתחו **Templates** → צרו ריק או בחרו starter (welcome, invoice, promo, …).  
+2. עצבו עם בלוקים (כותרת, טקסט, כפתור, עמודות, …).  
+3. תצוגה מקדימה בדסקטופ/טאבלט/מובייל.  
+4. הכניסו מכתיבה, או שלחו דרך API עם `template_id` + משתנים.
+
+תגי מיזוג נראים כמו `{{user_name}}`, `{{cta_url}}` וכו'.
+
+## אנשי קשר
+
+תחזקו פנקס כתובות; בחירה מרובה ומחיקה מרובה בניקוי. כתיבה יכולה לבחור אנשי קשר ל-To.
+
+## אוטומציות
+
+בתיבה **Settings → Automations**:
+
+- בנו כללי **When… Then…** (from, subject, has attachment, …)  
+- פעולות כמו הגשה לתיקייה, העברה ופעולות Sieve קשורות  
+- סידור עדיפות מחדש, הפעלה/השבתה, ייצוא/ייבוא JSON  
+- העברה יכולה גם להיות מוגדרת כ-`forward_to` פשוט ששומר עותק מקומי  
+
+## CLI
+
+```bash
+homecloud mail mailboxes
+homecloud mail messages --mailbox <id>
+homecloud mail get <message-id>
+homecloud mail attachment <message-id> <part-id> -o ./file.bin
+```
+
+ראו [CLI `mail`](../cli/commands/mail.md).
+
+## SDK
+
+```python
+from homecloud import HomeCloud
+
+client = HomeCloud.from_env()
+boxes = client.mail.list_mailboxes()
+msgs = client.mail.list_messages(mailbox_id=boxes[0]["id"], direction="INBOUND")
+detail = client.mail.get_message(msgs[0]["id"])
+data = client.mail.download_attachment(msgs[0]["id"], "0")
+```
+
+## דוגמאות API (JWT קונסול)
+
+```bash
+# List mailboxes
+curl -sS -H "Authorization: Bearer $TOKEN" \
+  "$API/api/v1/accounts/$ACCOUNT_ID/mail/mailboxes"
+
+# Send
+curl -sS -X POST -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
+  -d '{"mailbox_id":"…","to":["you@example.com"],"subject":"Hello","body_html":"<p>Hi</p>","body_text":"Hi"}' \
+  "$API/api/v1/accounts/$ACCOUNT_ID/mail/messages"
+```
+
+## טיפים ומלכודות
+
+- רענון רך של הממשק קורא מחדש מטא־נתונים; הוא עשוי **לא** למשוך מ-IMAP — השתמשו ב-**Sync inbox** או המתינו ל-worker סנכרון ברקע.  
+- «Sent» אומר ש-MTA של הפלטפורמה **קיבל** את ההודעה; דואר bounce מרוחק עדיין יכול להגיע מאוחר יותר.  
+- הדביקו כתובות בזהירות מקליינטי RTL — סימני Unicode בלתי נראים יכולים לשבור נמענים (הקונסול מסיר רבים מהם אוטומטית).  
+- כתובות מערכת כמו `noreply@` עשויות להתקיים לדואר פלטפורמה; בדרך כלל לא ניתן למחוק תיבות בבעלות מערכת.
+
+## קשור
+
+- [Domains](domains.md)  
+- [Functions](functions.md) (אירועי mail → function כשמופעל)  
+- [CLI `mail`](../cli/commands/mail.md)  

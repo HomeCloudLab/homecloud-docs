@@ -1,27 +1,32 @@
 # אימות
 
-ה-CLI של HomeCloud משתמש בשני מצבי אימות בהתאם לפקודה.
+ה-CLI משתמש ב**שני** סוגי אישורים. בחרו את זה שמתאים לפקודה.
 
-## התחברות ל-Console (JWT)
+## מתי להשתמש במה
 
-עבור פקודות control-plane: ‏`login`, `accounts`, `queues list`, `so ls-buckets`.
+| רוצים… | השתמשו ב |
+|--------|----------|
+| ליצור משאבים בממשק, לרשום תורים/buckets/apps, לנהל Function URLs | **התחברות לקונסול** (`homecloud login`) |
+| להעלות/לסנכרן אובייקטים, לשלוח/לקבל הודעות, לעשות invoke ל-Function URLs | **Access Key** (`homecloud configure`) |
+
+הרבה זרימות משתמשות בשניהם באותו סשן shell.
+
+## התחברות לקונסול (JWT)
 
 ```bash
 homecloud login --username alice
-# הסיסמה מתבקשת אינטראקטיבית, או:
+# Password prompted interactively, or:
 homecloud login --username alice --password '...'
 ```
 
 !!! important
-    ההתחברות משתמשת ב-**username**, לא ב-email. השדה ב-console API הוא `username`.
+    ההתחברות משתמשת ב**שם משתמש**, לא באימייל.
 
 ### MFA
 
-מנהלי פלטפורמה עם MFA חייבים להשלים גורם שני:
-
 | שיטה | איך |
 |------|-----|
-| TOTP / קוד גיבוי | בקשה בטרמינל, או `--mfa-code` |
+| TOTP / קוד גיבוי | הנחיה בטרמינל, או `--mfa-code` |
 | Passkey / מפתח אבטחה | `homecloud login --browser` |
 
 ```bash
@@ -29,19 +34,15 @@ homecloud login --username alice --mfa-code 123456
 homecloud login --browser
 ```
 
-כל קריאת console שמחזירה `MFA_REQUIRED` מטופלת על ידי מנגנון MFA מרכזי ב-CLI (אתגר login או step-up) — הפקודות עצמן לא מממשות MFA.
-
-ה-session נשמר ב-`~/.homecloud/session` לכל פרופיל.
+קובץ סשן: `~/.homecloud/session` (לפי פרופיל).
 
 ## Access Key (data plane)
-
-עבור `mq`, `so ls/cp/sync/rm`:
 
 ```bash
 homecloud configure
 ```
 
-או בשורה (אידיאלי ל-CI):
+או inline ל-CI:
 
 ```bash
 homecloud \
@@ -50,15 +51,21 @@ homecloud \
   so sync ./dist so://my-bucket/ --delete
 ```
 
-אין צורך ב-`account_id` — הוא מזוהה דרך `/access-key/whoami` בשער ה-SO.
+אין צורך בדגל `account_id` — המפתח כבר מוגבל לחשבון אחד.
 
-Access Keys לא דורשים MFA בכל בקשה. יוצרים אותם פעם אחת בקונסול כשכבר מחוברים (כולל MFA).
+Access Keys אף פעם לא מבקשים MFA בכל בקשה. צרו אותם פעם אחת בקונסול (עם MFA אם מופעל): [Access Keys](../getting-started/access-keys.md).
 
 ## פרופילים
 
 ```bash
-homecloud --profile production so ls media
 homecloud configure --profile production
+homecloud --profile production so ls media
 ```
 
-קובץ האישורים: `~/.homecloud/credentials`
+קובץ אישורים: `~/.homecloud/credentials`
+
+## קשור
+
+- [התקנה](install.md)  
+- [מפת פקודות](commands/index.md)  
+- [IAM](../guides/iam.md)  

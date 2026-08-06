@@ -1,41 +1,50 @@
 # HomeCloud Docs — https://docs.web.holab.abrdns.com/
 # Spec: https://llmstxt.org/
 
-> HomeCloud platform documentation: console, CLI, SDK, storage (SO), image registry (IR), queues (MQ), functions, mail, and operations.
+> HomeCloud user documentation for account owners and DevOps: console guides, CLI, and SDK for every service.
 
 ## Getting started
 
-- [Overview](https://docs.web.holab.abrdns.com/getting-started/overview/): What HomeCloud is and how the pieces fit
-- [Accounts](https://docs.web.holab.abrdns.com/getting-started/accounts/): Account number, alias, ROOT, and members
+- [Overview](https://docs.web.holab.abrdns.com/getting-started/overview/): What HomeCloud is for users
+- [Accounts](https://docs.web.holab.abrdns.com/getting-started/accounts/): Open an account, invites, sign-in
+- [Console](https://docs.web.holab.abrdns.com/getting-started/console/): Where things live in the UI
 - [Access Keys](https://docs.web.holab.abrdns.com/getting-started/access-keys/): Data-plane credentials for CLI/SDK
+
+## Guides
+
+- [Guides index](https://docs.web.holab.abrdns.com/guides/)
+- [Object Storage (SO)](https://docs.web.holab.abrdns.com/guides/object-storage/)
+- [Message Queues (MQ)](https://docs.web.holab.abrdns.com/guides/queues/)
+- [Managed Databases (MDB)](https://docs.web.holab.abrdns.com/guides/databases/)
+- [Redis](https://docs.web.holab.abrdns.com/guides/redis/)
+- [Functions](https://docs.web.holab.abrdns.com/guides/functions/)
+- [Applications](https://docs.web.holab.abrdns.com/guides/applications/)
+- [Kubernetes](https://docs.web.holab.abrdns.com/guides/kubernetes/)
+- [Image Registry (IR)](https://docs.web.holab.abrdns.com/guides/registry/)
+- [Mail](https://docs.web.holab.abrdns.com/guides/mail/)
+- [Secrets](https://docs.web.holab.abrdns.com/guides/secrets/)
+- [IAM](https://docs.web.holab.abrdns.com/guides/iam/)
+- [Domains](https://docs.web.holab.abrdns.com/guides/domains/)
+- [SSL](https://docs.web.holab.abrdns.com/guides/ssl/)
+- [Account & team](https://docs.web.holab.abrdns.com/guides/account/)
 
 ## CLI
 
 - [CLI overview](https://docs.web.holab.abrdns.com/cli/)
 - [Install](https://docs.web.holab.abrdns.com/cli/install/)
-- [Authentication](https://docs.web.holab.abrdns.com/cli/authentication/): Login (account + username) and Access Keys
-- [login](https://docs.web.holab.abrdns.com/cli/commands/login/)
-- [configure](https://docs.web.holab.abrdns.com/cli/commands/configure/)
-- [so](https://docs.web.holab.abrdns.com/cli/commands/so/): Object storage, including `so sync` for static sites
+- [Authentication](https://docs.web.holab.abrdns.com/cli/authentication/)
+- [Commands](https://docs.web.holab.abrdns.com/cli/commands/)
+- [so](https://docs.web.holab.abrdns.com/cli/commands/so/)
 - [mq](https://docs.web.holab.abrdns.com/cli/commands/mq/)
-- [Releases](https://docs.web.holab.abrdns.com/cli/releases/)
+- [fn](https://docs.web.holab.abrdns.com/cli/commands/fn/)
+- [ir](https://docs.web.holab.abrdns.com/cli/commands/ir/)
+- [mail](https://docs.web.holab.abrdns.com/cli/commands/mail/)
 
 ## SDK
 
-- [Python / JS SDK](https://docs.web.holab.abrdns.com/sdk/)
-
-## Platform
-
-- [Architecture](https://docs.web.holab.abrdns.com/platform/architecture/)
-- [Services](https://docs.web.holab.abrdns.com/platform/services/)
-- [Functions](https://docs.web.holab.abrdns.com/platform/functions/)
-- [Mail](https://docs.web.holab.abrdns.com/platform/mail/)
-- [Access Keys security](https://docs.web.holab.abrdns.com/platform/access-keys-security/)
-- [Security (MFA)](https://docs.web.holab.abrdns.com/platform/security/)
-
-## Operations
-
-- [Documentation site](https://docs.web.holab.abrdns.com/operations/docs-site/): How this site is built and deployed to SO static website hosting
+- [SDK overview](https://docs.web.holab.abrdns.com/sdk/)
+- [Python](https://docs.web.holab.abrdns.com/sdk/python/)
+- [Node.js](https://docs.web.holab.abrdns.com/sdk/nodejs/)
 
 ## Hebrew
 

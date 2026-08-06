@@ -1,114 +1,58 @@
-# SDK
+# SDK overview
 
-Python SDK for HomeCloud — programmatic access with Access Keys (no interactive MFA).
+Use the HomeCloud SDK from your applications, workers, and CI jobs. Unlike the console, the SDK is built for **automation**: Access Keys, no interactive MFA on each request.
 
-**Repo:** [homecloud-sdk](https://github.com/HomeCloudLab/homecloud-sdk) · **Version:** 0.5.4
+| Language | Package | Docs |
+|----------|---------|------|
+| **Python** | `homecloud-sdk` (`import homecloud`) | [Python SDK](python.md) |
+| **Node.js** | `@homecloud-platform/sdk` | [Node.js SDK](nodejs.md) |
 
-## Install
-
-```bash
-pip install homecloud-sdk
-```
-
-Until the package is on PyPI, install from GitHub (private repo needs a token):
-
-```bash
-pip install "git+https://github.com/HomeCloudLab/homecloud-sdk.git"
-# or editable sibling checkout:
-pip install -e ../homecloud-sdk
-```
-
-## Quick start
-
-```python
-from homecloud import HomeCloud
-
-# CI / servers — Access Key only
-client = HomeCloud(
-    access_key="HCAK...",
-    secret_key="...",
-)
-
-# Or environment: HC_ACCESS_KEY_ID / HC_SECRET_ACCESS_KEY
-# client = HomeCloud.from_env()
-
-# Or ~/.homecloud/credentials (+ optional HC_PROFILE)
-# client = HomeCloud()
-
-client.so.upload("my-bucket", "./file.txt", key="docs/file.txt")
-client.so.upload(
-    "my-bucket",
-    body=b"...",
-    key="videos/clip.mp4",
-    content_type="video/mp4",
-)
-meta = client.so.head_object("my-bucket", "docs/file.txt")  # metadata only
-client.mq.send("orders", {"id": 1})
-```
-
-### Async
-
-```python
-from homecloud import AsyncHomeCloud
-
-async with AsyncHomeCloud.from_env() as client:
-    meta = await client.so.head_object("my-bucket", "docs/file.txt")
-    await client.mq.send("orders", {"id": 1})
-```
-
-`from homecloud_sdk import …` still works for compatibility; prefer `from homecloud import …`.
-
-### Errors
-
-Catch typed errors (or base `HomeCloudError`):
-
-```python
-from homecloud import HomeCloud, NotFoundError, HomeCloudError
-
-try:
-    HomeCloud().so.head_object("docs", "missing.txt")
-except NotFoundError as exc:
-    print(exc.resource_type, exc.resource)  # object, docs/missing.txt
-except HomeCloudError as exc:
-    print(exc.status_code, exc)
-```
+Both languages target the same HomeCloud capabilities. Prefer the language your service already uses.
 
 ## Auth model
 
 | Who | How | MFA |
 |-----|-----|-----|
-| **SDK / automation** | Access Key + Secret (SigV1 data plane) | Never on requests |
-| **CLI / humans** | `homecloud login` → console JWT | At login / step-up only |
+| **SDK / automation** | Access Key ID + Secret (SigV1) | Never on data-plane requests |
+| **Humans / CLI login helpers** | Username/password → JWT | At login / step-up only |
 
-Create Access Keys once in the Console (IAM). Runtime SDK calls do not prompt for MFA.
+Create keys in the console: [Access Keys](../getting-started/access-keys.md).
 
-See also: [CLI authentication](../cli/authentication.md).
+## What you can call
 
-## Operations by plane
+| Area | Typical methods | Auth |
+|------|-----------------|------|
+| Object Storage (`so`) | upload, download, sync, list, delete, head, presign | Access Key |
+| Queues (`mq`) | send, receive, delete, purge, DLQ | Access Key |
+| Functions | list, invoke, url, logs | Mixed (see language pages) |
+| Mail | mailboxes, messages, get, attachment | Access Key / session |
+| Image Registry (`ir`) | list/create repos, usage | Session / key as documented |
+| Secrets | list | Access Key |
+| Management helpers | `queues.list`, `apps.list`, `accounts.*`, create bucket | Console JWT |
 
-| API | Auth | Notes |
-|-----|------|-------|
-| `so.upload` / `download` / `sync_*` / `list_objects` / `delete` / `head_object` | Access Key | Primary path |
-| `so.get_object_uri` / `generate_presigned_url` | Access Key | Public URI or time-limited URL |
-| `mq.send` / `receive` | Access Key | Primary path |
-| `account_id()` | Access Key whoami | No JWT |
-| `so.list_buckets` / `create_bucket` | Console JWT | Management helper |
-| `queues.list` / `apps.list` / `accounts.*` | Console JWT | Management helper |
+## Minimal examples
 
-Interactive helpers (`login`, `login_browser`) exist for tools/CLI only — not for unattended jobs. Async client supports the same helpers without blocking MFA prompts (pass `mfa_code` if needed).
+=== "Python"
 
-## Profiles and environment
+    ```python
+    from homecloud import HomeCloud
 
-| Variable | Short | Effect |
-|----------|-------|--------|
-| `HOMECLOUD_PROFILE` | `HC_PROFILE` | Active profile |
-| `HOMECLOUD_ACCESS_KEY_ID` | `HC_ACCESS_KEY_ID` | Access key |
-| `HOMECLOUD_SECRET_ACCESS_KEY` | `HC_SECRET_ACCESS_KEY` | Secret |
-| `HOMECLOUD_ACCOUNT_ID` | `HC_ACCOUNT_ID` | Optional account |
-| `HOMECLOUD_APEX` | `HC_APEX` | Platform domain |
+    client = HomeCloud.from_env()
+    client.so.upload("docs", "./a.txt", key="a.txt")
+    client.mq.send("orders", {"id": 1})
+    ```
 
-Credentials file: `~/.homecloud/credentials` (JSON multi-profile).
+=== "Node.js"
 
-## Relation to the CLI
+    ```js
+    const { HomeCloud } = require("@homecloud-platform/sdk");
 
-[`homecloud-cli`](https://github.com/HomeCloudLab/homecloud-cli) is a thin Typer/Rich wrapper that **depends on** `homecloud-sdk`. It does not vendor the SDK source.
+    const client = HomeCloud.fromEnv();
+    await client.so.putJson("docs", "a.json", { ok: true });
+    ```
+
+## Next
+
+1. Create an [Access Key](../getting-started/access-keys.md)  
+2. Follow [Python](python.md) or [Node.js](nodejs.md)  
+3. For shell scripts, you may prefer the [CLI](../cli/index.md) instead  

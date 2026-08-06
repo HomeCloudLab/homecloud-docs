@@ -1,32 +1,3 @@
-# פונקציות
+# הועבר
 
-HomeCloud Functions הן יחידות compute serverless מנוהלות. כותבים handlers ב-Python 3.12 בסביבת קונסול בסגנון VS Code, פורסים גרסאות בלתי משתנות, ומריצים invoke סינכרוני דרך ה-control plane (ה-runtime החם נמצא ב-data plane של Functions).
-
-## יצירה
-
-1. פתחו **Console → Functions**.
-2. **Create function** — שם תואם DNS, handler (ברירת מחדל `main.handler`), זיכרון ו-timeout.
-3. הפלטפורמה מזריעה workspace עם `main.py`.
-
-## סביבת קוד
-
-לשונית **Code**: עץ קבצים עם אייקונים ותגי תפקיד, עורך Monaco עם לשוניות, שמירה, Format, Outline ו-Problems.
-
-### אינטליגנציית שפה
-
-- **LSP (BasedPyright)** — עריכה אינטראקטיבית (hover, השלמה, אבחנות)
-- **HTTP `/language/analyze`** — רק ל־**Build Preview**, **Deploy Strict**, SDK/CI
-- בזמן ש־LSP מחובר אין analyze אחרי כל שמירה; מודל Monaco נשאר יציב (בלי remount); מעבר בין טאבים שומר את סשן ה־Language Host
-- Layers לחילוץ שפה נשמרים ב־cache משותף בשרת לפי גרסת layer
-
-## תצוגת Build ו-Deploy
-
-לפני Deploy אפשר לפתוח **Build & Deploy Preview**: Runtime, Entrypoint (נגזר מ-handler), Handler, רשימת קבצים בחבילה, גודל ואזהרות. אותם כללי אריזה כמו Deploy; Deploy נחסם כשיש שגיאות אימות.
-
-## Deploy / Invoke / Triggers / Layers
-
-ראו את הגרסה האנגלית לפרטים מלאים על deploy (`so://` לארטיפקטים), invoke, triggers ו-layers.
-
-## קישורים
-
-- [שירותי הפלטפורמה](services.md)
+→ **[Functions](../guides/functions.md)**

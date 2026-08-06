@@ -1,10 +1,17 @@
 # Authentication
 
-HomeCloud CLI uses two auth modes depending on the command.
+The CLI uses **two** credential types. Pick the one that matches the command.
+
+## When to use which
+
+| You want to… | Use |
+|--------------|-----|
+| Create resources in the UI, list queues/buckets/apps, manage Function URLs | **Console login** (`homecloud login`) |
+| Upload/sync objects, send/receive messages, invoke Function URLs | **Access Key** (`homecloud configure`) |
+
+Many workflows use both in the same shell session.
 
 ## Console login (JWT)
-
-For control-plane commands: `login`, `accounts`, `queues list`.
 
 ```bash
 homecloud login --username alice
@@ -13,15 +20,13 @@ homecloud login --username alice --password '...'
 ```
 
 !!! important
-    Login uses **username**, not email. The console API field is `username`.
+    Login uses **username**, not email.
 
 ### MFA
 
-Platform admins with MFA enabled must complete a second factor:
-
 | Method | How |
 |--------|-----|
-| TOTP / backup code | Prompted in the terminal, or `--mfa-code` |
+| TOTP / backup code | Terminal prompt, or `--mfa-code` |
 | Passkey / security key | `homecloud login --browser` |
 
 ```bash
@@ -29,19 +34,15 @@ homecloud login --username alice --mfa-code 123456
 homecloud login --browser
 ```
 
-Any console API call that returns `MFA_REQUIRED` is completed by a central CLI MFA handler (login challenge or step-up) — commands do not implement MFA themselves.
-
-Session is stored in `~/.homecloud/session` per profile.
+Session file: `~/.homecloud/session` (per profile).
 
 ## Access Key (data plane)
-
-For `mq`, `so ls-buckets/ls/cp/sync/rm`:
 
 ```bash
 homecloud configure
 ```
 
-Or inline (ideal for CI):
+Or inline for CI:
 
 ```bash
 homecloud \
@@ -50,15 +51,21 @@ homecloud \
   so sync ./dist so://my-bucket/ --delete
 ```
 
-No `account_id` needed — resolved via `/access-key/whoami` on the SO gateway.
+No `account_id` flag is required — the key is already scoped to one account.
 
-Access Keys do not use Console MFA on each request. Create them once while signed in (including MFA) in the Console.
+Access Keys never prompt for MFA on each request. Create them once in the console (with MFA if enabled): [Access Keys](../getting-started/access-keys.md).
 
 ## Profiles
 
 ```bash
-homecloud --profile production so ls media
 homecloud configure --profile production
+homecloud --profile production so ls media
 ```
 
 Credentials file: `~/.homecloud/credentials`
+
+## Related
+
+- [Install](install.md)  
+- [Command map](commands/index.md)  
+- [IAM](../guides/iam.md)  

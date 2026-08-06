@@ -1,114 +1,58 @@
-# SDK
+# סקירת SDK
 
-SDK של HomeCloud ל-Python — גישה תכנותית עם Access Keys (בלי MFA אינטראקטיבי).
+השתמשו ב-SDK של HomeCloud מהאפליקציות, ה-workers ומשימות ה-CI שלכם. בניגוד לקונסול, ה-SDK בנוי ל**אוטומציה**: Access Keys, בלי MFA אינטראקטיבי בכל בקשה.
 
-**מאגר:** [homecloud-sdk](https://github.com/HomeCloudLab/homecloud-sdk) · **גרסה:** 0.5.4
+| שפה | חבילה | תיעוד |
+|-----|-------|-------|
+| **Python** | `homecloud-sdk` (`import homecloud`) | [Python SDK](python.md) |
+| **Node.js** | `@homecloud-platform/sdk` | [Node.js SDK](nodejs.md) |
 
-## התקנה
+שתי השפות מכוונות לאותן יכולות HomeCloud. העדיפו את השפה שהשירות שלכם כבר משתמש בה.
 
-```bash
-pip install homecloud-sdk
-```
-
-עד הפרסום ב-PyPI, התקנה מ-GitHub (מאגר פרטי דורש טוקן):
-
-```bash
-pip install "git+https://github.com/HomeCloudLab/homecloud-sdk.git"
-# או checkout מקומי:
-pip install -e ../homecloud-sdk
-```
-
-## התחלה מהירה
-
-```python
-from homecloud import HomeCloud
-
-# CI / שרתים — Access Key בלבד
-client = HomeCloud(
-    access_key="HCAK...",
-    secret_key="...",
-)
-
-# או סביבה: HC_ACCESS_KEY_ID / HC_SECRET_ACCESS_KEY
-# client = HomeCloud.from_env()
-
-# או ~/.homecloud/credentials (+ אופציונלי HC_PROFILE)
-# client = HomeCloud()
-
-client.so.upload("my-bucket", "./file.txt", key="docs/file.txt")
-client.so.upload(
-    "my-bucket",
-    body=b"...",
-    key="videos/clip.mp4",
-    content_type="video/mp4",
-)
-meta = client.so.head_object("my-bucket", "docs/file.txt")  # מטא־דאטה בלבד
-client.mq.send("orders", {"id": 1})
-```
-
-### Async
-
-```python
-from homecloud import AsyncHomeCloud
-
-async with AsyncHomeCloud.from_env() as client:
-    meta = await client.so.head_object("my-bucket", "docs/file.txt")
-    await client.mq.send("orders", {"id": 1})
-```
-
-`from homecloud_sdk import …` עדיין עובד לתאימות; מומלץ `from homecloud import …`.
-
-### שגיאות
-
-תפסו טיפוסים ספציפיים (או את הבסיס `HomeCloudError`):
-
-```python
-from homecloud import HomeCloud, NotFoundError, HomeCloudError
-
-try:
-    HomeCloud().so.head_object("docs", "missing.txt")
-except NotFoundError as exc:
-    print(exc.resource_type, exc.resource)  # object, docs/missing.txt
-except HomeCloudError as exc:
-    print(exc.status_code, exc)
-```
-
-## מודל אימות
+## מודל Auth
 
 | מי | איך | MFA |
 |----|-----|-----|
-| **SDK / אוטומציה** | Access Key + Secret (SigV1 data plane) | לא בבקשות |
-| **CLI / משתמשים** | `homecloud login` → JWT | בזמן login / step-up |
+| **SDK / אוטומציה** | Access Key ID + Secret (SigV1) | אף פעם בבקשות data-plane |
+| **בני אדם / עוזרי login ב-CLI** | שם משתמש/סיסמה → JWT | בהתחברות / step-up בלבד |
 
-יוצרים Access Keys פעם אחת בקונסולה (IAM). קריאות SDK בזמן ריצה לא מבקשות MFA.
+צרו מפתחות בקונסול: [Access Keys](../getting-started/access-keys.md).
 
-ראו גם: [אימות CLI](../cli/authentication.md).
+## מה אפשר לקרוא
 
-## פעולות לפי מישור
+| אזור | שיטות טיפוסיות | Auth |
+|------|----------------|------|
+| Object Storage (`so`) | upload, download, sync, list, delete, head, presign | Access Key |
+| Queues (`mq`) | send, receive, delete, purge, DLQ | Access Key |
+| Functions | list, invoke, url, logs | Mixed (ראו עמודי השפה) |
+| Mail | mailboxes, messages, get, attachment | Access Key / session |
+| Image Registry (`ir`) | list/create repos, usage | Session / key as documented |
+| Secrets | list | Access Key |
+| עוזרי ניהול | `queues.list`, `apps.list`, `accounts.*`, create bucket | JWT קונסול |
 
-| API | אימות | הערות |
-|-----|--------|--------|
-| `so.upload` / `download` / `sync_*` / `list_objects` / `delete` / `head_object` | Access Key | נתיב ראשי |
-| `so.get_object_uri` / `generate_presigned_url` | Access Key | URI ציבורי או URL מוגבל בזמן |
-| `mq.send` / `receive` | Access Key | נתיב ראשי |
-| `account_id()` | Access Key whoami | בלי JWT |
-| `so.list_buckets` / `create_bucket` | Console JWT | ניהול |
-| `queues.list` / `apps.list` / `accounts.*` | Console JWT | ניהול |
+## דוגמאות מינימליות
 
-עוזרי login אינטראקטיביים (`login`, `login_browser`) מיועדים ל-CLI/כלים — לא לאוטומציה. ב-async אין prompt חוסם ל-MFA (אפשר להעביר `mfa_code`).
+=== "Python"
 
-## פרופילים וסביבה
+    ```python
+    from homecloud import HomeCloud
 
-| משתנה | קיצור | השפעה |
-|--------|--------|--------|
-| `HOMECLOUD_PROFILE` | `HC_PROFILE` | פרופיל פעיל |
-| `HOMECLOUD_ACCESS_KEY_ID` | `HC_ACCESS_KEY_ID` | מפתח |
-| `HOMECLOUD_SECRET_ACCESS_KEY` | `HC_SECRET_ACCESS_KEY` | סוד |
-| `HOMECLOUD_ACCOUNT_ID` | `HC_ACCOUNT_ID` | חשבון אופציונלי |
-| `HOMECLOUD_APEX` | `HC_APEX` | דומיין פלטפורמה |
+    client = HomeCloud.from_env()
+    client.so.upload("docs", "./a.txt", key="a.txt")
+    client.mq.send("orders", {"id": 1})
+    ```
 
-קובץ credentials: `~/.homecloud/credentials` (JSON multi-profile).
+=== "Node.js"
 
-## קשר ל-CLI
+    ```js
+    const { HomeCloud } = require("@homecloud-platform/sdk");
 
-[`homecloud-cli`](https://github.com/HomeCloudLab/homecloud-cli) הוא מעטפת Typer/Rich ש**תלויה** ב-`homecloud-sdk`. אין יותר העתקת מקור של ה-SDK בתוך ה-CLI.
+    const client = HomeCloud.fromEnv();
+    await client.so.putJson("docs", "a.json", { ok: true });
+    ```
+
+## הבא
+
+1. צרו [Access Key](../getting-started/access-keys.md)  
+2. עקבו אחרי [Python](python.md) או [Node.js](nodejs.md)  
+3. לסקריפטי shell, ייתכן שתעדיפו את ה-[CLI](../cli/index.md) במקום  
