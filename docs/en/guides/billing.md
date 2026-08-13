@@ -64,13 +64,16 @@ Single page — no separate Overview / Cost Explorer / Budgets routes.
 
 | Area | Behavior |
 |------|----------|
-| **Date range** | This month, last month, 7 days, 30 days, or custom `from`/`to` |
-| **Estimate** | Usage × catalog for the **selected range** (e.g. Estimated usage cost · Aug 7–13) |
-| **Forecast** | Always the **current calendar month** (run-rate + remaining RUNNING hours) |
-| **Cost over time** | Daily series from Meter hour buckets × prices |
-| **By service** | Meter totals × prices (bar + table) |
+| **Date range** | Shadcn range calendar (presets + highlighted range). Days billed as UTC. |
+| **Estimate** | Usage × catalog for the **selected range** |
+| **Forecast** | Current calendar month, with a short basis line (run-rate + RUNNING hours) |
+| **What is driving cost?** | Top services with a clear usage summary (e.g. avg GB stored) |
+| **Cost over time** | Stacked daily bars **grouped by service**; Cost / Usage toggle |
+| **Cost breakdown** | One row per service; expand for metric / unit price / quantity |
 | **Invoices** | Generate on demand; Mark paid is manual |
-| **Spend alerts** | Create / edit / disable / delete; month or week window |
+| **Spend alerts** | Notify only — never stop or suspend resources |
+
+Object Storage cost accumulates while objects exist (GB × time). A large SO figure after “recent” Monitoring activity usually means existing objects were metered across the selected days — not only new uploads.
 
 ### Timezone contract (v1)
 
