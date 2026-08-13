@@ -2,7 +2,7 @@
 
 Compute הוא שכבת ה-**IaaS** של HomeCloud: מכונות וירטואליות עם image של HomeCloud, SSH, volume (במחלקת Standard), ו-Agent של הפלטפורמה. HomeCloud הוא הענן. ספקי קיבולת (Hetzner ראשון) נשארים מאחורי ה-API — לא שולחים שם ספק ולא image id של ספק.
 
-Workspace בקונסול: **`/console/compute`** — רשימת מכונות, יצירה, ו-workspace לפרטים (סקירה, טרמינל, קבצים, ביצועים, Snapshots). פקודות CLI/SDK יגיעו אחרי שהחוזה יתייצב.
+Workspace בקונסול: **`/console/compute`** — טאבים **מכונות** ו-**מפתחות SSH**, ו-workspace לפרטי מכונה (סקירה, טרמינל, קבצים, ביצועים, Snapshots). פקודות CLI/SDK יגיעו אחרי שהחוזה יתייצב.
 
 | פריט | ערך |
 |------|--------|
@@ -45,7 +45,7 @@ Invoke-RestMethod -Method Post `
   -Uri "$env:HOMECLOUD_API/api/v1/accounts/$accountId/compute/machines" `
   -Headers @{ Authorization = "Bearer $token"; "Idempotency-Key" = "create-web-1" } `
   -ContentType "application/json" `
-  -Body '{"name":"web-1","class":"standard","image_id":"ubuntu-24.04","region_code":"eu-central","ssh_keys":["ssh-ed25519 AAAA..."]}'
+  -Body '{"name":"web-1","class":"standard","image_id":"ubuntu-24.04","region_code":"eu-central","ssh_key_ids":["KEY_ID"]}'
 ```
 
 bash:
@@ -55,12 +55,24 @@ curl -sS -X POST "$HOMECLOUD_API/api/v1/accounts/$ACCOUNT_ID/compute/machines" \
   -H "Authorization: Bearer $TOKEN" \
   -H "Idempotency-Key: create-web-1" \
   -H "Content-Type: application/json" \
-  -d '{"name":"web-1","class":"standard","image_id":"ubuntu-24.04","region_code":"eu-central","ssh_keys":["ssh-ed25519 AAAA..."]}'
+  -d '{"name":"web-1","class":"standard","image_id":"ubuntu-24.04","region_code":"eu-central","ssh_key_ids":["KEY_ID"]}'
 ```
 
 `region_code=eu-central` הוא קיבולת Hetzner (`fsn1`). יצירה חיה דורשת `HETZNER_API_TOKEN` על ה-API. בלי טוקן ה-Operation מסתיים ב-**FAILED** (עדיין HTTP 202) בלי קריאה לספק.
 
 אותו `Idempotency-Key` + אותו גוף מחזירים את אותו `machine_id` / `operation_id`.
+
+## מפתחות SSH
+
+מפתחות SSH הם **ברמת החשבון**, לא פר-מכונה. HomeCloud מייצר מפתחות Ed25519. הקובץ **הפרטי** מוחזר **פעם אחת** ב-`POST .../compute/ssh-keys` ואינו נשמר. רשימה מחזירה שם, fingerprint ומפתח ציבורי בלבד. אותו מפתח אפשר להזריק לכמה מכונות דרך `ssh_key_ids`.
+
+| Method | Path |
+|--------|------|
+| GET | `/api/v1/accounts/{id}/compute/ssh-keys` |
+| POST | `/api/v1/accounts/{id}/compute/ssh-keys` `{"name":"laptop"}` → כולל `private_key` **פעם אחת** |
+| DELETE | `/api/v1/accounts/{id}/compute/ssh-keys/{key_id}` |
+
+יצירת מכונה עם `"ssh_key_ids": ["<uuid>"]`. מחרוזות `ssh_keys` ציבוריות עדיין מתקבלות לאוטומציה.
 
 ## מחזור חיים
 
@@ -108,10 +120,10 @@ HomeCloud הוא הענן. **Hetzner** הוא מתאם הקיבולת הראשו
 
 | דף | נתיב |
 |------|------|
-| רשימה + יצירה | `/console/compute` |
+| מכונות + מפתחות SSH | `/console/compute` |
 | Workspace | `/console/compute/{machine_id}` |
 
-טאבים: **סקירה** (משולש בריאות, מחזור חיים, firewall), **טרמינל** (exec של Agent), **קבצים**, **ביצועים**, **Snapshots**. טרמינל וקבצים דורשים `agent_state=ONLINE`. בלי `HETZNER_API_TOKEN` יצירה עדיין מחזירה HTTP 202; ה-Operation הוא **FAILED**.
+טאבי שירות: **מכונות**, **מפתחות SSH**. טאבי מכונה: **סקירה** (משולש בריאות, מחזור חיים, firewall), **טרמינל** (exec של Agent), **קבצים**, **ביצועים**, **Snapshots**. טרמינל וקבצים דורשים `agent_state=ONLINE`. בלי `HETZNER_API_TOKEN` יצירה עדיין מחזירה HTTP 202; ה-Operation הוא **FAILED**.
 
 ## שינויים שוברים
 
