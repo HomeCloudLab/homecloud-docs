@@ -2,7 +2,7 @@
 
 HomeCloud is a private cloud control plane: one web console, one CLI, and one SDK for the services you need to run apps — storage, queues, databases, functions, containers, mail, and more.
 
-You work inside an **account**. An account is your isolated workspace (similar in spirit to an AWS account or a GCP project). Resources you create — buckets, queues, databases, apps — belong to that account and are not shared with other accounts unless you explicitly grant access.
+You work inside an **account**. An account is your isolated workspace. Resources you create — buckets, queues, databases, apps — belong to that account and are not shared with other accounts unless you explicitly grant access.
 
 ## Who this is for
 
@@ -66,6 +66,14 @@ You do not need the internal architecture — only this distinction:
 
 **Rule of thumb:** creating and configuring resources → console / login. Moving data at runtime → Access Key.
 
+## Regions, catalog, isolation
+
+HomeCloud places are **regions** (`homelab`, `eu-central`, …) — not vendor names. The console region switcher scopes regional lists. See [Regions](../guides/regions.md).
+
+The services page and sidebar show the **account catalog**: released services intersected with your IAM grants. An unreleased product looks like it is not there yet. A released product you are not granted appears as an empty workspace — not an Access Denied page. See [IAM](../guides/iam.md).
+
+On production lines the Event Bus uses `PLATFORM_NATS_URL`. Tenant queues use `TENANT_NATS_URL` / `NATS_URL`. The product is **Compute** (machines), **SO** (`so://`), **MDB**, **MQ**.
+
 !!! note "Account ID is automatic"
     Access Keys are already scoped to one account. The CLI and SDK resolve the account from the key — you do not pass `account_id` on every command.
 
@@ -74,6 +82,7 @@ You do not need the internal architecture — only this distinction:
 | Service | Short name | What you use it for |
 |---------|------------|---------------------|
 | Object Storage | **SO** | Files, backups, static websites (`so://bucket/key`) |
+| Compute | **Compute** | Virtual machines in a HomeCloud region |
 | Message Queues | **MQ** | Async jobs, fan-out, DLQ |
 | Managed Databases | **MDB** | PostgreSQL, MySQL, MongoDB |
 | Redis | **Redis** | Managed cache |
@@ -94,4 +103,4 @@ Full how-to pages live under [Guides](../guides/index.md).
 1. [Open an account](accounts.md) (or accept an invite)  
 2. [Tour the console](console.md)  
 3. [Create an Access Key](access-keys.md) and install the [CLI](../cli/install.md)  
-4. Follow a service guide — start with [Object Storage](../guides/object-storage.md) or [Queues](../guides/queues.md) if you are unsure  
+4. Follow a service guide — start with [Object Storage](../guides/object-storage.md), [Compute](../guides/compute.md), or [Regions](../guides/regions.md)  

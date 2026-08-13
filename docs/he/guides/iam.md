@@ -21,6 +21,10 @@ IAM שולט **מי יכול לעשות מה** בחשבון: משתמשי ותפ
 
 הזמינו אנשים תחת **Account → Members**. פרטים: [חשבון וצוות](account.md).
 
+### קטלוג workspace
+
+הקונסול מציג שירותים מ-`GET /api/v1/accounts/{id}/catalog` (קטלוג ששוחרר ∩ IAM). מוצרים שלא שוחררו מושמטים. שירות ששוחרר אבל לא הוענק נפתח כ-workspace ריק — לא כמסך Access Denied. API: לא שוחרר → `404 identity.service_unreleased`; לא הוענק → `403 identity.service_not_granted`.
+
 ### 2. IAM של data-plane (אוטומציה)
 
 | אובייקט | מטרה |

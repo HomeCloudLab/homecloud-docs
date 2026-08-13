@@ -90,6 +90,7 @@ nav:
       - guides/queues.md
       - guides/databases.md
       - guides/compute.md
+      - guides/regions.md
       - guides/redis.md
       - guides/functions.md
       - guides/applications.md

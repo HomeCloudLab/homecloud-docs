@@ -21,6 +21,10 @@ Roles such as **Owner**, **Admin**, **Developer**, **Viewer** decide who can ope
 
 Invite people under **Account → Members**. Details: [Account & team](account.md).
 
+### Workspace catalog
+
+The console lists services from `GET /api/v1/accounts/{id}/catalog` (released catalog ∩ IAM). Unreleased products are omitted (they look unavailable). A released service you are not granted opens as an empty workspace — not an Access Denied screen. API: unreleased → `404 identity.service_unreleased`; ungranted → `403 identity.service_not_granted`.
+
 ### 2. Data-plane IAM (automation)
 
 | Object | Purpose |

@@ -2,7 +2,7 @@
 
 HomeCloud הוא control plane לענן פרטי: קונסול ווב אחד, CLI אחד ו-SDK אחד לשירותים שצריך כדי להריץ אפליקציות — אחסון, תורים, מסדי נתונים, פונקציות, קונטיינרים, דוא״ל ועוד.
 
-עובדים בתוך **חשבון**. חשבון הוא workspace מבודד (ברוח דומה לחשבון AWS או לפרויקט GCP). משאבים שיוצרים — buckets, תורים, מסדי נתונים, אפליקציות — שייכים לחשבון הזה ואינם משותפים עם חשבונות אחרים אלא אם מעניקים גישה במפורש.
+עובדים בתוך **חשבון**. חשבון הוא workspace מבודד. משאבים שיוצרים — buckets, תורים, מסדי נתונים, אפליקציות — שייכים לחשבון הזה ואינם משותפים עם חשבונות אחרים אלא אם מעניקים גישה במפורש.
 
 ## למי זה מיועד
 
@@ -66,6 +66,14 @@ client.mq.send("orders", {"id": 1})
 
 **כלל אצבע:** יצירה והגדרה של משאבים → קונסול / login. העברת נתונים בזמן ריצה → Access Key.
 
+## אזורים, קטלוג, בידוד
+
+מקומות ב-HomeCloud הם **אזורים** (`homelab`, `eu-central`, …) — לא שמות ספק. בורר האזור בקונסול מצמצם רשימות אזוריות. ראו [אזורים](../guides/regions.md).
+
+עמוד השירותים והסיידבר מציגים את **קטלוג החשבון**: שירותים ששוחררו intersect עם הרשאות IAM. מוצר שלא שוחרר נראה כאילו אינו קיים עדיין. מוצר ששוחרר אבל לא הוענק מופיע כ-workspace ריק — לא כעמוד Access Denied. ראו [IAM](../guides/iam.md).
+
+בקווי ייצור ה-Event Bus משתמש ב-`PLATFORM_NATS_URL`. תורי tenant משתמשים ב-`TENANT_NATS_URL` / `NATS_URL`. המוצר הוא **Compute** (מכונות), **SO** (`so://`), **MDB**, **MQ**.
+
 !!! note "מזהה החשבון אוטומטי"
     Access Keys כבר מוגבלים לחשבון אחד. ה-CLI וה-SDK מזהים את החשבון מהמפתח — אין צורך להעביר `account_id` בכל פקודה.
 
@@ -74,6 +82,7 @@ client.mq.send("orders", {"id": 1})
 | שירות | שם קצר | למה משתמשים בו |
 |-------|--------|----------------|
 | Object Storage | **SO** | קבצים, גיבויים, אתרים סטטיים (`so://bucket/key`) |
+| Compute | **Compute** | מכונות וירטואליות באזור HomeCloud |
 | Message Queues | **MQ** | משימות אסינכרוניות, fan-out, DLQ |
 | Managed Databases | **MDB** | PostgreSQL, MySQL, MongoDB |
 | Redis | **Redis** | מטמון מנוהל |
@@ -94,4 +103,4 @@ client.mq.send("orders", {"id": 1})
 1. [פתיחת חשבון](accounts.md) (או קבלת הזמנה)  
 2. [סיור בקונסול](console.md)  
 3. [יצירת Access Key](access-keys.md) והתקנת ה-[CLI](../cli/install.md)  
-4. עקבו אחרי מדריך שירות — התחילו ב-[Object Storage](../guides/object-storage.md) או ב-[Queues](../guides/queues.md) אם אינכם בטוחים  
+4. עקבו אחרי מדריך שירות — התחילו ב-[Object Storage](../guides/object-storage.md), [Compute](../guides/compute.md), או [אזורים](../guides/regions.md)  
