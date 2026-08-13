@@ -26,6 +26,8 @@
 | [IAM](iam.md) | IAM | תפקידים, מדיניות, Access Keys, תפקידי קונסול |
 | [Domains & DNS](domains.md) | Domains | להביא דומיין משלכם |
 | [SSL certificates](ssl.md) | SSL | לראות תעודות שהונפקו |
+| [Billing](billing.md) | Billing | שימוש, אומדנים, חשבוניות, התראות הוצאה |
+| [Monitoring](monitoring.md) | Monitoring | מדדים, לוגים, התראות |
 | [Account & team](account.md) | Account | חברים, ביקורת, פרויקטים, אבטחה |
 
 ## תזכורת אימות

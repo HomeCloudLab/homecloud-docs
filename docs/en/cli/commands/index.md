@@ -88,6 +88,19 @@ Details: [ir](ir.md).
 
 Details: [mail](mail.md).
 
+## Billing, usage, monitoring
+
+| Command | Auth | Description |
+|---------|------|-------------|
+| `homecloud usage list` | JWT | Metered quantities (no prices) |
+| `homecloud billing summary` | JWT | Month-to-date estimate |
+| `homecloud billing forecast` | JWT | Period forecast (Estimate) |
+| `homecloud billing invoices` | JWT | List invoices |
+| `homecloud monitoring workspace` | JWT | Monitoring workspace |
+| `homecloud monitoring dashboards` | JWT | Default charts |
+
+Details: [billing](billing.md).
+
 ## URI scheme
 
 ```bash

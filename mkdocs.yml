@@ -101,6 +101,8 @@ nav:
       - guides/iam.md
       - guides/domains.md
       - guides/ssl.md
+      - guides/billing.md
+      - guides/monitoring.md
       - guides/account.md
   - CLI:
       - cli/index.md
@@ -114,6 +116,7 @@ nav:
       - cli/commands/fn.md
       - cli/commands/ir.md
       - cli/commands/mail.md
+      - cli/commands/billing.md
       - cli/releases.md
   - SDK:
       - sdk/index.md

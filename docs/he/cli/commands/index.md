@@ -88,6 +88,19 @@
 
 פרטים: [mail](mail.md).
 
+## Billing, usage, monitoring
+
+| פקודה | Auth | תיאור |
+|-------|------|-------|
+| `homecloud usage list` | JWT | כמויות מטר (בלי מחיר) |
+| `homecloud billing summary` | JWT | אומדן מתחילת החודש |
+| `homecloud billing forecast` | JWT | תחזית (Estimate) |
+| `homecloud billing invoices` | JWT | רשימת חשבוניות |
+| `homecloud monitoring workspace` | JWT | סביבת Monitoring |
+| `homecloud monitoring dashboards` | JWT | גרפים ברירת מחדל |
+
+פרטים: [billing](billing.md).
+
 ## סכמת URI
 
 ```bash

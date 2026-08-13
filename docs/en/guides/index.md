@@ -26,6 +26,8 @@ Step-by-step guides for every major HomeCloud service. Each page covers:
 | [IAM](iam.md) | IAM | Roles, policies, Access Keys, console roles |
 | [Domains & DNS](domains.md) | Domains | Bring your own domain |
 | [SSL certificates](ssl.md) | SSL | See issued certificates |
+| [Billing](billing.md) | Billing | Usage, estimates, invoices, spend alerts |
+| [Monitoring](monitoring.md) | Monitoring | Metrics, logs, alerts |
 | [Account & team](account.md) | Account | Members, audit, projects, security |
 
 ## Auth reminder
