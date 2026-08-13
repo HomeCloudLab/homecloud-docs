@@ -19,7 +19,7 @@ homecloud billing forecast --horizon 7
 homecloud billing invoices
 ```
 
-USD estimates. Homelab totals are `$0.00` until production list prices are set.
+USD estimates using temporary placeholder list prices (final GTM rates later). Mark paid is manual — card capture is not enabled yet.
 
 ## monitoring
 

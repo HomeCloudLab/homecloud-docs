@@ -1,8 +1,8 @@
 # Billing
 
-HomeCloud **Billing** is a first-class console service (`/console/billing`). It is **not** Cost Explorer.
+HomeCloud **Billing** is a first-class console service (`/console/billing`). The console **Billing Explorer** uses Cost Explorer–style analysis (date range, trend, by-service) with HomeCloud design — it is not an AWS UI clone.
 
-The meter stores **quantities only**. Billing does `Usage × net USD catalog price = Charge`. VAT is a separate invoice line — never baked into SKU prices. Homelab list prices are **$0**; invoices are still generated so the path Meter → Invoice → PDF (`so://billing/{account_id}/{period}.pdf`) can be tested.
+The meter stores **quantities only**. Billing does `Usage × net USD catalog price = Charge`. VAT is a separate invoice line — never baked into SKU prices. Homelab still issues invoices. Current **list prices are temporary placeholders** (not final GTM rates) so Estimate / Forecast / Invoice show real money math. Card payment is **not** enabled — Mark paid is manual only.
 
 ## How usage is recorded
 
@@ -17,8 +17,10 @@ usage drain or holdings worker  (same DB transaction as record_usage + watermark
         ↓
 Meter ledger (immutable)
         ↓
-Billing
+Billing Explorer (presentation only)
 ```
+
+Billing never queries Compute, SO, Mail, or other service tables for cost. It only consumes Meter via `query_usage`.
 
 | Service | What is measured | Cursor |
 |---------|------------------|--------|
@@ -56,13 +58,37 @@ PowerShell: the same commands (no quoting difference).
 | Currency | USD |
 | Payments (v1) | Manual (platform admin marks paid). Stripe is the next adapter, not this release. |
 
-## What you will see
+## Billing Explorer
 
-- Month-to-date **Estimate**
-- **Forecast** (7/30-day run-rate + remaining RUNNING machine hours) — labelled Estimate
-- Usage totals by service/metric (no money on the usage API)
-- Invoices including `$0.00` on homelab
-- Spend alerts (notify only — they never stop Compute)
+Single page — no separate Overview / Cost Explorer / Budgets routes.
+
+| Area | Behavior |
+|------|----------|
+| **Date range** | This month, last month, 7 days, 30 days, or custom `from`/`to` |
+| **Estimate** | Usage × catalog for the **selected range** (e.g. Estimated usage cost · Aug 7–13) |
+| **Forecast** | Always the **current calendar month** (run-rate + remaining RUNNING hours) |
+| **Cost over time** | Daily series from Meter hour buckets × prices |
+| **By service** | Meter totals × prices (bar + table) |
+| **Invoices** | Generate on demand; Mark paid is manual |
+| **Spend alerts** | Create / edit / disable / delete; month or week window |
+
+### Timezone contract (v1)
+
+Daily buckets are **UTC calendar days**. The explore API returns `"timezone": "UTC"`. The UI labels this explicitly. Per-account local timezone is not implemented yet.
+
+### API
+
+```http
+GET /api/v1/accounts/{id}/billing/explore?from=&to=
+```
+
+Returns `timezone`, `estimate`, `daily_series`, `by_service`, `prices_are_placeholder`, `has_usage`, and `has_unpriced_usage`.
+
+`GET …/billing/forecast` stays separate for the current month.
+
+## Spend alerts vs hard caps
+
+Spend alerts **notify only**. Crossing a threshold never stops Compute or suspends resources. There is **no hard spend limit** in v1. Resource quotas (machine count, etc.) remain a separate Identity/quotas control.
 
 ## CLI
 
@@ -78,7 +104,7 @@ PowerShell: the same commands (no quoting difference).
 ## Permissions
 
 - `billing.read` — viewer+
-- `billing.write` — owner/admin (generate invoice, mark paid, alerts)
+- `billing.write` — owner/admin (generate invoice, mark paid, manage alerts)
 
 ## Related
 
