@@ -14,6 +14,7 @@
 | [Object Storage (SO)](object-storage.md) | SO | לאחסן קבצים, לסנכרן תיקיות, לארח אתר סטטי |
 | [Message Queues (MQ)](queues.md) | MQ | לנתק workers, להשתמש ב-DLQ |
 | [Managed Databases (MDB)](databases.md) | MDB | להריץ PostgreSQL, MySQL או MongoDB |
+| [Compute](compute.md) | Compute | מכונות וירטואליות, Agent, volumes, operations |
 | [Redis](redis.md) | Redis | מטמון מנוהל |
 | [Functions](functions.md) | FN | handlers ב-serverless עם triggers |
 | [Applications](applications.md) | Apps | לפרוס מתבנית |
