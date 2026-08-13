@@ -2,7 +2,7 @@
 
 Compute הוא שכבת ה-**IaaS** של HomeCloud: מכונות וירטואליות עם image של HomeCloud, SSH, volume (במחלקת Standard), ו-Agent של הפלטפורמה. HomeCloud הוא הענן. ספקי קיבולת (Hetzner ראשון) נשארים מאחורי ה-API — לא שולחים שם ספק ולא image id של ספק.
 
-Workspace בקונסול (`/console/compute`) עדיין לא פורסם. השתמשו ב-HTTP API למטה. פקודות CLI/SDK יגיעו אחרי שהחוזה יתייצב.
+Workspace בקונסול: **`/console/compute`** — רשימת מכונות, יצירה, ו-workspace לפרטים (סקירה, טרמינל, קבצים, ביצועים, Snapshots). פקודות CLI/SDK יגיעו אחרי שהחוזה יתייצב.
 
 | פריט | ערך |
 |------|--------|
@@ -85,7 +85,7 @@ Stop / reboot / delete עוברים בספק גם כש-`agent_state=OFFLINE`.
 
 - ברירת מחדל לכניסה **TCP 22**. כללים נוספים: TCP/UDP בלבד (`PUT .../machines/{id}/firewall`).
 - מוקצה IPv4; IPv6 נשמר כ-null ולא נדרש.
-- Snapshot ל-**volume** (`POST .../volumes/{id}/snapshots`), שחזור ל-**volume חדש** (`POST .../snapshots/{id}/restore`). לא snapshot של מכונה.
+- Snapshot ל-**volume** (`POST .../volumes/{id}/snapshots`), רשימה ב-`GET .../volumes/{id}/snapshots`, שחזור ל-**volume חדש** (`POST .../snapshots/{id}/restore`). לא snapshot של מכונה.
 
 ## Agent
 
@@ -104,6 +104,15 @@ Exec וקבצים דורשים Agent **ONLINE**:
 
 HomeCloud הוא הענן. **Hetzner** הוא מתאם הקיבולת הראשון (אחר כך Scaleway, אחר כך OVH). לא מריצים מכונות לקוח על שרת ה-control-plane ב-homelab. MDB, Mail, SO ו-MQ לא רצים על Compute.
 
+## קונסול
+
+| דף | נתיב |
+|------|------|
+| רשימה + יצירה | `/console/compute` |
+| Workspace | `/console/compute/{machine_id}` |
+
+טאבים: **סקירה** (משולש בריאות, מחזור חיים, firewall), **טרמינל** (exec של Agent), **קבצים**, **ביצועים**, **Snapshots**. טרמינל וקבצים דורשים `agent_state=ONLINE`. בלי `HETZNER_API_TOKEN` יצירה עדיין מחזירה HTTP 202; ה-Operation הוא **FAILED**.
+
 ## שינויים שוברים
 
-אין — Compute חדש. הקטלוג בקונסול נשאר מוסתר עד soak.
+אין — Compute חדש. הקטלוג בקונסול כולל עכשיו את Compute.

@@ -2,7 +2,7 @@
 
 Compute is HomeCloud **IaaS**: virtual machines with a HomeCloud image, SSH, a volume (Standard class), and a platform Agent. HomeCloud is the cloud. Capacity providers (Hetzner first) stay behind the API — you never send a vendor name or a vendor image id.
 
-The console workspace (`/console/compute`) is not shipped yet. Use the HTTP API below. CLI/SDK commands will follow when this contract is soaked.
+The console workspace is **`/console/compute`**: machine list, create, and a detail workspace (Overview, Terminal, Files, Performance, Snapshots). CLI/SDK commands will follow when this contract is soaked.
 
 | Item | Value |
 |------|--------|
@@ -85,7 +85,7 @@ Disk is **grow-only**: `POST .../volumes/{volume_id}/resize` `{"size_gb":80}`.
 
 - Default inbound **TCP 22**. Extra rules: TCP/UDP only (`PUT .../machines/{id}/firewall`).
 - IPv4 is allocated; IPv6 is stored as null and not required.
-- Snapshot a **volume** (`POST .../volumes/{id}/snapshots`), restore to a **new volume** (`POST .../snapshots/{id}/restore`). Not a machine snapshot.
+- Snapshot a **volume** (`POST .../volumes/{id}/snapshots`), list with `GET .../volumes/{id}/snapshots`, restore to a **new volume** (`POST .../snapshots/{id}/restore`). Not a machine snapshot.
 
 ## Agent
 
@@ -104,6 +104,15 @@ Otherwise `409 compute.agent_offline`.
 
 HomeCloud is the cloud. **Hetzner** is the first capacity adapter (then Scaleway, then OVH). Do not put customer VMs on the homelab control-plane host. MDB, Mail, SO, and MQ do not run on Compute.
 
+## Console
+
+| Page | Path |
+|------|------|
+| List + create | `/console/compute` |
+| Workspace | `/console/compute/{machine_id}` |
+
+Tabs: **Overview** (health triad, lifecycle, firewall), **Terminal** (Agent exec), **Files**, **Performance**, **Snapshots**. Terminal and files require `agent_state=ONLINE`. Without `HETZNER_API_TOKEN` a create still returns HTTP 202; the Operation is **FAILED**.
+
 ## Breaking changes
 
-None — Compute is new. Catalog stays hidden in the console until soak.
+None — Compute is new. The console catalog now includes Compute.
