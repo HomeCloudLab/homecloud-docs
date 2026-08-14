@@ -73,8 +73,10 @@ client.so.copy("dest-bucket", "a.txt", "folder/a.txt", source_bucket="src-bucket
 client.so.move("dest-bucket", "a.txt", "folder/a.txt", source_bucket="src-bucket")
 client.so.delete("docs", "readme.md")
 
-client.so.sync_local_to_bucket("./dist", "my-website", delete=True)
-client.so.sync_bucket_to_local("docs", "./site")
+# One API: local↔bucket or bucket↔bucket (same shape as CLI `so sync`)
+client.so.sync("./dist", "so://my-website/", delete=True)
+client.so.sync("so://docs/", "./site")
+client.so.sync("so://photos/", "so://backup/photos/", delete=True)
 ```
 
 Management helpers (`list_buckets`, `create_bucket`) expect a console JWT session — use them from tools after `login`, not from unattended workers, unless you intentionally attach a session.

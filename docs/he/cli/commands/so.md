@@ -71,6 +71,8 @@ homecloud so ls media --prefix photos/ --recursive --name ".jpg"
 | `--skip` | דילוג כשגודל היעד כבר תואם (גודל בלבד, לא hash תוכן) |
 | `--delete` | גם הסרת עודפים ביעד (מראה) |
 
+פקודה אחת מכסה **מקומי → באקט**, **באקט → מקומי**, ו-**באקט → באקט** (`so://` → `so://`, העתקה בצד השרת).
+
 === "העלאה (מקומי → SO)"
 
     ```bash
@@ -104,6 +106,16 @@ homecloud so ls media --prefix photos/ --recursive --name ".jpg"
     ```
 
     קבצים גדולים נזרמים לדיסק (בלי buffer של הקובץ המלא בזיכרון). מפתחות אובייקט עם רווחים משתמשים בנתיבים מקודדי URL ל-HTTP בזמן חתימת נתיב המפתח הקנוני.
+
+=== "באקט → באקט"
+
+    ```bash
+    homecloud so sync so://photos/ so://backup/photos/
+    homecloud so sync so://src-bucket/prefix/ so://dest-bucket/prefix/ --delete
+    homecloud so sync so://a/ so://b/ --skip -j 16
+    ```
+
+    סנכרון מרוחק משתמש בהעתקה בצד השרת (בלי הורדה דרך המחשב שלכם). `--delete` מסיר אובייקטים תחת prefix היעד שאינם קיימים תחת prefix המקור.
 
 !!! warning "שינוי שובר (v0.2.15)"
     לפני v0.2.15, sync דילג על קבצים באותו גודל כברירת מחדל. מ-v0.2.15, sync **דורס כברירת מחדל**. השתמשו ב-`--skip` כדי לשחזר את התנהגות הדילוג לפי גודל הישנה.

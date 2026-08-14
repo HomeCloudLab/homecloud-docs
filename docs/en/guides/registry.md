@@ -7,7 +7,7 @@ IR is your account’s **private OCI / Docker registry**. Push images here for A
 | Console | **Registry** → `/console/registry` |
 | Registry host | `ir.{apex}` |
 | Image reference | `ir.{apex}/{account_short_id}/{repository}:{tag}` |
-| Auth | Access Key ID + secret (`docker login`) with `ir:Push` / `ir:Pull` |
+| Auth | `homecloud ir login` (Access Key profile) with `ir:Push` / `ir:Pull` |
 
 Platform GHCR (if any) is for HomeCloud’s own CI — not for your tenant images.
 
@@ -29,14 +29,21 @@ Open **Usage** (console or CLI) to see how much storage you consume. Disable or 
 ### Login
 
 ```bash
-homecloud ir login
-# or:
-docker login ir.holab.abrdns.com -u 'HCAK...' -p '<secret>'
+homecloud configure   # once: Access Key id + secret
+homecloud ir login    # runs docker login with your profile (no manual prompts)
 ```
 
-Use your Access Key ID as username and the secret as password. The key needs `ir:Push` and/or `ir:Pull`.
+AWS-style alternative:
+
+```bash
+homecloud ir get-login-password | docker login --username <AccessKeyId> --password-stdin ir.holab.abrdns.com
+```
+
+The Access Key needs `ir:Push` and/or `ir:Pull`.
 
 ### Tag and push
+
+In the console, open the repository and use **View push commands** for host/account/repo already filled in. Or:
 
 ```bash
 docker build -t myapp:1.0 .

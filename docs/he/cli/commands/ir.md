@@ -4,21 +4,33 @@
 
 ## login
 
-מדפיס הוראות `docker login` למארח ה-registry:
+מתחבר ל-Docker מול IR עם פרופיל ה-Access Key המוגדר (בלי הזנת username/password ידנית):
 
 ```bash
+homecloud configure   # פעם אחת: שמירת מזהה + secret
 homecloud ir login
 ```
 
-ואז:
+שקיל ל-pipe בסגנון AWS:
 
 ```bash
-docker login ir.holab.abrdns.com
-# Username: Access Key ID (HCAK…)
-# Password: Access Key secret
+homecloud ir get-login-password | docker login --username <AccessKeyId> --password-stdin ir.holab.abrdns.com
 ```
 
+אפשרויות:
+
+- `--registry HOST` — דריסת מארח ה-registry (ברירת מחדל `ir.{apex}`)
+- `--print-only` — הדפסת פקודת ה-pipe בלבד; לא מריץ `docker`
+
 Access Key צריך `ir:Push` ו/או `ir:Pull`.
+
+## get-login-password
+
+מדפיס את ה-secret ל-stdout עבור `--password-stdin` (CI / סקריפטים):
+
+```bash
+homecloud ir get-login-password | docker login --username "$HOMECLOUD_ACCESS_KEY_ID" --password-stdin ir.holab.abrdns.com
+```
 
 ## repo
 
@@ -44,7 +56,7 @@ docker tag myapp:1.0 ir.holab.abrdns.com/<account_short_id>/myapp:1.0
 docker push ir.holab.abrdns.com/<account_short_id>/myapp:1.0
 ```
 
-Account short id ומארח ה-registry המדויק מוצגים בדף Registry בקונסול ובפלט של `ir login`.
+Account short id ומארח ה-registry מוצגים בדף Registry בקונסול (**פקודות push**) ונגזרים מ-apex ב-`ir login`.
 
 ## קשור
 

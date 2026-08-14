@@ -71,6 +71,8 @@ In the Console, open an object’s **Properties** tab and copy the **SO URI** (`
 | `--skip` | Skip when destination size already matches (size-only, not content hash) |
 | `--delete` | Also remove extras on the destination (mirror) |
 
+One command covers **local → bucket**, **bucket → local**, and **bucket → bucket** (`so://` → `so://`, server-side copy).
+
 === "Upload (local → SO)"
 
     ```bash
@@ -105,12 +107,22 @@ In the Console, open an object’s **Properties** tab and copy the **SO URI** (`
 
     Large files stream to disk (no full-file memory buffer). Object keys with spaces use URL-encoded paths for HTTP while signing the canonical key path.
 
+=== "Bucket → bucket"
+
+    ```bash
+    homecloud so sync so://photos/ so://backup/photos/
+    homecloud so sync so://src-bucket/prefix/ so://dest-bucket/prefix/ --delete
+    homecloud so sync so://a/ so://b/ --skip -j 16
+    ```
+
+    Remote sync uses server-side copy (no download through your machine). `--delete` removes objects under the destination prefix that are not present under the source prefix.
+
 !!! warning "Breaking change (v0.2.15)"
     Before v0.2.15, sync skipped same-size files by default. From v0.2.15, sync **overwrites by default**. Use `--skip` to restore the old size-based skip behavior.
 
 ### Live output (default)
 
-Progress is **byte-based** for uploads and downloads: one shared bar shows transferred size, speed, ETA, and file count. Workers update a thread-safe byte counter; the UI refreshes at 10 Hz (workers never touch Rich directly). Per-file lines still show `upload`, `download`, `skip`, or `delete`.
+Progress is **byte-based** for uploads, downloads, and remote copies: one shared bar shows transferred size, speed, ETA, and file count. Workers update a thread-safe byte counter; the UI refreshes at 10 Hz (workers never touch Rich directly). Per-file lines still show `upload`, `download`, `copy`, `skip`, or `delete`.
 
 ```
 scan  57 local, 12 remote, 57 operations
@@ -120,9 +132,9 @@ upload  index.html
 upload  assets/app.js
 ```
 
-With `--skip`, unchanged same-size files show as `skip` instead of `upload`/`download`.
+With `--skip`, unchanged same-size files show as `skip` instead of `upload`/`download`/`copy`.
 
-Download shows `sync ← so://bucket/` and `download` lines instead of `upload`.
+Download shows `sync ← so://bucket/` and `download` lines; bucket→bucket shows `copy` lines.
 
 ### Parallel transfers
 
@@ -131,6 +143,7 @@ By default **10 files** transfer at once (`-j` / `--workers`, max 64). Reuses HT
 ```bash
 homecloud so sync so://docs/ ./site -j 20
 homecloud so sync ./dist so://my-website/ --delete -j 16
+homecloud so sync so://photos/ so://backup/photos/ --delete -j 16
 homecloud so sync ./dist so://my-website/ --skip -j 16
 ```
 

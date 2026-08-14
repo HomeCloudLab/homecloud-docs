@@ -15,6 +15,7 @@ https://homecloud-cli.so.holab.abrdns.com/releases/latest/homecloud-windows-amd6
 
 | Version | Highlights |
 |---------|------------|
+| v0.2.40 | `so sync` bucket↔bucket (`so://` → `so://`); unified SDK `so.sync(source, dest)` |
 | v0.2.31 | `usage list`, `billing summary/forecast/invoices`, `monitoring workspace/dashboards` |
 | v0.2.30 | Managed errors (no traceback); `homecloud update` / `version --check` |
 | v0.2.18 | Bidirectional `so cp` (download + upload); byte progress on single-file copy |

@@ -7,7 +7,7 @@ IR הוא **registry פרטי של OCI / Docker** לחשבון שלכם. דחפ�
 | Console | **Registry** → `/console/registry` |
 | Registry host | `ir.{apex}` |
 | Image reference | `ir.{apex}/{account_short_id}/{repository}:{tag}` |
-| Auth | Access Key ID + secret (`docker login`) עם `ir:Push` / `ir:Pull` |
+| Auth | `homecloud ir login` (פרופיל Access Key) עם `ir:Push` / `ir:Pull` |
 
 GHCR של הפלטפורמה (אם קיים) מיועד ל-CI של HomeCloud עצמה — לא לתמונות ה-tenant שלכם.
 
@@ -29,14 +29,21 @@ GHCR של הפלטפורמה (אם קיים) מיועד ל-CI של HomeCloud ע�
 ### התחברות
 
 ```bash
-homecloud ir login
-# or:
-docker login ir.holab.abrdns.com -u 'HCAK...' -p '<secret>'
+homecloud configure   # פעם אחת: מזהה Access Key + secret
+homecloud ir login    # מריץ docker login מהפרופיל (בלי הזנה ידנית)
 ```
 
-השתמשו ב-Access Key ID כשם משתמש וב-secret כסיסמה. המפתח צריך `ir:Push` ו/או `ir:Pull`.
+חלופה בסגנון AWS:
+
+```bash
+homecloud ir get-login-password | docker login --username <AccessKeyId> --password-stdin ir.holab.abrdns.com
+```
+
+המפתח צריך `ir:Push` ו/או `ir:Pull`.
 
 ### Tag ו-push
+
+בקונסול, פתחו את ה-repository והשתמשו ב-**פקודות push** עם host/חשבון/ריפו כבר ממולאים. או:
 
 ```bash
 docker build -t myapp:1.0 .

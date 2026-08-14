@@ -109,6 +109,13 @@ homecloud so ls media --prefix photos/ --recursive
     homecloud so sync so://docs/ ./site --delete
     ```
 
+=== "באקט → באקט"
+
+    ```bash
+    homecloud so sync so://photos/ so://backup/photos/
+    homecloud so sync so://src/ so://dest/ --delete --skip
+    ```
+
 === "CI (סיכום JSON, בלי סרגל חי)"
 
     ```bash
@@ -149,8 +156,9 @@ homecloud so rm so://media/old/ --recursive
 
     url = client.so.generate_presigned_url("docs", "readme.md", expires_in=3600)
 
-    client.so.sync_local_to_bucket("./dist", "my-website", delete=True)
-    client.so.sync_bucket_to_local("docs", "./site")
+    client.so.sync("./dist", "so://my-website/", delete=True)
+    client.so.sync("so://docs/", "./site")
+    client.so.sync("so://photos/", "so://backup/photos/", delete=True)
     ```
 
 === "Python (async)"

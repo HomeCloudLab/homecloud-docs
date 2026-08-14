@@ -109,6 +109,13 @@ Direction follows argument order. Default behavior **overwrites** matching keys.
     homecloud so sync so://docs/ ./site --delete
     ```
 
+=== "Bucket → bucket"
+
+    ```bash
+    homecloud so sync so://photos/ so://backup/photos/
+    homecloud so sync so://src/ so://dest/ --delete --skip
+    ```
+
 === "CI (JSON summary, no live bar)"
 
     ```bash
@@ -149,8 +156,9 @@ Full flag reference: [CLI `so` commands](../cli/commands/so.md).
 
     url = client.so.generate_presigned_url("docs", "readme.md", expires_in=3600)
 
-    client.so.sync_local_to_bucket("./dist", "my-website", delete=True)
-    client.so.sync_bucket_to_local("docs", "./site")
+    client.so.sync("./dist", "so://my-website/", delete=True)
+    client.so.sync("so://docs/", "./site")
+    client.so.sync("so://photos/", "so://backup/photos/", delete=True)
     ```
 
 === "Python (async)"
