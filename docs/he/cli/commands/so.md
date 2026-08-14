@@ -13,14 +13,23 @@ homecloud so ls-buckets
 
 ## ls
 
+מציג אובייקטים ועובר על **כל העמודים** (כמו `aws s3 ls`).
+
 ```bash
 homecloud so ls media
 homecloud so ls media --prefix photos/ --recursive
+homecloud so ls media --prefix photos/ --recursive --name ".jpg"
 ```
+
+| דגל | התנהגות |
+|------|----------|
+| `--prefix` | הגבלה למפתחות תחת ה-prefix |
+| `--recursive` | עץ שטוח (קבצים בלבד; בלי placeholders של תיקיות) |
+| `--name` | סינון substring לא רגיש לרישיות על מפתחות (אחרי pagination מלא) |
 
 ## cp
 
-העתקת קובץ יחיד מקומי ↔ bucket. הכיוון נקבע לפי סדר הארגומנטים (התקדמות לפי בתים).
+העתקת קובץ יחיד. הכיוון נקבע לפי סדר הארגומנטים.
 
 === "העלאה (מקומי → SO)"
 
@@ -37,7 +46,16 @@ homecloud so ls media --prefix photos/ --recursive
 
     אם היעד הוא תיקייה, שם הקובץ המקומי הוא ה-basename של מפתח ה-object.
 
-מציג התקדמות חיה לפי בתים כברירת מחדל.
+=== "בשרת (SO → SO)"
+
+    ```bash
+    homecloud so cp so://media/a.txt so://media/backup/a.txt
+    homecloud so cp so://media/a.txt so://other-bucket/a.txt
+    ```
+
+    אותו bucket או בין buckets. התקדמות היא סטטוס בלבד (אין זרם בתים).
+
+מציג התקדמות חיה לפי בתים עבור מקומי ↔ bucket כברירת מחדל.
 
 ## sync
 

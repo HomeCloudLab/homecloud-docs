@@ -13,14 +13,23 @@ homecloud so ls-buckets
 
 ## ls
 
+Lists objects and paginates through **all pages** (like `aws s3 ls`).
+
 ```bash
 homecloud so ls media
 homecloud so ls media --prefix photos/ --recursive
+homecloud so ls media --prefix photos/ --recursive --name ".jpg"
 ```
+
+| Flag | Behavior |
+|------|----------|
+| `--prefix` | Limit to keys under this prefix |
+| `--recursive` | Flatten the tree (files only; no folder placeholders) |
+| `--name` | Case-insensitive substring filter on keys (after full pagination) |
 
 ## cp
 
-Copy a single file local ↔ bucket. Direction is determined by argument order (byte-based progress).
+Copy a single file. Direction is determined by argument order.
 
 === "Upload (local → SO)"
 
@@ -37,7 +46,16 @@ Copy a single file local ↔ bucket. Direction is determined by argument order (
 
     If the destination is a directory, the object key basename is used as the local filename.
 
-Shows live byte progress by default.
+=== "Server-side (SO → SO)"
+
+    ```bash
+    homecloud so cp so://media/a.txt so://media/backup/a.txt
+    homecloud so cp so://media/a.txt so://other-bucket/a.txt
+    ```
+
+    Same-bucket or cross-bucket. Progress is status-only (no byte stream).
+
+Shows live byte progress for local ↔ bucket by default.
 
 ## sync
 

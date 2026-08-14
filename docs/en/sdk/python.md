@@ -67,6 +67,10 @@ print(client.so.get_object_uri("docs", "readme.md"))
 print(client.so.generate_presigned_url("docs", "readme.md", expires_in=3600))
 
 client.so.list_objects("docs", prefix="readme")
+# All pages under a prefix (continuation tokens)
+keys = client.so.list_all_objects("docs", prefix="photos/", recursive=True)
+client.so.copy("dest-bucket", "a.txt", "folder/a.txt", source_bucket="src-bucket")
+client.so.move("dest-bucket", "a.txt", "folder/a.txt", source_bucket="src-bucket")
 client.so.delete("docs", "readme.md")
 
 client.so.sync_local_to_bucket("./dist", "my-website", delete=True)
