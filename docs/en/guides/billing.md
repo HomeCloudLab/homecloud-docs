@@ -68,7 +68,7 @@ Single page — no separate Overview / Cost Explorer / Budgets routes.
 | **Estimate** | Usage × catalog for the **selected range** |
 | **Forecast** | Current calendar month, with a short basis line (run-rate + RUNNING hours) |
 | **What is driving cost?** | Top services with a clear usage summary (e.g. avg GB stored) |
-| **Cost over time** | Stacked daily bars **grouped by service**; Cost / Usage toggle |
+| **Cost over time** | Stacked bars **grouped by service**; Daily / Monthly. Each period has a **fixed slot** (inner chart scrolls sideways — bars never shrink to hairlines or stretch to fill the card). Monthly canvas is **at least 6 UTC months** through the current month (`$0` padding). |
 | **Cost breakdown** | One row per service; expand for metric / unit price / quantity |
 | **Invoices** | Generate on demand; Mark paid is manual |
 | **Spend alerts** | Notify only — never stop or suspend resources |
