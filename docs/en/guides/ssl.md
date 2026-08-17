@@ -1,33 +1,34 @@
 # SSL certificates
 
-The SSL page shows **TLS certificates** issued for your account (via the platform certificate manager). It is primarily a **read-only** view so you can confirm hosts are covered and see expiry.
+The SSL page lists **TLS certificates** for your account hostnames. The platform requests and renews them when a domain is verified (External DNS) or nameservers are delegated (HomeCloud DNS). You do not upload certificate files for the standard path.
 
 | Item | Value |
 |------|--------|
-| Console | **SSL** → `/console/ssl` |
+| Console | **SSL** → `/console/ssl` (also the SSL tab on a domain) |
 
-## What you will see
+## How certificates are issued
 
-- Certificate list (hosts / secrets)  
-- Status and expiry  
-- Links or names that correlate to Ingress / domain attachments  
+| Domain DNS | Challenge |
+|------------|-----------|
+| External DNS | HTTP-01 after the hostname points at the platform |
+| HomeCloud DNS | DNS-01 (RFC2136 on the hosted zone; apex and wildcard when possible) |
 
-You normally do **not** upload raw certificate files here for standard Application or console hostnames — the platform requests and renews certificates when domains are attached correctly.
+Renewal is automatic. Platform edge wildcards (`*.app.{apex}` and similar) are not shown on the tenant SSL list.
 
 ## Typical flow
 
-1. Verify and attach a hostname under [Domains](domains.md) / Application domains.  
-2. Wait for the certificate to become Ready.  
-3. Confirm on the **SSL** page.  
-4. Open `https://your-host` and validate in the browser.
+1. Add and verify the domain under [Domains](domains.md).  
+2. Attach a hostname to an Application, Function, or website.  
+3. Wait until the certificate is Ready.  
+4. Open `https://your-host` in the browser.
 
 ## Troubleshooting
 
 | Symptom | What to check |
 |---------|----------------|
-| Certificate stuck Pending | DNS not pointing at the platform yet; HTTP-01/DNS-01 challenge failing |
-| Wrong host covered | Domain attach on the wrong Application / Ingress |
-| Expiry soon | Platform should renew automatically; if not, contact your operator |
+| Certificate stuck Pending | DNS not pointing at the platform yet, or nameservers not delegated |
+| Wrong host covered | Attachment on the wrong Application |
+| Expiry soon | Renewal should run automatically; if not, contact your operator |
 
 ## Related
 
