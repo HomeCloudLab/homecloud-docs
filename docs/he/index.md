@@ -19,7 +19,7 @@
 | לפרוס אפליקציה מתבנית | [Applications](guides/applications.md) |
 | לדחוף תמונות Docker | [Image Registry (IR)](guides/registry.md) |
 | לשלוח ולקרוא דוא״ל | [Mail](guides/mail.md) |
-| לאוטומט עם סקריפטים | [CLI](cli/index.md) · [SDK](sdk/index.md) |
+| לאוטומט עם סקריפטים | [CLI](cli/index.md) · [SDK](sdk/index.md) · [Terraform](terraform/index.md) |
 
 ## איך HomeCloud מאורגן (למשתמשים)
 
@@ -30,7 +30,7 @@
 | איך עובדים | אישור | שימוש טיפוסי |
 |------------|--------|--------------|
 | קונסול בדפדפן, או `homecloud login` | שם משתמש + סיסמה (+ MFA) → סשן קצר־חיים | יצירת משאבים, הזמנת אנשים, ניהול הגדרות |
-| סקריפטים, CI, אפליקציות, `homecloud so` / `mq` / … | **Access Key** ID + secret | העלאת אובייקטים, פרסום הודעות, invoke לפונקציות |
+| סקריפטים, CI, אפליקציות, `homecloud so` / `mq` / Terraform | **Access Key** ID + secret | העלאת אובייקטים, פרסום הודעות, invoke לפונקציות, פרוויז'ן של תורים/באקטים |
 
 יוצרים Access Keys פעם אחת בקונסול. אוטומציה בזמן ריצה לא מבקשת MFA.
 

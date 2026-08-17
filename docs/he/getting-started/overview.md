@@ -12,7 +12,7 @@ HomeCloud הוא control plane לענן פרטי: קונסול ווב אחד, CL
 
 אם אתם מפעילים את *התשתית עצמה* של HomeCloud (צמתי K3s, Traefik, operators) — זה מחוץ להיקף כאן. המדריכים מניחים שהפלטפורמה כבר רצה ושיש לכם כתובת קונסול.
 
-## שלוש דרכים לעבוד
+## ארבע דרכים לעבוד
 
 ### 1. קונסול ווב
 
@@ -55,16 +55,20 @@ client.mq.send("orders", {"id": 1})
 
 ראו את [מדריך ה-SDK](../sdk/index.md).
 
+### 4. Terraform / OpenTofu
+
+פרוויז'ן של תורים ובאקטים מ-CI עם Access Key הקשור למשתמש. ראו [Terraform](../terraform/index.md).
+
 ## מודל מנטלי: control plane מול data plane
 
 אין צורך באדריכלות הפנימית — רק בהבחנה הזו:
 
 | Plane | דוגמאות | Auth |
 |-------|---------|------|
-| **Control plane** | יצירת bucket, רשימת תורים, הזמנת משתמש, פריסת גרסת פונקציה | סשן קונסול (`homecloud login`) או APIs ניהול עם JWT |
-| **Data plane** | העלאת אובייקט, שליחת הודעה, משיכת image, invoke לפונקציה חמה | Access Key (בקשות חתומות) |
+| **Control plane** | יצירת bucket, רשימת תורים, הזמנת משתמש, פריסת גרסת פונקציה | סשן קונסול (`homecloud login`) או **Access Key ב-SigV1** על ה-console API ([Terraform](../terraform/index.md)) |
+| **Data plane** | העלאת אובייקט, שליחת הודעה, משיכת image, invoke לפונקציה חמה | Access Key (בקשות חתומות על `so.` / `mq.` / …) |
 
-**כלל אצבע:** יצירה והגדרה של משאבים → קונסול / login. העברת נתונים בזמן ריצה → Access Key.
+**כלל אצבע:** יצירה והגדרה של משאבים → קונסול / login / Terraform. העברת נתונים בזמן ריצה → Access Key על מארחי data-plane.
 
 ## אזורים, קטלוג, בידוד
 

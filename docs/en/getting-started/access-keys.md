@@ -1,6 +1,6 @@
 # Access Keys
 
-Access Keys authenticate **data-plane** work: Object Storage, Message Queues, Secrets, Image Registry login, and most SDK/CLI runtime commands.
+Access Keys authenticate **data-plane** work (Object Storage, Message Queues, Secrets, Image Registry, SDK/CLI runtime) **and** programmatic **management** of the console API (Terraform / CI — [Terraform](../terraform/index.md)).
 
 They are **not** your console password. Create them once, store the secret safely, and use them in CI and servers. Requests signed with an Access Key do **not** prompt for MFA.
 

@@ -29,10 +29,11 @@
 | [Billing](billing.md) | Billing | שימוש, אומדנים, חשבוניות, התראות הוצאה |
 | [Monitoring](monitoring.md) | Monitoring | מדדים, לוגים, התראות |
 | [Account & team](account.md) | Account | חברים, ביקורת, פרויקטים, אבטחה |
+| [Terraform](../terraform/index.md) | IaC | פרוויז'ן של תורים ובאקטים מ-CI |
 
 ## תזכורת אימות
 
-- **קונסול + `homecloud login`** — יצירה והגדרה של משאבים  
-- **Access Key** — העברת נתונים וקריאה ל-APIs של זמן ריצה  
+- **קונסול + `homecloud login`** — יצירה והגדרה של משאבים בדפדפן  
+- **Access Key** — העברת נתונים, קריאה ל-APIs של זמן ריצה, ו(עם מפתח הקשור למשתמש) פרוויז'ן דרך [Terraform](../terraform/index.md)  
 
 צרו מפתחות ב-[Access Keys](../getting-started/access-keys.md) לפני שניסיונות דוגמאות CLI באתר הזה.

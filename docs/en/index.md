@@ -19,7 +19,7 @@ They are written for **account owners, developers, and DevOps** who build and ru
 | Deploy an app from a template | [Applications](guides/applications.md) |
 | Push Docker images | [Image Registry (IR)](guides/registry.md) |
 | Send and read email | [Mail](guides/mail.md) |
-| Automate with scripts | [CLI](cli/index.md) · [SDK](sdk/index.md) |
+| Automate with scripts | [CLI](cli/index.md) · [SDK](sdk/index.md) · [Terraform](terraform/index.md) |
 
 ## How HomeCloud is organized (for users)
 
@@ -30,7 +30,7 @@ There are two ways to authenticate:
 | How you work | Credential | Typical use |
 |--------------|------------|-------------|
 | Browser console, or `homecloud login` | Username + password (+ MFA) → short-lived session | Create resources, invite people, manage settings |
-| Scripts, CI, apps, `homecloud so` / `mq` / … | **Access Key** ID + secret | Upload objects, publish messages, invoke functions |
+| Scripts, CI, apps, `homecloud so` / `mq` / Terraform | **Access Key** ID + secret | Upload objects, publish messages, invoke functions, provision queues/buckets |
 
 You create Access Keys once in the console. Runtime automation never asks for MFA.
 

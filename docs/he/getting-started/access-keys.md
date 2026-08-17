@@ -1,6 +1,6 @@
 # Access Keys
 
-Access Keys מאמתים עבודת **data-plane**: Object Storage, Message Queues, Secrets, התחברות ל-Image Registry, ורוב פקודות הריצה של SDK/CLI.
+Access Keys מאמתים עבודת **data-plane** (Object Storage, Message Queues, Secrets, Image Registry, ריצה של SDK/CLI) **וגם** ניהול פרוגרמטי של ה-console API (Terraform / CI — [Terraform](../terraform/index.md)).
 
 הם **לא** סיסמת הקונסול. צרו אותם פעם אחת, שמרו את ה-secret בבטחה, והשתמשו בהם ב-CI ובשרתים. בקשות חתומות עם Access Key **לא** מבקשות MFA.
 

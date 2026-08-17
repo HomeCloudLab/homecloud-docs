@@ -55,6 +55,7 @@ plugins:
             Guides: מדריכים
             CLI: CLI
             SDK: SDK
+            Terraform: Terraform
   - tags
 
 markdown_extensions:
@@ -122,6 +123,8 @@ nav:
       - sdk/index.md
       - sdk/python.md
       - sdk/nodejs.md
+  - Terraform:
+      - terraform/index.md
 
 extra_css:
   - stylesheets/homecloud.css

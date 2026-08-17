@@ -12,7 +12,7 @@ You work inside an **account**. An account is your isolated workspace. Resources
 
 If you are operating the HomeCloud *infrastructure itself* (K3s nodes, Traefik, operators), that is out of scope here — these guides assume the platform is already running and you have a console URL.
 
-## The three ways to work
+## The four ways to work
 
 ### 1. Web console
 
@@ -55,16 +55,20 @@ client.mq.send("orders", {"id": 1})
 
 See the [SDK guide](../sdk/index.md).
 
+### 4. Terraform / OpenTofu
+
+Provision queues and buckets from CI with a user-bound Access Key. See [Terraform](../terraform/index.md).
+
 ## Mental model: control plane vs data plane
 
 You do not need the internal architecture — only this distinction:
 
 | Plane | Examples | Auth |
 |-------|----------|------|
-| **Control plane** | Create a bucket, list queues, invite a user, deploy a function version | Console session (`homecloud login`) or management APIs with JWT |
-| **Data plane** | Upload an object, send a message, pull an image, invoke a warm function | Access Key (signed requests) |
+| **Control plane** | Create a bucket, list queues, invite a user, deploy a function version | Console session (`homecloud login`) or **SigV1 Access Key** on the console API ([Terraform](../terraform/index.md)) |
+| **Data plane** | Upload an object, send a message, pull an image, invoke a warm function | Access Key (signed requests on `so.` / `mq.` / …) |
 
-**Rule of thumb:** creating and configuring resources → console / login. Moving data at runtime → Access Key.
+**Rule of thumb:** creating and configuring resources → console / login / Terraform. Moving data at runtime → Access Key on data-plane hosts.
 
 ## Regions, catalog, isolation
 
