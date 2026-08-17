@@ -6,12 +6,12 @@ HomeCloud Mail gives your account **mailboxes**, a full webmail client, **templa
 |------|--------|
 | Console | **Mail** → `/console/mail` |
 | Per mailbox | `/console/mail/{mailboxId}` |
-| Templates | `/console/mail/templates` |
-| Contacts | `/console/mail/contacts` |
+| Templates | `/console/mail?tab=templates` (editor: `/console/mail/templates/{id}`) |
+| Contacts | `/console/mail?tab=contacts` |
 
 ## Console map
 
-1. **Mailbox list** — create mailboxes, open Templates / Contacts, check service status & DNS hints.  
+1. **Mailboxes / Contacts / Templates tabs** — URL-synced (`?tab=`). Header **Refresh** is always there; **Create mailbox / contact / template** follows the active tab. Create contact is a dialog.  
 2. **Mailbox client** — folders (Inbox, Sent, Drafts, Trash, Archive), search, compose, settings.  
 3. **Template Studio** — visual email builder with preview and code.  
 4. **Contacts** — address book for compose.
@@ -47,7 +47,7 @@ Open **Status → Deliverability** (from the mail service area) for SPF / DKIM /
 
 ## Templates
 
-1. Open **Templates** → create blank or pick a starter (welcome, invoice, promo, …).  
+1. Open **Mail → Templates** → **New template** (blank) or pick a starter (welcome, invoice, promo, …).  
 2. Design with blocks (header, text, button, columns, …).  
 3. Preview on desktop/tablet/mobile.  
 4. Insert from compose, or send via API with `template_id` + variables.
@@ -56,7 +56,7 @@ Merge tags look like `{{user_name}}`, `{{cta_url}}`, etc.
 
 ## Contacts
 
-Maintain an address book; multi-select and bulk delete when cleaning up. Compose can pick contacts into To.
+Maintain an address book from the **Contacts** tab; **Create contact** opens a dialog. Multi-select and bulk delete when cleaning up. Compose can pick contacts into To.
 
 ## Automations
 

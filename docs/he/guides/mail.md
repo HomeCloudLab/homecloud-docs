@@ -6,15 +6,15 @@ HomeCloud Mail נותן לחשבון **תיבות דואר**, לקוח webmail �
 |------|--------|
 | Console | **Mail** → `/console/mail` |
 | Per mailbox | `/console/mail/{mailboxId}` |
-| Templates | `/console/mail/templates` |
-| Contacts | `/console/mail/contacts` |
+| Templates | `/console/mail?tab=templates` (עורך: `/console/mail/templates/{id}`) |
+| Contacts | `/console/mail?tab=contacts` |
 
 ## מפת קונסול
 
-1. **רשימת תיבות** — יצירת תיבות, פתיחת Templates / Contacts, בדיקת סטטוס שירות ורמזי DNS.  
+1. **טאבים תיבות / אנשי קשר / תבניות** — מסונכרנים ל-URL (`?tab=`). **רענון** תמיד בכותרת; **צור תיבה / איש קשר / תבנית** לפי הטאב הפעיל. יצירת איש קשר בדיאלוג.  
 2. **לקוח תיבה** — תיקיות (Inbox, Sent, Drafts, Trash, Archive), חיפוש, כתיבה, הגדרות.  
 3. **Template Studio** — בונה דוא״ל חזותי עם תצוגה מקדימה וקוד.  
-4. **Contacts** — פנקס כתובות לכתיבה.
+4. **אנשי קשר** — פנקס כתובות לכתיבה.
 
 ## יצירה ושימוש בתיבה
 
@@ -47,7 +47,7 @@ Reply / Reply all / Forward שומרים כותרות threading.
 
 ## תבניות
 
-1. פתחו **Templates** → צרו ריק או בחרו starter (welcome, invoice, promo, …).  
+1. פתחו **דואר → תבניות** → **תבנית חדשה** (ריק) או בחרו starter (welcome, invoice, promo, …).  
 2. עצבו עם בלוקים (כותרת, טקסט, כפתור, עמודות, …).  
 3. תצוגה מקדימה בדסקטופ/טאבלט/מובייל.  
 4. הכניסו מכתיבה, או שלחו דרך API עם `template_id` + משתנים.
@@ -56,7 +56,7 @@ Reply / Reply all / Forward שומרים כותרות threading.
 
 ## אנשי קשר
 
-תחזקו פנקס כתובות; בחירה מרובה ומחיקה מרובה בניקוי. כתיבה יכולה לבחור אנשי קשר ל-To.
+תחזקו פנקס כתובות מטאב **אנשי קשר**; **צור איש קשר** נפתח בדיאלוג. בחירה מרובה ומחיקה מרובה בניקוי. כתיבה יכולה לבחור אנשי קשר ל-To.
 
 ## אוטומציות
 
