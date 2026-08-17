@@ -35,7 +35,7 @@ export HC_APEX=holab.abrdns.com
 # אופציונלי: HC_ACCOUNT_ID, HC_ENDPOINT
 ```
 
-בנייה מהמקור עד שיופיע ב-Terraform Registry:
+בנייה מהמקור עד שיופיע ב-Terraform Registry. העתיקו `dev.tfrc.example` ל-`dev.tfrc`, הפנו אותו לתיקיית הריפו, והגדירו `TF_CLI_CONFIG_FILE`. **דלגו על `terraform init`** — overrides לא משתמשים ב-Registry.
 
 ```bash
 git clone https://github.com/HomeCloudLab/terraform-provider-homecloud

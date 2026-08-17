@@ -35,7 +35,7 @@ export HC_APEX=holab.abrdns.com
 # optional: HC_ACCOUNT_ID, HC_ENDPOINT
 ```
 
-Build from source until the Terraform Registry listing ships:
+Build from source until the Terraform Registry listing ships. Copy `dev.tfrc.example` to `dev.tfrc`, point it at the repo directory, and set `TF_CLI_CONFIG_FILE`. **Skip `terraform init`** — overrides do not use the Registry.
 
 ```bash
 git clone https://github.com/HomeCloudLab/terraform-provider-homecloud
