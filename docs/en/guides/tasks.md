@@ -14,26 +14,24 @@ Tasks is a lightweight operational tracker for the account (Hebrew UI name: **מ
 
 ### Create
 
-1. Open **Tasks** → **+ Task**.  
-2. Enter title, type, optional assignee, optional due date.  
-3. From a Compute, MDB, or Domain detail page, **+ Task** prefills the resource.
-
-Labels, watchers, and description live on the item **Details** panel after create.
+1. Open **Tasks** → **Task**.  
+2. Enter title, body, type, optional assignee, optional due date, and labels (pick existing or type a new name).  
+3. From a Compute, MDB, or Domain detail page, **Task** prefills the resource.
 
 ### Tabs
 
-- **All** — Kanban columns Open / In progress / Waiting/Blocked / Done (drag cards to change status). Toggle **List** for a table.  
+- **All** — Kanban columns Open / In progress / Waiting/Blocked / Done (drag cards to change status). Use the grid/list icon to switch to the table.  
 - **My Tasks** — items assigned to you, grouped (overdue, due today, in progress, waiting/blocked, recently completed).  
 - **Watching** — items you follow.  
 - **Done** — completed items.
 
 ### Item page
 
-Open `TASK-12` for status, assignee, due date, resource chip, activity, and comments. `@username` mentions notify that account member by email.
+Open `TASK-12` to edit title and body, change status/assignee/due date, set labels, and continue the conversation. `@username` mentions notify that account member by email.
 
 ### Labels
 
-Admins manage the catalog at `/console/tasks/labels`. Developers attach/detach labels on the item; they cannot rename or archive the catalog.
+Pick existing labels or type a new name when creating or editing an item. There is no separate labels catalog page.
 
 ## Email
 
@@ -61,7 +59,7 @@ Due-soon mail is sent once when an item is due within 24 hours and is not alread
 | `tasks.create` | Create items |
 | `tasks.update` | Status, comments, labels on items, watchers |
 | `tasks.delete` | Delete items |
-| `tasks.manage_labels` | Label catalog |
+| `tasks.manage_labels` | Rename or archive labels (API) |
 
 Without `tasks.read` the service tile is hidden.
 
