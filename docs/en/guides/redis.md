@@ -53,3 +53,4 @@ Exact TLS and port details appear on the instance page for your platform version
 - [Secrets](secrets.md)  
 - [Applications](applications.md)  
 - [Managed Databases](databases.md)  
+- [Terraform](../terraform/index.md) (`homecloud_redis_instance`)  

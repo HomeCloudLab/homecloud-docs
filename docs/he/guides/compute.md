@@ -128,3 +128,7 @@ HomeCloud הוא הענן. **Hetzner** הוא מתאם הקיבולת הראשו
 ## שינויים שוברים
 
 אין — Compute חדש. הקטלוג בקונסול כולל עכשיו את Compute.
+
+## קשור
+
+- [מפתחות SSH ומכונות ב-Terraform](../terraform/index.md) (`homecloud_compute_machine` / `homecloud_ssh_key`)

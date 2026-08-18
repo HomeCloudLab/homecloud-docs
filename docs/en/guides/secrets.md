@@ -65,3 +65,4 @@ Management and reveal often go through the console JWT APIs; keep long-lived aut
 - [Databases](databases.md)  
 - [Functions](functions.md)  
 - [Applications](applications.md)  
+- [Terraform](../terraform/index.md) (`homecloud_secret`)  

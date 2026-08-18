@@ -214,3 +214,4 @@ homecloud so sync ./dist so://my-website/ --delete --output json
 - [CLI `so`](../cli/commands/so.md)  
 - [SDK](../sdk/index.md)  
 - [Access Keys](../getting-started/access-keys.md)  
+- [Terraform](../terraform/index.md) (`homecloud_so_bucket`)  

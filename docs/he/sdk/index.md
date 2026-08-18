@@ -56,3 +56,4 @@
 1. צרו [Access Key](../getting-started/access-keys.md)  
 2. עקבו אחרי [Python](python.md) או [Node.js](nodejs.md)  
 3. לסקריפטי shell, ייתכן שתעדיפו את ה-[CLI](../cli/index.md) במקום  
+4. לפרוויז'ן משאבי חשבון מ-CI השתמשו ב-[Terraform](../terraform/index.md) (לא ב-SDK)  

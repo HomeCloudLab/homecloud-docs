@@ -41,6 +41,8 @@ Create and revoke under **IAM → Access Keys**. Full how-to: [Access Keys](../g
 
 Root / owner-scoped keys may have broad power — prefer scoped keys for CI.
 
+Roles can also trust **GitHub Actions OIDC** (`Principal.Federated` + `Condition` on `sub` / `aud`). Terraform then uses `HC_ROLE_ARN` instead of a long-lived Access Key. Assumed-role sessions can Create/Delete/Get queues, buckets, and secrets; other console routes return `403 iam.management_role_not_enabled`. See [Terraform — GitHub OIDC](../terraform/index.md#github-oidc-no-long-lived-key).
+
 ## Policies
 
 1. Open **Policies** → create or clone a managed starter.  
@@ -95,4 +97,4 @@ See also platform MFA notes if your operator published a security page for passk
 - [Access Keys](../getting-started/access-keys.md)  
 - [Functions](functions.md)  
 - [Account & team](account.md)  
-- [Terraform](../terraform/index.md) (P2: `homecloud_iam_policy` / `homecloud_iam_role` / `homecloud_iam_policy_attachment`)  
+- [Terraform](../terraform/index.md) (`homecloud_iam_policy` / `homecloud_iam_role` / `homecloud_iam_policy_attachment`, plus GitHub OIDC trust)  

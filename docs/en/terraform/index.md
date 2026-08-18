@@ -1,14 +1,67 @@
 # Terraform
 
-Provision HomeCloud **account resources** (queues, buckets, later DBs) from Terraform or OpenTofu. The provider calls `console.{apex}/api/v1` with a **SigV1 Access Key**. It does **not** manage the homelab (K3s, Helm, Compose).
+Provision HomeCloud **account resources** from Terraform or OpenTofu: queues, buckets, secrets, IAM, databases, Redis, functions, image repositories, domains, compute, SSH keys, and draft applications. The provider calls `console.{apex}/api/v1` with a **SigV1 Access Key** (or a short-lived key from GitHub OIDC). It does **not** manage the homelab (K3s, Helm, Compose).
 
-Architecture: [ADR-049](https://github.com/HomeCloudLab/homecloud-infra/blob/main/docs/adr/adr-049-terraform-provider.md).
+Architecture: [ADR-049](https://github.com/HomeCloudLab/homecloud-infra/blob/main/docs/adr/adr-049-terraform-provider.md).  
+Provider repo: [`terraform-provider-homecloud`](https://github.com/HomeCloudLab/terraform-provider-homecloud) (keep the `terraform-provider-*` name — HashiCorp Registry requires that prefix).
+
+Signed GitHub Release **v0.1.0** already exists. The provider is **not** on `registry.terraform.io` until someone with HomeCloudLab org access clicks **Publish** on HashiCorp’s site. Until then, build from source and skip `terraform init`.
 
 ## Create a key
 
-Use a dedicated IAM user with console role **developer** or **admin**, then an Access Key bound to that user. See [Access Keys](../getting-started/access-keys.md).
+Use a dedicated IAM user with console role **developer** or **admin**, then an Access Key bound to that user. See [Access Keys](../getting-started/access-keys.md). Put the secret in the environment — never in `.tf` files.
 
-Service Account keys can Create/Delete/Get queues, buckets, and secrets when an IAM policy allows the matching action (`mq:CreateQueue`, `so:CreateBucket`, `secrets:CreateSecret`, …). Other console routes still return `403 iam.management_sa_not_enabled`.
+| Variable | Meaning |
+|----------|---------|
+| `HC_ACCESS_KEY_ID` | Access Key ID |
+| `HC_SECRET_ACCESS_KEY` | Secret |
+| `HC_APEX` | Platform apex (default `holab.abrdns.com`) |
+| `HC_ACCOUNT_ID` | Optional account UUID (default: whoami) |
+| `HC_ENDPOINT` | Optional console URL override (tests) |
+
+IAM create/update/delete needs a console role of **owner or admin**. Function **delete** also needs owner/admin. Queue/bucket/secret Create/Delete/Get can use a Service Account key with the matching IAM actions (`mq:CreateQueue`, `so:CreateBucket`, `secrets:CreateSecret`, …). Unmapped SA console routes return `403 iam.management_sa_not_enabled`.
+
+## GitHub OIDC (no long-lived key)
+
+CI can mint a **temporary** Access Key from a GitHub Actions OIDC JWT. No `HC_SECRET_ACCESS_KEY` in repo secrets.
+
+1. Create an IAM role whose **trust** allows GitHub Actions (`Principal.Federated` + `Condition` on `sub` and `aud`). Attach managed policies such as `MQAdmin` / `SOBucketAdmin` / `SecretsAdmin`.
+2. In GitHub Actions, `permissions: id-token: write`.
+3. Set `HC_ROLE_ARN` (and optionally `HC_OIDC_AUDIENCE`, default `https://console.{apex}`). The provider exchanges the JWT at `POST /api/v1/sts/assume-role-with-web-identity` and uses the short-lived SigV1 credentials (including `X-Homecloud-Session-Token`).
+
+Assumed-role sessions use IAM `authorize()` on the **same mapped routes as Service Account keys** (queue / bucket / secret Create/Delete/Get). Unmapped console routes return `403 iam.management_role_not_enabled`. IAM / MDB / functions / compute still need a User-bound key.
+
+Trust example (replace account number, repo, and audience):
+
+```json
+{
+  "Version": "2026-07-24",
+  "Statement": [{
+    "Effect": "Allow",
+    "Principal": {
+      "Federated": "arn:homecloud:iam::123456789012:oidc-provider/token.actions.githubusercontent.com"
+    },
+    "Action": "sts:AssumeRole",
+    "Condition": {
+      "StringEquals": {
+        "token.actions.githubusercontent.com:aud": "https://console.holab.abrdns.com"
+      },
+      "StringLike": {
+        "token.actions.githubusercontent.com:sub": "repo:HomeCloudLab/my-infra:*"
+      }
+    }
+  }]
+}
+```
+
+Copy a workflow skeleton from [`examples/github-oidc`](https://github.com/HomeCloudLab/terraform-provider-homecloud/tree/main/examples/github-oidc). In Actions the provider reads `ACTIONS_ID_TOKEN_REQUEST_URL` / `ACTIONS_ID_TOKEN_REQUEST_TOKEN` when `HC_WEB_IDENTITY_TOKEN` is unset.
+
+| Variable | Meaning |
+|----------|---------|
+| `HC_ROLE_ARN` | IAM role ARN to assume |
+| `HC_WEB_IDENTITY_TOKEN` | OIDC JWT (optional in GitHub Actions; the provider can fetch it) |
+| `HC_OIDC_AUDIENCE` | JWT audience (default `https://console.{apex}`) |
+| `HC_SESSION_TOKEN` | Already-exchanged STS session token (optional) |
 
 ## Configure
 
@@ -26,28 +79,19 @@ provider "homecloud" {
 }
 ```
 
-Environment (same names as the CLI):
+OpenTofu works the same (`tofu apply`).
 
-```bash
-export HC_ACCESS_KEY_ID=HCAK...
-export HC_SECRET_ACCESS_KEY=...
-export HC_APEX=holab.abrdns.com
-# optional: HC_ACCOUNT_ID, HC_ENDPOINT
-```
+## Install (local, until Registry)
 
-GitHub Actions can use OIDC instead of a long-lived secret: set `HC_ROLE_ARN` and
-`permissions: id-token: write`. The provider calls
-`POST /api/v1/sts/assume-role-with-web-identity`. Trust must pin GitHub `sub` and
-`aud`. Assumed-role sessions work on queue/bucket/secret like Service Account keys.
-See [github-oidc example](https://github.com/HomeCloudLab/terraform-provider-homecloud/tree/main/examples/github-oidc).
-
-Build from source until the Terraform Registry listing ships. Copy `dev.tfrc.example` to `dev.tfrc`, point it at the repo directory, and set `TF_CLI_CONFIG_FILE`. **Skip `terraform init`** — overrides do not use the Registry.
+Copy `dev.tfrc.example` to `dev.tfrc`, point it at the repo directory, and set `TF_CLI_CONFIG_FILE`. **Skip `terraform init`** — overrides do not use the Registry (`init` will 404). `terraform apply` warns that development overrides are in effect. That is expected.
 
 ```bash
 git clone https://github.com/HomeCloudLab/terraform-provider-homecloud
 cd terraform-provider-homecloud
 go build -o terraform-provider-homecloud
 ```
+
+On Windows the binary is `terraform-provider-homecloud.exe`. CI on the provider repo (`go test` / `go build` on push to `main`) is already running; signed tags `v*` use GoReleaser.
 
 ## P1 / P1b resources
 
@@ -71,9 +115,11 @@ resource "homecloud_secret" "db" {
 }
 ```
 
+Bucket schema is `name` only. Versioning / lifecycle / website stay in the console. Secret `values` are write-only (Terraform 1.11+) and never stored in state.
+
 ## P2 IAM
 
-IAM create/update/delete needs a User-bound Access Key with console role **owner or admin** (`iam.manage`). Developer keys get 403. Service Account keys are not enabled on IAM routes.
+IAM create/update/delete needs a User-bound Access Key with console role **owner or admin** (`iam.manage`). Developer keys get 403. Service Account keys and assumed-role OIDC sessions are not enabled on IAM routes.
 
 ```hcl
 data "homecloud_iam_service_account" "functions" {
@@ -103,7 +149,7 @@ resource "homecloud_iam_policy_attachment" "functions_mq" {
 }
 ```
 
-Use the policy's `arn` (already IAM-canonical). Attachments take a principal UUID, not a name. `Version` in the document is `2026-07-24`, not AWS `2012-10-17`.
+Use the policy's `arn` (already IAM-canonical). Attachments take a principal UUID, not a name. `Version` in the document is `2026-07-24`, not AWS `2012-10-17`. Put GitHub OIDC **trust** on `homecloud_iam_role` (see above) when CI assumes the role.
 
 ## P3 MDB / Redis
 
@@ -197,8 +243,26 @@ resource "homecloud_compute_machine" "web" {
 | `homecloud_ssh_key` | `/api/v1/accounts/{id}/compute/ssh-keys` |
 | `homecloud_application` | `/api/v1/accounts/{id}/applications` |
 
-State `id` is the control-plane `resources.id` UUID. `iam_arn` is the IAM-canonical ARN (`arn:homecloud:mq::…:queue/name`). Secret `values` are write-only (Terraform 1.11+) and never stored in state. The console stays fully writable — there is no `managed_by=terraform` lock.
+State `id` is the control-plane `resources.id` UUID. `iam_arn` is the IAM-canonical ARN (`arn:homecloud:mq::…:queue/name`). Import is almost always by **name** (slug for applications). After import, `terraform plan` should be empty if HCL matches the live object. The console stays fully writable — there is no `managed_by=terraform` lock.
+
+## Worked examples
+
+| Directory | What it creates |
+|-----------|-----------------|
+| [`examples/mvp`](https://github.com/HomeCloudLab/terraform-provider-homecloud/tree/main/examples/mvp) | Queue + bucket + account data |
+| [`examples/secret`](https://github.com/HomeCloudLab/terraform-provider-homecloud/tree/main/examples/secret) | Secret with write-only values |
+| [`examples/iam`](https://github.com/HomeCloudLab/terraform-provider-homecloud/tree/main/examples/iam) | Policy + role + SA attachment (owner/admin) |
+| [`examples/mdb`](https://github.com/HomeCloudLab/terraform-provider-homecloud/tree/main/examples/mdb) | PostgreSQL + user + Redis |
+| [`examples/p4`](https://github.com/HomeCloudLab/terraform-provider-homecloud/tree/main/examples/p4) | Function + URL + IR repo + domain |
+| [`examples/p5`](https://github.com/HomeCloudLab/terraform-provider-homecloud/tree/main/examples/p5) | SSH key + draft application (machine commented) |
+| [`examples/github-oidc`](https://github.com/HomeCloudLab/terraform-provider-homecloud/tree/main/examples/github-oidc) | GitHub Actions OIDC trust + workflow skeleton |
+
+## Registry listing
+
+Docs, `terraform-registry-manifest.json`, GoReleaser, and GitHub Actions (CI + signed `v*` releases) live in the provider repo. **v0.1.0** is already a GPG-signed GitHub Release (public key [`docs/signing-key.asc`](https://github.com/HomeCloudLab/terraform-provider-homecloud/blob/main/docs/signing-key.asc)). A live listing on `registry.terraform.io` still needs a HashiCorp **Publish** click for namespace `homecloudlab`. See [`PUBLISHING.md`](https://github.com/HomeCloudLab/terraform-provider-homecloud/blob/main/PUBLISHING.md).
+
+The console does **not** offer copy-HCL or Queue API curl tabs. Terraform lives here and in the provider repo.
 
 ## Not in Terraform
 
-Object bodies, MQ messages, function IDE files, mail inbox, and platform bootstrap stay on the SDK/CLI or GitHub Actions.
+Object bodies, MQ messages, function IDE files, mail inbox, IR tags, domain DNS verify, machine firewall/disks, application provision/deploy, and platform bootstrap stay on the SDK/CLI, the console, or GitHub Actions.

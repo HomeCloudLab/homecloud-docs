@@ -137,3 +137,4 @@ curl -s -X POST -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/
 - [Secrets](secrets.md)  
 - [Applications](applications.md)  
 - [Kubernetes](kubernetes.md)  
+- [Terraform](../terraform/index.md) (`homecloud_mdb_instance` / `homecloud_mdb_user`)  

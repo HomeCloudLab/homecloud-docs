@@ -41,6 +41,8 @@ IAM שולט **מי יכול לעשות מה** בחשבון: משתמשי ותפ
 
 מפתחות בהיקף root / בעלים עשויים להיות רחבים — העדיפו מפתחות מוגבלים ל-CI.
 
+תפקידים יכולים גם לתת אמון ב-**GitHub Actions OIDC** (`Principal.Federated` + `Condition` על `sub` / `aud`). אז Terraform משתמש ב-`HC_ROLE_ARN` במקום Access Key ארוך-טווח. סשן assumed-role יכול ליצור/למחוק/לקרוא תורים, באקטים וסודות; נתיבי קונסול אחרים מחזירים `403 iam.management_role_not_enabled`. ראו [Terraform — GitHub OIDC](../terraform/index.md#github-oidc-בלי-מפתח-ארוך-טווח).
+
 ## מדיניות
 
 1. פתחו **Policies** → צרו או שכפלו starter מנוהל.  
@@ -95,4 +97,4 @@ Functions חייבות להשתמש ב-**ARN של Role לביצוע** (לא בש
 - [Access Keys](../getting-started/access-keys.md)  
 - [Functions](functions.md)  
 - [חשבון וצוות](account.md)  
-- [Terraform](../terraform/index.md) (P2: `homecloud_iam_policy` / `homecloud_iam_role` / `homecloud_iam_policy_attachment`)  
+- [Terraform](../terraform/index.md) (`homecloud_iam_policy` / `homecloud_iam_role` / `homecloud_iam_policy_attachment`, וגם trust של GitHub OIDC)  

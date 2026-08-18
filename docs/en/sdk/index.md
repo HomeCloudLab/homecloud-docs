@@ -56,3 +56,4 @@ Create keys in the console: [Access Keys](../getting-started/access-keys.md).
 1. Create an [Access Key](../getting-started/access-keys.md)  
 2. Follow [Python](python.md) or [Node.js](nodejs.md)  
 3. For shell scripts, you may prefer the [CLI](../cli/index.md) instead  
+4. To provision account resources from CI, use [Terraform](../terraform/index.md) (not the SDK)  

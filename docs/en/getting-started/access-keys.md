@@ -105,12 +105,15 @@ Attach policies via **IAM → Policies / Roles**. See [IAM](../guides/iam.md) fo
 | `homecloud queues list` / `homecloud so ls-buckets` | `homecloud login` (JWT) |
 | `homecloud so cp` / `so sync` / `mq send` | Access Key |
 | CI deploy of a static site | Access Key in GitHub Actions secrets |
+| Terraform provision of queues / buckets / secrets from CI | User-bound Access Key, **or** GitHub OIDC (`HC_ROLE_ARN`) — [Terraform](../terraform/index.md) |
 | Day-to-day browsing in the browser | Console session + MFA |
 
 You often use **both**: login for management listing, Access Key for transfers.
 
+For Terraform in GitHub Actions, prefer **OIDC** over a long-lived `HC_SECRET_ACCESS_KEY` in GitHub Secrets. The provider exchanges a GitHub JWT at `POST /api/v1/sts/assume-role-with-web-identity`. See [Terraform — GitHub OIDC](../terraform/index.md#github-oidc-no-long-lived-key).
+
 !!! warning "Never commit secrets"
-    Do not put Access Key secrets in git. Use your CI secret store (`GitHub Actions` secrets, etc.).
+    Do not put Access Key secrets in git. Use your CI secret store (`GitHub Actions` secrets, etc.), or skip the long-lived secret entirely with GitHub OIDC for Terraform.
 
 ## Troubleshooting
 
@@ -126,3 +129,4 @@ You often use **both**: login for management listing, Access Key for transfers.
 - [CLI authentication](../cli/authentication.md)  
 - [IAM guide](../guides/iam.md)  
 - [SDK](../sdk/index.md)  
+- [Terraform](../terraform/index.md) (SigV1 Access Key or GitHub OIDC)  

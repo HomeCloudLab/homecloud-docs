@@ -214,3 +214,4 @@ Use `generate_presigned_url` in the SDK, or download via CLI and distribute the 
 - [CLI `so`](../cli/commands/so.md)  
 - [SDK](../sdk/index.md)  
 - [Access Keys](../getting-started/access-keys.md)  
+- [Terraform](../terraform/index.md) (`homecloud_so_bucket`)  

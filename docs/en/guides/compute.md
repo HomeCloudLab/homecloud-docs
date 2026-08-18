@@ -128,3 +128,7 @@ Service tabs: **Machines**, **SSH keys**. Machine tabs: **Overview** (health tri
 ## Breaking changes
 
 None — Compute is new. The console catalog now includes Compute.
+
+## Related
+
+- [SSH keys and machines in Terraform](../terraform/index.md) (`homecloud_compute_machine` / `homecloud_ssh_key`)

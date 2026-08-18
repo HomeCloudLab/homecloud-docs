@@ -171,3 +171,4 @@ homecloud fn invoke hello --payload '{"name":"Ada"}'
 - [Queues](queues.md)  
 - [Object Storage](object-storage.md)  
 - [CLI `fn`](../cli/commands/fn.md)  
+- [Terraform](../terraform/index.md) (`homecloud_function` / `_function_url` — spec בלבד; בלי קבצי IDE)  

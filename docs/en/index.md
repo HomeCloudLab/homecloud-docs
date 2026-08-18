@@ -30,7 +30,7 @@ There are two ways to authenticate:
 | How you work | Credential | Typical use |
 |--------------|------------|-------------|
 | Browser console, or `homecloud login` | Username + password (+ MFA) → short-lived session | Create resources, invite people, manage settings |
-| Scripts, CI, apps, `homecloud so` / `mq` / Terraform | **Access Key** ID + secret | Upload objects, publish messages, invoke functions, provision queues/buckets |
+| Scripts, CI, apps, `homecloud so` / `mq` / Terraform | **Access Key** ID + secret, or GitHub OIDC for Terraform | Upload objects, publish messages, invoke functions, provision account resources |
 
 You create Access Keys once in the console. Runtime automation never asks for MFA.
 

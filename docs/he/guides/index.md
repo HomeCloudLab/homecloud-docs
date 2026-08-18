@@ -30,11 +30,12 @@
 | [Monitoring](monitoring.md) | Monitoring | מדדים, לוגים, התראות |
 | [משימות (Tasks)](tasks.md) | Tasks | משימות תפעול, יעדים, תוויות (`TASK-{n}`) |
 | [Account & team](account.md) | Account | חברים, ביקורת, פרויקטים, אבטחה |
-| [Terraform](../terraform/index.md) | IaC | פרוויז'ן של תורים ובאקטים מ-CI |
+| [Terraform](../terraform/index.md) | IaC | פרוויז'ן של משאבי חשבון מ-CI (Access Key או GitHub OIDC) |
 
 ## תזכורת אימות
 
 - **קונסול + `homecloud login`** — יצירה והגדרה של משאבים בדפדפן  
 - **Access Key** — העברת נתונים, קריאה ל-APIs של זמן ריצה, ו(עם מפתח הקשור למשתמש) פרוויז'ן דרך [Terraform](../terraform/index.md)  
+- **GitHub OIDC** — Terraform ב-Actions בלי סוד ארוך-טווח (`HC_ROLE_ARN`)  
 
 צרו מפתחות ב-[Access Keys](../getting-started/access-keys.md) לפני שניסיונות דוגמאות CLI באתר הזה.

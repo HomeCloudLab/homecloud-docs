@@ -83,3 +83,4 @@ Deeper lifecycle (create/update/delete) is console-first today; use the UI for t
 - [Image Registry](registry.md)  
 - [Domains](domains.md)  
 - [Account & projects](account.md)  
+- [Terraform](../terraform/index.md) (`homecloud_application` — draft / spec only)  

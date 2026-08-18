@@ -53,3 +53,4 @@ redis-cli -h <host> -p <port> --tls -a '<password>'
 - [Secrets](secrets.md)  
 - [Applications](applications.md)  
 - [Managed Databases](databases.md)  
+- [Terraform](../terraform/index.md) (`homecloud_redis_instance`)  

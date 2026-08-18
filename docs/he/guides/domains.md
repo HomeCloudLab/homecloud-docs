@@ -48,3 +48,4 @@ Apex (`example.com` → Application) הוא צירוף לשירות, לא סוג
 - [Applications](applications.md)  
 - [SSL certificates](ssl.md)  
 - [Mail](mail.md)  
+- [Terraform](../terraform/index.md) (`homecloud_domain` — יצירה לא ממתינה לאימות DNS)  

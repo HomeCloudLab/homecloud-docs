@@ -30,11 +30,12 @@ Step-by-step guides for every major HomeCloud service. Each page covers:
 | [Monitoring](monitoring.md) | Monitoring | Metrics, logs, alerts |
 | [Tasks](tasks.md) | Tasks | Assign ops tasks, due dates, labels (`TASK-{n}`) |
 | [Account & team](account.md) | Account | Members, audit, projects, security |
-| [Terraform](../terraform/index.md) | IaC | Provision queues and buckets from CI |
+| [Terraform](../terraform/index.md) | IaC | Provision account resources from CI (Access Key or GitHub OIDC) |
 
 ## Auth reminder
 
 - **Console + `homecloud login`** — create and configure resources in a browser  
 - **Access Key** — move data, call runtime APIs, and (with a user-bound key) provision via [Terraform](../terraform/index.md)  
+- **GitHub OIDC** — Terraform in Actions without a long-lived secret (`HC_ROLE_ARN`)  
 
 Create keys in [Access Keys](../getting-started/access-keys.md) before trying CLI examples on this site.

@@ -57,7 +57,7 @@ See the [SDK guide](../sdk/index.md).
 
 ### 4. Terraform / OpenTofu
 
-Provision queues and buckets from CI with a user-bound Access Key. See [Terraform](../terraform/index.md).
+Provision queues, buckets, secrets, IAM, databases, functions, and compute from CI. Use a user-bound Access Key, or GitHub OIDC (`HC_ROLE_ARN`) so CI never stores a long-lived secret. See [Terraform](../terraform/index.md).
 
 ## Mental model: control plane vs data plane
 

@@ -105,12 +105,15 @@ Access Keys מאמתים עבודת **data-plane** (Object Storage, Message Queu
 | `homecloud queues list` / `homecloud so ls-buckets` | `homecloud login` (JWT) |
 | `homecloud so cp` / `so sync` / `mq send` | Access Key |
 | פריסת אתר סטטי ב-CI | Access Key ב-secrets של GitHub Actions |
+| פרוויז'ן Terraform של תורים / באקטים / סודות מ-CI | Access Key הקשור למשתמש, **או** GitHub OIDC (`HC_ROLE_ARN`) — [Terraform](../terraform/index.md) |
 | גלישה יומיומית בדפדפן | סשן קונסול + MFA |
 
 לעיתים קרובות משתמשים ב**שניהם**: login לרשימות ניהול, Access Key להעברות.
 
+ל-Terraform ב-GitHub Actions העדיפו **OIDC** על פני `HC_SECRET_ACCESS_KEY` ארוך-טווח ב-GitHub Secrets. הספק מחליף JWT של GitHub ב-`POST /api/v1/sts/assume-role-with-web-identity`. ראו [Terraform — GitHub OIDC](../terraform/index.md#github-oidc-בלי-מפתח-ארוך-טווח).
+
 !!! warning "לעולם אל תעלו סודות ל-git"
-    אל תשימו secret של Access Key ב-git. השתמשו במאגר הסודות של ה-CI (`GitHub Actions` secrets וכו').
+    אל תשימו secret של Access Key ב-git. השתמשו במאגר הסודות של ה-CI (`GitHub Actions` secrets וכו'), או דלגו על הסוד הארוך-טווח לגמרי עם GitHub OIDC ל-Terraform.
 
 ## פתרון בעיות
 
@@ -126,3 +129,4 @@ Access Keys מאמתים עבודת **data-plane** (Object Storage, Message Queu
 - [אימות ב-CLI](../cli/authentication.md)  
 - [מדריך IAM](../guides/iam.md)  
 - [SDK](../sdk/index.md)  
+- [Terraform](../terraform/index.md) (Access Key ב-SigV1 או GitHub OIDC)  

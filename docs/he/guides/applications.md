@@ -83,3 +83,4 @@ homecloud apps list
 - [Image Registry](registry.md)  
 - [Domains](domains.md)  
 - [חשבון ופרויקטים](account.md)  
+- [Terraform](../terraform/index.md) (`homecloud_application` — draft / spec בלבד)  

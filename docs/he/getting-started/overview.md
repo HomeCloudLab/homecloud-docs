@@ -57,7 +57,7 @@ client.mq.send("orders", {"id": 1})
 
 ### 4. Terraform / OpenTofu
 
-פרוויז'ן של תורים ובאקטים מ-CI עם Access Key הקשור למשתמש. ראו [Terraform](../terraform/index.md).
+פרוויז'ן של תורים, באקטים, סודות, IAM, מסדי נתונים, פונקציות ומחשוב מ-CI. השתמשו ב-Access Key הקשור למשתמש, או ב-GitHub OIDC (`HC_ROLE_ARN`) כדי ש-CI לא ישמור סוד ארוך-טווח. ראו [Terraform](../terraform/index.md).
 
 ## מודל מנטלי: control plane מול data plane
 

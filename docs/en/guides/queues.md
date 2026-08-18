@@ -185,3 +185,4 @@ Full reference: [CLI `mq`](../cli/commands/mq.md).
 - [Functions](functions.md) (queue triggers)  
 - [CLI `mq`](../cli/commands/mq.md)  
 - [Access Keys](../getting-started/access-keys.md)  
+- [Terraform](../terraform/index.md) (`homecloud_mq_queue`)  

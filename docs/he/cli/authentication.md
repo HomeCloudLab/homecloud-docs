@@ -69,3 +69,4 @@ homecloud --profile production so ls media
 - [התקנה](install.md)  
 - [מפת פקודות](commands/index.md)  
 - [IAM](../guides/iam.md)  
+- [Terraform](../terraform/index.md)  

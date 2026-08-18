@@ -48,3 +48,4 @@ Apex (`example.com` → an Application) is an attachment, not a user-facing ALIA
 - [Applications](applications.md)  
 - [SSL certificates](ssl.md)  
 - [Mail](mail.md)  
+- [Terraform](../terraform/index.md) (`homecloud_domain` — create does not wait for DNS verify)  

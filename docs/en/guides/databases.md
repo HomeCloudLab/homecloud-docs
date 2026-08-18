@@ -137,3 +137,4 @@ Some engines expose scale (`instances` count) from the console or API. On smalle
 - [Secrets](secrets.md)  
 - [Applications](applications.md)  
 - [Kubernetes](kubernetes.md)  
+- [Terraform](../terraform/index.md) (`homecloud_mdb_instance` / `homecloud_mdb_user`)  

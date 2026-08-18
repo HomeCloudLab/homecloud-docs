@@ -185,3 +185,4 @@ homecloud mq purge-dlq orders
 - [Functions](functions.md) (triggers של תורים)  
 - [CLI `mq`](../cli/commands/mq.md)  
 - [Access Keys](../getting-started/access-keys.md)  
+- [Terraform](../terraform/index.md) (`homecloud_mq_queue`)  

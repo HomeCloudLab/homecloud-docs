@@ -69,3 +69,4 @@ Credentials file: `~/.homecloud/credentials`
 - [Install](install.md)  
 - [Command map](commands/index.md)  
 - [IAM](../guides/iam.md)  
+- [Terraform](../terraform/index.md)  
