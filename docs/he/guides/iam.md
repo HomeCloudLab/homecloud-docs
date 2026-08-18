@@ -95,3 +95,4 @@ Functions חייבות להשתמש ב-**ARN של Role לביצוע** (לא בש
 - [Access Keys](../getting-started/access-keys.md)  
 - [Functions](functions.md)  
 - [חשבון וצוות](account.md)  
+- [Terraform](../terraform/index.md) (P2: `homecloud_iam_policy` / `homecloud_iam_role` / `homecloud_iam_policy_attachment`)  

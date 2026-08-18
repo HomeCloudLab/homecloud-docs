@@ -65,12 +65,50 @@ resource "homecloud_secret" "db" {
 }
 ```
 
+## P2 IAM
+
+IAM create/update/delete needs a User-bound Access Key with console role **owner or admin** (`iam.manage`). Developer keys get 403. Service Account keys are not enabled on IAM routes.
+
+```hcl
+data "homecloud_iam_service_account" "functions" {
+  name = "functions"
+}
+
+resource "homecloud_iam_policy" "mq" {
+  name = "ci-mq"
+  document = jsonencode({
+    Version = "2026-07-24"
+    Statement = [{
+      Effect   = "Allow"
+      Action   = ["mq:*"]
+      Resource = "arn:homecloud:mq::${data.homecloud_account.this.account_number}:queue/*"
+    }]
+  })
+}
+
+resource "homecloud_iam_role" "ci" {
+  name = "ci"
+}
+
+resource "homecloud_iam_policy_attachment" "functions_mq" {
+  policy_arn     = homecloud_iam_policy.mq.arn
+  principal_type = "service_account"
+  principal_id   = data.homecloud_iam_service_account.functions.id
+}
+```
+
+Use the policy's `arn` (already IAM-canonical). Attachments take a principal UUID, not a name. `Version` in the document is `2026-07-24`, not AWS `2012-10-17`.
+
 | Resource | API |
 |----------|-----|
 | `homecloud_mq_queue` | `/api/v1/accounts/{id}/queues` |
 | `homecloud_so_bucket` | `/api/v1/accounts/{id}/storage/buckets` |
 | `homecloud_secret` | `/api/v1/accounts/{id}/secrets` |
 | `data.homecloud_account` | whoami + `GET /accounts/{id}` |
+| `homecloud_iam_policy` | `/api/v1/accounts/{id}/iam/policies` |
+| `homecloud_iam_role` | `/api/v1/accounts/{id}/iam/roles` |
+| `homecloud_iam_policy_attachment` | `/iam/principals/attachments` |
+| `data.homecloud_iam_service_account` | `GET /iam/service-accounts/{name}` |
 
 State `id` is the control-plane `resources.id` UUID. `iam_arn` is the IAM-canonical ARN (`arn:homecloud:mq::…:queue/name`). Secret `values` are write-only (Terraform 1.11+) and never stored in state. The console stays fully writable — there is no `managed_by=terraform` lock.
 

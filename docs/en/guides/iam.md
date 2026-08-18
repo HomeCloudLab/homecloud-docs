@@ -95,3 +95,4 @@ See also platform MFA notes if your operator published a security page for passk
 - [Access Keys](../getting-started/access-keys.md)  
 - [Functions](functions.md)  
 - [Account & team](account.md)  
+- [Terraform](../terraform/index.md) (P2: `homecloud_iam_policy` / `homecloud_iam_role` / `homecloud_iam_policy_attachment`)  
