@@ -99,6 +99,29 @@ resource "homecloud_iam_policy_attachment" "functions_mq" {
 
 Use the policy's `arn` (already IAM-canonical). Attachments take a principal UUID, not a name. `Version` in the document is `2026-07-24`, not AWS `2012-10-17`.
 
+## P3 MDB / Redis
+
+Create waits until `status=active` (errors if `failed`). GET is by name or UUID. User `password` is write-only and never returned. Redis passwords stay in `credentials_secret`.
+
+```hcl
+resource "homecloud_mdb_instance" "app" {
+  name           = "app-db"
+  engine         = "postgresql"
+  instance_class = "micro"
+}
+
+resource "homecloud_mdb_user" "ci" {
+  instance_name = homecloud_mdb_instance.app.name
+  username      = "ci"
+  password      = var.db_password
+}
+
+resource "homecloud_redis_instance" "cache" {
+  name           = "app-cache"
+  instance_class = "micro"
+}
+```
+
 | Resource | API |
 |----------|-----|
 | `homecloud_mq_queue` | `/api/v1/accounts/{id}/queues` |
@@ -109,6 +132,9 @@ Use the policy's `arn` (already IAM-canonical). Attachments take a principal UUI
 | `homecloud_iam_role` | `/api/v1/accounts/{id}/iam/roles` |
 | `homecloud_iam_policy_attachment` | `/iam/principals/attachments` |
 | `data.homecloud_iam_service_account` | `GET /iam/service-accounts/{name}` |
+| `homecloud_mdb_instance` | `/api/v1/accounts/{id}/databases` |
+| `homecloud_mdb_user` | `/databases/{instance}/users` |
+| `homecloud_redis_instance` | `/api/v1/accounts/{id}/caches` |
 
 State `id` is the control-plane `resources.id` UUID. `iam_arn` is the IAM-canonical ARN (`arn:homecloud:mq::…:queue/name`). Secret `values` are write-only (Terraform 1.11+) and never stored in state. The console stays fully writable — there is no `managed_by=terraform` lock.
 

@@ -99,6 +99,29 @@ resource "homecloud_iam_policy_attachment" "functions_mq" {
 
 השתמשו ב-`arn` של המדיניות (כבר קנוני ל-IAM). צירוף דורש UUID של principal, לא שם. `Version` במסמך הוא `2026-07-24`, לא AWS `2012-10-17`.
 
+## P3 MDB / Redis
+
+יצירה ממתינה עד `status=active` (נכשל אם `failed`). GET לפי שם או UUID. `password` של משתמש הוא write-only ולא חוזר ב-GET. סיסמת Redis נשארת ב-`credentials_secret`.
+
+```hcl
+resource "homecloud_mdb_instance" "app" {
+  name           = "app-db"
+  engine         = "postgresql"
+  instance_class = "micro"
+}
+
+resource "homecloud_mdb_user" "ci" {
+  instance_name = homecloud_mdb_instance.app.name
+  username      = "ci"
+  password      = var.db_password
+}
+
+resource "homecloud_redis_instance" "cache" {
+  name           = "app-cache"
+  instance_class = "micro"
+}
+```
+
 | משאב | API |
 |------|-----|
 | `homecloud_mq_queue` | `/api/v1/accounts/{id}/queues` |
@@ -109,6 +132,9 @@ resource "homecloud_iam_policy_attachment" "functions_mq" {
 | `homecloud_iam_role` | `/api/v1/accounts/{id}/iam/roles` |
 | `homecloud_iam_policy_attachment` | `/iam/principals/attachments` |
 | `data.homecloud_iam_service_account` | `GET /iam/service-accounts/{name}` |
+| `homecloud_mdb_instance` | `/api/v1/accounts/{id}/databases` |
+| `homecloud_mdb_user` | `/databases/{instance}/users` |
+| `homecloud_redis_instance` | `/api/v1/accounts/{id}/caches` |
 
 מזהה ה-state הוא UUID של `resources.id`. `iam_arn` הוא ה-ARN הקנוני של IAM. `values` של סוד הוא write-only (Terraform 1.11+) ולא נשמר ב-state. הקונסול נשאר ניתן לכתיבה — אין נעילת `managed_by=terraform`.
 
