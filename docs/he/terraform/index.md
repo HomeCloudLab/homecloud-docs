@@ -8,7 +8,7 @@
 
 השתמשו במשתמש IAM ייעודי עם תפקיד קונסול **developer** או **admin**, ואז Access Key הקשור למשתמש הזה. ראו [Access Keys](../getting-started/access-keys.md).
 
-מפתחות Service Account יכולים ליצור/לקרוא/למחוק תורים ובאקטים כשמדיניות IAM מתירה את הפעולה (`mq:CreateQueue`, `so:CreateBucket`, …). נתיבי קונסול אחרים עדיין מחזירים `403 iam.management_sa_not_enabled`.
+מפתחות Service Account יכולים ליצור/לקרוא/למחוק תורים, באקטים וסודות כשמדיניות IAM מתירה את הפעולה (`mq:CreateQueue`, `so:CreateBucket`, `secrets:CreateSecret`, …). נתיבי קונסול אחרים עדיין מחזירים `403 iam.management_sa_not_enabled`.
 
 ## הגדרה
 
@@ -43,7 +43,7 @@ cd terraform-provider-homecloud
 go build -o terraform-provider-homecloud
 ```
 
-## משאבי P1
+## משאבי P1 / P1b
 
 ```hcl
 data "homecloud_account" "this" {}
@@ -55,15 +55,24 @@ resource "homecloud_mq_queue" "jobs" {
 resource "homecloud_so_bucket" "assets" {
   name = "assets"
 }
+
+resource "homecloud_secret" "db" {
+  name        = "database-url"
+  description = "Primary DB"
+  values = {
+    DATABASE_URL = var.database_url
+  }
+}
 ```
 
 | משאב | API |
 |------|-----|
 | `homecloud_mq_queue` | `/api/v1/accounts/{id}/queues` |
 | `homecloud_so_bucket` | `/api/v1/accounts/{id}/storage/buckets` |
+| `homecloud_secret` | `/api/v1/accounts/{id}/secrets` |
 | `data.homecloud_account` | whoami + `GET /accounts/{id}` |
 
-מזהה ה-state הוא UUID של `resources.id`. `iam_arn` הוא ה-ARN הקנוני של IAM. הקונסול נשאר ניתן לכתיבה — אין נעילת `managed_by=terraform`.
+מזהה ה-state הוא UUID של `resources.id`. `iam_arn` הוא ה-ARN הקנוני של IAM. `values` של סוד הוא write-only (Terraform 1.11+) ולא נשמר ב-state. הקונסול נשאר ניתן לכתיבה — אין נעילת `managed_by=terraform`.
 
 ## לא ב-Terraform
 

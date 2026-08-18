@@ -8,7 +8,7 @@ Architecture: [ADR-049](https://github.com/HomeCloudLab/homecloud-infra/blob/mai
 
 Use a dedicated IAM user with console role **developer** or **admin**, then an Access Key bound to that user. See [Access Keys](../getting-started/access-keys.md).
 
-Service Account keys can Create/Delete/Get queues and buckets when an IAM policy allows the matching action (`mq:CreateQueue`, `so:CreateBucket`, …). Other console routes still return `403 iam.management_sa_not_enabled`.
+Service Account keys can Create/Delete/Get queues, buckets, and secrets when an IAM policy allows the matching action (`mq:CreateQueue`, `so:CreateBucket`, `secrets:CreateSecret`, …). Other console routes still return `403 iam.management_sa_not_enabled`.
 
 ## Configure
 
@@ -43,7 +43,7 @@ cd terraform-provider-homecloud
 go build -o terraform-provider-homecloud
 ```
 
-## P1 resources
+## P1 / P1b resources
 
 ```hcl
 data "homecloud_account" "this" {}
@@ -55,15 +55,24 @@ resource "homecloud_mq_queue" "jobs" {
 resource "homecloud_so_bucket" "assets" {
   name = "assets"
 }
+
+resource "homecloud_secret" "db" {
+  name        = "database-url"
+  description = "Primary DB"
+  values = {
+    DATABASE_URL = var.database_url
+  }
+}
 ```
 
 | Resource | API |
 |----------|-----|
 | `homecloud_mq_queue` | `/api/v1/accounts/{id}/queues` |
 | `homecloud_so_bucket` | `/api/v1/accounts/{id}/storage/buckets` |
+| `homecloud_secret` | `/api/v1/accounts/{id}/secrets` |
 | `data.homecloud_account` | whoami + `GET /accounts/{id}` |
 
-State `id` is the control-plane `resources.id` UUID. `iam_arn` is the IAM-canonical ARN (`arn:homecloud:mq::…:queue/name`). The console stays fully writable — there is no `managed_by=terraform` lock.
+State `id` is the control-plane `resources.id` UUID. `iam_arn` is the IAM-canonical ARN (`arn:homecloud:mq::…:queue/name`). Secret `values` are write-only (Terraform 1.11+) and never stored in state. The console stays fully writable — there is no `managed_by=terraform` lock.
 
 ## Not in Terraform
 
