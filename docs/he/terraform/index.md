@@ -35,6 +35,11 @@ export HC_APEX=holab.abrdns.com
 # אופציונלי: HC_ACCOUNT_ID, HC_ENDPOINT
 ```
 
+ב-GitHub Actions אפשר בלי סוד ארוך-טווח: `HC_ROLE_ARN` ו-`permissions: id-token: write`.
+הספק קורא ל-`POST /api/v1/sts/assume-role-with-web-identity`. ה-trust חייב לצמצם
+`sub` ו-`aud`. סשן assumed-role עובד על תור/באקט/סוד כמו מפתח Service Account.
+ראו [דוגמת github-oidc](https://github.com/HomeCloudLab/terraform-provider-homecloud/tree/main/examples/github-oidc).
+
 בנייה מהמקור עד שיופיע ב-Terraform Registry. העתיקו `dev.tfrc.example` ל-`dev.tfrc`, הפנו אותו לתיקיית הריפו, והגדירו `TF_CLI_CONFIG_FILE`. **דלגו על `terraform init`** — overrides לא משתמשים ב-Registry.
 
 ```bash

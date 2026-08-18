@@ -35,6 +35,12 @@ export HC_APEX=holab.abrdns.com
 # optional: HC_ACCOUNT_ID, HC_ENDPOINT
 ```
 
+GitHub Actions can use OIDC instead of a long-lived secret: set `HC_ROLE_ARN` and
+`permissions: id-token: write`. The provider calls
+`POST /api/v1/sts/assume-role-with-web-identity`. Trust must pin GitHub `sub` and
+`aud`. Assumed-role sessions work on queue/bucket/secret like Service Account keys.
+See [github-oidc example](https://github.com/HomeCloudLab/terraform-provider-homecloud/tree/main/examples/github-oidc).
+
 Build from source until the Terraform Registry listing ships. Copy `dev.tfrc.example` to `dev.tfrc`, point it at the repo directory, and set `TF_CLI_CONFIG_FILE`. **Skip `terraform init`** — overrides do not use the Registry.
 
 ```bash
