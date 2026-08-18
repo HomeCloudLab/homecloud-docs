@@ -28,6 +28,7 @@ Step-by-step guides for every major HomeCloud service. Each page covers:
 | [SSL certificates](ssl.md) | SSL | See issued certificates |
 | [Billing](billing.md) | Billing | Usage, estimates, invoices, spend alerts |
 | [Monitoring](monitoring.md) | Monitoring | Metrics, logs, alerts |
+| [Tasks](tasks.md) | Tasks | Assign ops tasks, due dates, labels (`TASK-{n}`) |
 | [Account & team](account.md) | Account | Members, audit, projects, security |
 | [Terraform](../terraform/index.md) | IaC | Provision queues and buckets from CI |
 

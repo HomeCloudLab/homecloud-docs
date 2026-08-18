@@ -104,6 +104,7 @@ nav:
       - guides/ssl.md
       - guides/billing.md
       - guides/monitoring.md
+      - guides/tasks.md
       - guides/account.md
   - CLI:
       - cli/index.md
