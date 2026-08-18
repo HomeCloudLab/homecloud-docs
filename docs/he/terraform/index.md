@@ -122,6 +122,31 @@ resource "homecloud_redis_instance" "cache" {
 }
 ```
 
+## P4 Functions / IR / Domains
+
+פונקציה לפי spec בלבד (בלי קבצי IDE). Function URL הוא משאב אח. יצירת דומיין **לא** ממתינה לאימות DNS. תגיות IR לא ב-Terraform.
+
+```hcl
+resource "homecloud_function" "hello" {
+  name    = "hello"
+  handler = "main.handler"
+}
+
+resource "homecloud_function_url" "hello" {
+  function_name = homecloud_function.hello.name
+}
+
+resource "homecloud_ir_repository" "app" {
+  name = "frontend"
+}
+
+resource "homecloud_domain" "site" {
+  hostname = "app.example.com"
+}
+```
+
+מחיקת פונקציה דורשת owner/admin. יצירה/עדכון עובדים עם מפתח developer.
+
 | משאב | API |
 |------|-----|
 | `homecloud_mq_queue` | `/api/v1/accounts/{id}/queues` |
@@ -135,6 +160,10 @@ resource "homecloud_redis_instance" "cache" {
 | `homecloud_mdb_instance` | `/api/v1/accounts/{id}/databases` |
 | `homecloud_mdb_user` | `/databases/{instance}/users` |
 | `homecloud_redis_instance` | `/api/v1/accounts/{id}/caches` |
+| `homecloud_function` | `/api/v1/accounts/{id}/functions` |
+| `homecloud_function_url` | `.../functions/{name}/url` |
+| `homecloud_ir_repository` | `/api/v1/accounts/{id}/registry/repositories` |
+| `homecloud_domain` | `/api/v1/accounts/{id}/domains` |
 
 מזהה ה-state הוא UUID של `resources.id`. `iam_arn` הוא ה-ARN הקנוני של IAM. `values` של סוד הוא write-only (Terraform 1.11+) ולא נשמר ב-state. הקונסול נשאר ניתן לכתיבה — אין נעילת `managed_by=terraform`.
 

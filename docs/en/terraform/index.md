@@ -122,6 +122,31 @@ resource "homecloud_redis_instance" "cache" {
 }
 ```
 
+## P4 Functions / IR / Domains
+
+Spec-only function (no IDE files). Function URL is a sibling. Domain create does **not** wait for DNS verification. Image tags stay out of Terraform.
+
+```hcl
+resource "homecloud_function" "hello" {
+  name    = "hello"
+  handler = "main.handler"
+}
+
+resource "homecloud_function_url" "hello" {
+  function_name = homecloud_function.hello.name
+}
+
+resource "homecloud_ir_repository" "app" {
+  name = "frontend"
+}
+
+resource "homecloud_domain" "site" {
+  hostname = "app.example.com"
+}
+```
+
+Function **delete** needs owner/admin. Create/update works with a developer key.
+
 | Resource | API |
 |----------|-----|
 | `homecloud_mq_queue` | `/api/v1/accounts/{id}/queues` |
@@ -135,6 +160,10 @@ resource "homecloud_redis_instance" "cache" {
 | `homecloud_mdb_instance` | `/api/v1/accounts/{id}/databases` |
 | `homecloud_mdb_user` | `/databases/{instance}/users` |
 | `homecloud_redis_instance` | `/api/v1/accounts/{id}/caches` |
+| `homecloud_function` | `/api/v1/accounts/{id}/functions` |
+| `homecloud_function_url` | `.../functions/{name}/url` |
+| `homecloud_ir_repository` | `/api/v1/accounts/{id}/registry/repositories` |
+| `homecloud_domain` | `/api/v1/accounts/{id}/domains` |
 
 State `id` is the control-plane `resources.id` UUID. `iam_arn` is the IAM-canonical ARN (`arn:homecloud:mq::…:queue/name`). Secret `values` are write-only (Terraform 1.11+) and never stored in state. The console stays fully writable — there is no `managed_by=terraform` lock.
 
