@@ -8,7 +8,7 @@ Architecture: [ADR-049](https://github.com/HomeCloudLab/homecloud-infra/blob/mai
 
 Use a dedicated IAM user with console role **developer** or **admin**, then an Access Key bound to that user. See [Access Keys](../getting-started/access-keys.md).
 
-Service Account keys cannot mutate the management API yet (`403 iam.management_sa_not_enabled`).
+Service Account keys can Create/Delete/Get queues and buckets when an IAM policy allows the matching action (`mq:CreateQueue`, `so:CreateBucket`, …). Other console routes still return `403 iam.management_sa_not_enabled`.
 
 ## Configure
 

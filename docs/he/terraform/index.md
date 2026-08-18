@@ -8,7 +8,7 @@
 
 השתמשו במשתמש IAM ייעודי עם תפקיד קונסול **developer** או **admin**, ואז Access Key הקשור למשתמש הזה. ראו [Access Keys](../getting-started/access-keys.md).
 
-מפתחות Service Account עדיין לא יכולים לשנות את ה-management API (`403 iam.management_sa_not_enabled`).
+מפתחות Service Account יכולים ליצור/לקרוא/למחוק תורים ובאקטים כשמדיניות IAM מתירה את הפעולה (`mq:CreateQueue`, `so:CreateBucket`, …). נתיבי קונסול אחרים עדיין מחזירים `403 iam.management_sa_not_enabled`.
 
 ## הגדרה
 
