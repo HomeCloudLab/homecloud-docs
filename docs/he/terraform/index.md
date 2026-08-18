@@ -147,6 +147,29 @@ resource "homecloud_domain" "site" {
 
 מחיקת פונקציה דורשת owner/admin. יצירה/עדכון עובדים עם מפתח developer.
 
+## P5 Compute / SSH / Applications
+
+יצירת מכונה ממתינה ל-Operations API. יצירת אפליקציה נשארת **draft** (בלי provision/deploy). `private_key` של SSH הוא sensitive וחוזר רק ביצירה.
+
+```hcl
+resource "homecloud_ssh_key" "ci" {
+  name = "ci"
+}
+
+resource "homecloud_application" "api" {
+  name     = "api"
+  slug     = "api"
+  template = "api-only"
+}
+
+resource "homecloud_compute_machine" "web" {
+  name          = "web-1"
+  machine_class = "basic"
+  image_id      = "ubuntu-24.04"
+  ssh_key_ids   = [homecloud_ssh_key.ci.id]
+}
+```
+
 | משאב | API |
 |------|-----|
 | `homecloud_mq_queue` | `/api/v1/accounts/{id}/queues` |
@@ -164,6 +187,9 @@ resource "homecloud_domain" "site" {
 | `homecloud_function_url` | `.../functions/{name}/url` |
 | `homecloud_ir_repository` | `/api/v1/accounts/{id}/registry/repositories` |
 | `homecloud_domain` | `/api/v1/accounts/{id}/domains` |
+| `homecloud_compute_machine` | `/api/v1/accounts/{id}/compute/machines` |
+| `homecloud_ssh_key` | `/api/v1/accounts/{id}/compute/ssh-keys` |
+| `homecloud_application` | `/api/v1/accounts/{id}/applications` |
 
 מזהה ה-state הוא UUID של `resources.id`. `iam_arn` הוא ה-ARN הקנוני של IAM. `values` של סוד הוא write-only (Terraform 1.11+) ולא נשמר ב-state. הקונסול נשאר ניתן לכתיבה — אין נעילת `managed_by=terraform`.
 

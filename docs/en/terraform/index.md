@@ -147,6 +147,29 @@ resource "homecloud_domain" "site" {
 
 Function **delete** needs owner/admin. Create/update works with a developer key.
 
+## P5 Compute / SSH / Applications
+
+Machine create waits on the Operations API. Application create stays **draft** (no provision/deploy). SSH `private_key` is sensitive and only returned on create.
+
+```hcl
+resource "homecloud_ssh_key" "ci" {
+  name = "ci"
+}
+
+resource "homecloud_application" "api" {
+  name     = "api"
+  slug     = "api"
+  template = "api-only"
+}
+
+resource "homecloud_compute_machine" "web" {
+  name          = "web-1"
+  machine_class = "basic"
+  image_id      = "ubuntu-24.04"
+  ssh_key_ids   = [homecloud_ssh_key.ci.id]
+}
+```
+
 | Resource | API |
 |----------|-----|
 | `homecloud_mq_queue` | `/api/v1/accounts/{id}/queues` |
@@ -164,6 +187,9 @@ Function **delete** needs owner/admin. Create/update works with a developer key.
 | `homecloud_function_url` | `.../functions/{name}/url` |
 | `homecloud_ir_repository` | `/api/v1/accounts/{id}/registry/repositories` |
 | `homecloud_domain` | `/api/v1/accounts/{id}/domains` |
+| `homecloud_compute_machine` | `/api/v1/accounts/{id}/compute/machines` |
+| `homecloud_ssh_key` | `/api/v1/accounts/{id}/compute/ssh-keys` |
+| `homecloud_application` | `/api/v1/accounts/{id}/applications` |
 
 State `id` is the control-plane `resources.id` UUID. `iam_arn` is the IAM-canonical ARN (`arn:homecloud:mq::…:queue/name`). Secret `values` are write-only (Terraform 1.11+) and never stored in state. The console stays fully writable — there is no `managed_by=terraform` lock.
 
