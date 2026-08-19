@@ -116,4 +116,5 @@ SDKs של Node ו-Python מתפרסמים יחד על אותו תג `v*` כדי 
 
 - [סקירת SDK](index.md)  
 - [Python SDK](python.md)  
+- [SDK ל-Go](go.md)  
 - [מדריך Functions](../guides/functions.md)  

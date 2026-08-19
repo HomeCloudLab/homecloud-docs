@@ -184,5 +184,6 @@ except HomeCloudError as exc:
 
 - [סקירת SDK](index.md)  
 - [Node.js SDK](nodejs.md)  
+- [SDK ל-Go](go.md)  
 - [מדריך Object Storage](../guides/object-storage.md)  
 - [מדריך Queues](../guides/queues.md)  

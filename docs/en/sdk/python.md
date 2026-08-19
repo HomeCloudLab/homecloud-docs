@@ -185,5 +185,6 @@ Credentials file: `~/.homecloud/credentials` (JSON multi-profile).
 
 - [SDK overview](index.md)  
 - [Node.js SDK](nodejs.md)  
+- [Go SDK](go.md)  
 - [Object Storage guide](../guides/object-storage.md)  
 - [Queues guide](../guides/queues.md)  

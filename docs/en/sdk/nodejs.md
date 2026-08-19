@@ -116,4 +116,5 @@ Node and Python SDKs publish together on the same `v*` tag so versions stay alig
 
 - [SDK overview](index.md)  
 - [Python SDK](python.md)  
+- [Go SDK](go.md)  
 - [Functions guide](../guides/functions.md)  
