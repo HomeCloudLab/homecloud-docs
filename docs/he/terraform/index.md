@@ -9,12 +9,17 @@
 
 ## יצירת מפתח
 
-השתמשו במשתמש IAM ייעודי עם תפקיד קונסול **developer** או **admin**, ואז Access Key הקשור למשתמש הזה. ראו [Access Keys](../getting-started/access-keys.md). את הסוד שימו במשתני סביבה — לא בקבצי `.tf`.
+השתמשו במשתמש IAM ייעודי עם תפקיד קונסול **developer** או **admin**, ואז Access Key הקשור למשתמש הזה. ראו [Access Keys](../getting-started/access-keys.md). אל תשימו את הסוד בקבצי `.tf`.
+
+על הלפטופ: `homecloud configure` פעם אחת, ואז `terraform apply`. הספק קורא את אותו `%USERPROFILE%\.homecloud\credentials` כמו ה-CLI (`profile` / `HC_PROFILE` לחשבונות נוספים).
+
+ב-CI: `HC_ACCESS_KEY_ID` + `HC_SECRET_ACCESS_KEY`, **או** `HC_ROLE_ARN` (GitHub OIDC). אם `HC_ROLE_ARN` מוגדר, קובץ credentials שנשאר על ה-runner לא נקרא.
 
 | משתנה | משמעות |
 |--------|--------|
-| `HC_ACCESS_KEY_ID` | מזהה המפתח |
+| `HC_ACCESS_KEY_ID` | מזהה המפתח (גובר על קובץ ה-credentials) |
 | `HC_SECRET_ACCESS_KEY` | הסוד |
+| `HC_PROFILE` | פרופיל בקובץ ה-credentials |
 | `HC_APEX` | Apex של הפלטפורמה (ברירת מחדל `holab.abrdns.com`) |
 | `HC_ACCOUNT_ID` | UUID חשבון אופציונלי (ברירת מחדל: whoami) |
 | `HC_ENDPOINT` | כתובת console חלופית (בדיקות) |

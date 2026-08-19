@@ -9,12 +9,17 @@ Listed on the Terraform Registry as [`homecloudlab/homecloud`](https://registry.
 
 ## Create a key
 
-Use a dedicated IAM user with console role **developer** or **admin**, then an Access Key bound to that user. See [Access Keys](../getting-started/access-keys.md). Put the secret in the environment — never in `.tf` files.
+Use a dedicated IAM user with console role **developer** or **admin**, then an Access Key bound to that user. See [Access Keys](../getting-started/access-keys.md). Never put the secret in `.tf` files.
+
+Local laptop: `homecloud configure` once, then `terraform apply`. The provider reads the same `%USERPROFILE%\.homecloud\credentials` file as the CLI (`profile` / `HC_PROFILE` for other accounts).
+
+CI: set `HC_ACCESS_KEY_ID` + `HC_SECRET_ACCESS_KEY`, **or** `HC_ROLE_ARN` (GitHub OIDC). If `HC_ROLE_ARN` is set, a leftover credentials file on the runner is ignored.
 
 | Variable | Meaning |
 |----------|---------|
-| `HC_ACCESS_KEY_ID` | Access Key ID |
+| `HC_ACCESS_KEY_ID` | Access Key ID (overrides the credentials file) |
 | `HC_SECRET_ACCESS_KEY` | Secret |
+| `HC_PROFILE` | Named profile in the credentials file |
 | `HC_APEX` | Platform apex (default `holab.abrdns.com`) |
 | `HC_ACCOUNT_ID` | Optional account UUID (default: whoami) |
 | `HC_ENDPOINT` | Optional console URL override (tests) |
