@@ -15,7 +15,7 @@ Tasks is a lightweight operational tracker for the account (Hebrew UI name: **מ
 ### Create
 
 1. Open **Tasks** → **Task**.  
-2. Enter title, body, type, optional assignee, optional due date, and labels (pick existing or type a new name).  
+2. Enter title, body, type, optional assignee, optional due date, and labels (pick existing or type a new name). Details are Markdown: leave the field to preview; the box stays a fixed height and scrolls.  
 3. From a Compute, MDB, or Domain detail page, **Task** prefills the resource.
 
 ### Tabs
