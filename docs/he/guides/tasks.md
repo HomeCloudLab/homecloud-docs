@@ -65,12 +65,26 @@
 #so/my-bucket/images
 #so/my-bucket/images/logo.png
 #compute/server-01
+#mq/events
+#mdb/prod-pg
+#redis/cache-1
+#fn/resize
+#ir/api
+#dns/example.com
+#secrets/db-password
+#iam/developers
+#tasks/12
+#k8s/default
+#apps/web
+#ssl/console-cert
+#mon/cpu
+#billing
 ```
 
-- `#` — שירות (`mail`, `so`, `compute` וכינויים אחרים)
-- `/` — משאב (תיבה, באקט, מכונה), ואז נתיב (תיקיית דואר, קידומת SO או קובץ)
+- `#` — כינוי שירות (`mail`, `so`, `compute`, `mq`, `mdb`, `redis`, `fn`, `ir`, `dns`, `secrets`, `iam`, `tasks`, `k8s`, `apps`, `ssl`, `mon`, `billing`)
+- `/` — משאב מהרשימה של השירות. ל-Mail גם תיקיות; ל-SO גם קידומות וקבצים.
 
-השלמה אוטומטית לפי השלבים האלה. טוקן לא תקין נשאר טקסט רגיל. מתאמים ראשונים: Mail, SO, Compute. כינויים אחרים מפנים את `#service` לדף הבית של השירות עד שיהיה מתאם.
+השלמה אוטומטית לפי השלבים האלה. טוקן לא תקין נשאר טקסט רגיל. ל-`#billing` אין רשימת משאבים. IAM/SSL/Monitoring נפתחים בדף השירות כשאין דף פריט נפרד.
 
 ## הרשאות
 

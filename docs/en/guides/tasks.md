@@ -65,12 +65,26 @@ Stored text stays plain. `#` starts a service token until whitespace or end of l
 #so/my-bucket/images
 #so/my-bucket/images/logo.png
 #compute/server-01
+#mq/events
+#mdb/prod-pg
+#redis/cache-1
+#fn/resize
+#ir/api
+#dns/example.com
+#secrets/db-password
+#iam/developers
+#tasks/12
+#k8s/default
+#apps/web
+#ssl/console-cert
+#mon/cpu
+#billing
 ```
 
-- `#` — service (`mail`, `so`, `compute`, and other console aliases)
-- `/` — resource (mailbox, bucket, machine), then path (mail folder, SO prefix or object)
+- `#` — service alias (`mail`, `so`, `compute`, `mq`, `mdb`, `redis`, `fn`, `ir`, `dns`, `secrets`, `iam`, `tasks`, `k8s`, `apps`, `ssl`, `mon`, `billing`)
+- `/` — resource from that service’s list (mailbox, bucket, machine, queue, …). Mail also has folders; SO also has prefixes and objects.
 
-Autocomplete follows those stages. Invalid or unknown tokens stay as plain text. First adapters: Mail, SO, Compute. Other aliases resolve `#service` to the console home until an adapter exists.
+Autocomplete follows those stages. Invalid or unknown tokens stay as plain text. `#billing` has no resource list (billing home only). IAM/SSL/Monitoring resources open the service page when there is no dedicated detail route.
 
 ## Permissions
 
