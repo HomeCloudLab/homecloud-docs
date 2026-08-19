@@ -37,6 +37,8 @@ Pick existing labels or type a new name when creating or editing an item. There 
 
 The person who made the change is **never** emailed. One save sends at most one email per recipient. Watchers are not emailed for status or comments.
 
+System copy (status names such as Open / In progress / Done, the change summary, and chrome) follows the **recipient's** console language. Item title, details, comments, and usernames stay as written.
+
 | Change | Who gets mail |
 |--------|----------------|
 | Created (with assignee) | Assignee |
