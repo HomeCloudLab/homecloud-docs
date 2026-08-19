@@ -53,7 +53,7 @@ System copy (status names such as Open / In progress / Done, the change summary,
 | Watcher added | The added user |
 | Watcher removed | Nobody |
 
-Cosmetic edits (title, details, type, priority, project, resource links) send no mail and do not appear in the discussion. Label add/remove still shows in the thread, without mail. Watcher added still emails that user, but is not listed in the discussion.
+Cosmetic edits (title, details, type, labels, priority, project, resource links) send no mail and do not appear in the discussion. Watcher added still emails that user, but is not listed in the discussion.
 
 Due-soon mail is sent once when an item is due within 24 hours and is not already done/cancelled.
 
