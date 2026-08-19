@@ -125,6 +125,7 @@ nav:
       - sdk/python.md
       - sdk/nodejs.md
       - sdk/go.md
+      - sdk/java.md
   - Terraform:
       - terraform/index.md
 

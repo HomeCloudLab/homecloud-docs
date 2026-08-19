@@ -7,8 +7,9 @@ Use the HomeCloud SDK from your applications, workers, and CI jobs. Unlike the c
 | **Python** | `homecloud-sdk` (`import homecloud`) | [Python SDK](python.md) |
 | **Node.js** | `@homecloud-platform/sdk` | [Node.js SDK](nodejs.md) |
 | **Go** | `github.com/HomeCloudLab/homecloud-sdk/go` | [Go SDK](go.md) |
+| **Java** | `com.homecloudlab:homecloud-sdk` | [Java SDK](java.md) |
 
-All three languages target the same HomeCloud capabilities. Prefer the language your service already uses.
+All four languages target the same HomeCloud capabilities. Prefer the language your service already uses.
 
 ## Auth model
 
@@ -59,9 +60,16 @@ Create keys in the console: [Access Keys](../getting-started/access-keys.md).
     _, _ = client.SO.PutJSON(ctx, "docs", "a.json", map[string]any{"ok": true})
     ```
 
+=== "Java"
+
+    ```java
+    HomeCloud client = HomeCloud.fromEnv();
+    client.so().putJson("docs", "a.json", Map.of("ok", true));
+    ```
+
 ## Next
 
 1. Create an [Access Key](../getting-started/access-keys.md)  
-2. Follow [Python](python.md), [Node.js](nodejs.md), or [Go](go.md)  
+2. Follow [Python](python.md), [Node.js](nodejs.md), [Go](go.md), or [Java](java.md)  
 3. For shell scripts, you may prefer the [CLI](../cli/index.md) instead  
 4. To provision account resources from CI, use [Terraform](../terraform/index.md) (not the SDK)  

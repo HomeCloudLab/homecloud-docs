@@ -7,8 +7,9 @@
 | **Python** | `homecloud-sdk` (`import homecloud`) | [Python SDK](python.md) |
 | **Node.js** | `@homecloud-platform/sdk` | [Node.js SDK](nodejs.md) |
 | **Go** | `github.com/HomeCloudLab/homecloud-sdk/go` | [SDK ל-Go](go.md) |
+| **Java** | `com.homecloudlab:homecloud-sdk` | [SDK ל-Java](java.md) |
 
-שלוש השפות מכוונות לאותן יכולות HomeCloud. העדיפו את השפה שהשירות שלכם כבר משתמש בה.
+ארבע השפות מכוונות לאותן יכולות HomeCloud. העדיפו את השפה שהשירות שלכם כבר משתמש בה.
 
 ## מודל Auth
 
@@ -59,9 +60,16 @@
     _, _ = client.SO.PutJSON(ctx, "docs", "a.json", map[string]any{"ok": true})
     ```
 
+=== "Java"
+
+    ```java
+    HomeCloud client = HomeCloud.fromEnv();
+    client.so().putJson("docs", "a.json", Map.of("ok", true));
+    ```
+
 ## הבא
 
 1. צרו [Access Key](../getting-started/access-keys.md)  
-2. עקבו אחרי [Python](python.md), [Node.js](nodejs.md) או [Go](go.md)  
+2. עקבו אחרי [Python](python.md), [Node.js](nodejs.md), [Go](go.md) או [Java](java.md)  
 3. לסקריפטי shell, ייתכן שתעדיפו את ה-[CLI](../cli/index.md) במקום  
 4. לפרוויז'ן משאבי חשבון מ-CI השתמשו ב-[Terraform](../terraform/index.md) (לא ב-SDK)  

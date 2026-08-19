@@ -109,5 +109,6 @@ Optional: `homecloud.WithRequestTimeout(30 * time.Second)` — used only when th
 - [SDK overview](index.md)  
 - [Python SDK](python.md)  
 - [Node.js SDK](nodejs.md)  
+- [Java SDK](java.md)  
 - [Object Storage guide](../guides/object-storage.md)  
 - [Queues guide](../guides/queues.md)
