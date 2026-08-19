@@ -5,7 +5,7 @@
 ארכיטקטורה: [ADR-049](https://github.com/HomeCloudLab/homecloud-infra/blob/main/docs/adr/adr-049-terraform-provider.md).  
 ריפו הספק: [`terraform-provider-homecloud`](https://github.com/HomeCloudLab/terraform-provider-homecloud) (השאירו את הקידומת `terraform-provider-*` — HashiCorp Registry דורש אותה).
 
-רשום ב-Terraform Registry כ-[`homecloudlab/homecloud`](https://registry.terraform.io/providers/homecloudlab/homecloud/latest) (**v0.1.0**). הריצו `terraform init` — בלי בנייה מקומית ובלי `dev.tfrc` לשימוש רגיל. ספקי קהילה מופיעים כ-**self-signed**; מזהה המפתח `4B8BCFED1A615BA9` הוא מפתח ה-GPG שלנו. זה צפוי.
+רשום ב-Terraform Registry כ-[`homecloudlab/homecloud`](https://registry.terraform.io/providers/homecloudlab/homecloud/latest) (**v0.1.1**). הריצו `terraform init` — בלי בנייה מקומית ובלי `dev.tfrc` לשימוש רגיל. workspace שנעל כבר ל-v0.1.0: `terraform init -upgrade` (נדרש בשביל `homecloud configure` / `~/.homecloud/credentials`). ספקי קהילה מופיעים כ-**self-signed**; מזהה המפתח `4B8BCFED1A615BA9` הוא מפתח ה-GPG שלנו. זה צפוי.
 
 ## יצירת מפתח
 
@@ -101,6 +101,7 @@ terraform {
 
 ```bash
 terraform init
+# קובץ lock קיים: terraform init -upgrade
 ```
 
 לעבוד על הספק עצמו: העתיקו `dev.tfrc.example` ל-`dev.tfrc`, הגדירו `TF_CLI_CONFIG_FILE`, ו**דלגו על `terraform init`** (overrides מתעלמים מה-Registry). אז `terraform apply` מזהיר ש-overrides פעילים.

@@ -5,7 +5,7 @@ Provision HomeCloud **account resources** from Terraform or OpenTofu: queues, bu
 Architecture: [ADR-049](https://github.com/HomeCloudLab/homecloud-infra/blob/main/docs/adr/adr-049-terraform-provider.md).  
 Provider repo: [`terraform-provider-homecloud`](https://github.com/HomeCloudLab/terraform-provider-homecloud) (keep the `terraform-provider-*` name — HashiCorp Registry requires that prefix).
 
-Listed on the Terraform Registry as [`homecloudlab/homecloud`](https://registry.terraform.io/providers/homecloudlab/homecloud/latest) (**v0.1.0**). Run `terraform init` — no local build and no `dev.tfrc` for normal use. Community providers show as **self-signed**; the key ID `4B8BCFED1A615BA9` is our GPG key. That is expected.
+Listed on the Terraform Registry as [`homecloudlab/homecloud`](https://registry.terraform.io/providers/homecloudlab/homecloud/latest) (**v0.1.1**). Run `terraform init` — no local build and no `dev.tfrc` for normal use. Workspaces already locked to v0.1.0: `terraform init -upgrade` (needed for `homecloud configure` / `~/.homecloud/credentials`). Community providers show as **self-signed**; the key ID `4B8BCFED1A615BA9` is our GPG key. That is expected.
 
 ## Create a key
 
@@ -101,6 +101,7 @@ terraform {
 
 ```bash
 terraform init
+# existing .terraform.lock.hcl: terraform init -upgrade
 ```
 
 Hack on the provider itself: copy `dev.tfrc.example` to `dev.tfrc`, set `TF_CLI_CONFIG_FILE`, and **skip `terraform init`** (overrides ignore the Registry). `terraform apply` then warns that development overrides are in effect.
