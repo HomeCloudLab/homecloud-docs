@@ -27,7 +27,7 @@ Tasks is a lightweight operational tracker for the account (Hebrew UI name: **מ
 
 ### Item page
 
-Open `TASK-12` to edit title and body, change status/assignee/due date, set labels, and continue the discussion. `@username` mentions notify that account member by email. Type `#` in title, details, or discussion to insert a console reference (`#mail\noreply@example.com/inbox`).
+Open `TASK-12` to edit title and body, change status/assignee/due date, set labels, and continue the discussion. Type `@username` to mention someone in the thread (discussion messages do not send email). Type `#` in title, details, or discussion to insert a console reference (`#mail/noreply@example.com/inbox`).
 
 ### Labels
 
@@ -46,7 +46,7 @@ The person who made the change is **never** emailed. One save sends at most one 
 | Status → `done` or `cancelled` | Creator |
 | Status → `blocked` | Creator and assignee |
 | Other status (open ↔ in progress, waiting, …) | Nobody |
-| Comment | `@username` mentions, plus the assignee if they did not write it |
+| Comment / discussion | Nobody |
 | Due date / due soon | Assignee, otherwise creator |
 | Watcher added | The added user |
 | Watcher removed | Nobody |
@@ -61,14 +61,14 @@ Stored text stays plain. `#` starts a service token until whitespace or end of l
 
 ```text
 #mail
-#mail\noreply@holab.abrdns.com/inbox
-#so\my-bucket/images
-#compute\server-01
+#mail/noreply@holab.abrdns.com/inbox
+#so/my-bucket/images
+#so/my-bucket/images/logo.png
+#compute/server-01
 ```
 
 - `#` — service (`mail`, `so`, `compute`, and other console aliases)
-- `\` — resource (mailbox, bucket, machine)
-- `/` — path (mail folder, SO prefix)
+- `/` — resource (mailbox, bucket, machine), then path (mail folder, SO prefix or object)
 
 Autocomplete follows those stages. Invalid or unknown tokens stay as plain text. First adapters: Mail, SO, Compute. Other aliases resolve `#service` to the console home until an adapter exists.
 
