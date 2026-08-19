@@ -23,9 +23,9 @@ Tasks is a lightweight operational tracker for the account (Hebrew UI name: **מ
 - **All** — every open and completed item in the account.  
 - **Mine** — assigned to you.  
 - **Watching** — items you follow.  
-- **Done** — completed items.
+- **Done** — completed items, as the same table (status can still be changed from the dropdown or **⋯**). There is no board on this tab, because other statuses never appear here.
 
-Every tab uses the same workspace as **All**: Kanban columns Open / In progress / Waiting/Blocked / Done (drag cards to change status), or one table. Right-click a card for open, copy link, status, watch, assign to me, and delete. Use the grid/list icon to switch layout; each table row has the same actions under **⋯**. Tabs only change which items appear.
+**All**, **Mine**, and **Watching** share one workspace: Kanban columns Open / In progress / Waiting/Blocked / Done (drag cards to change status), or one table. Right-click a card for open, copy link, status, watch, assign to me, and delete. Use the grid/list icon to switch layout; each table row has the same actions under **⋯**. Tabs only change which items appear.
 
 ### Item page
 
