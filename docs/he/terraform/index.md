@@ -5,7 +5,7 @@
 ארכיטקטורה: [ADR-049](https://github.com/HomeCloudLab/homecloud-infra/blob/main/docs/adr/adr-049-terraform-provider.md).  
 ריפו הספק: [`terraform-provider-homecloud`](https://github.com/HomeCloudLab/terraform-provider-homecloud) (השאירו את הקידומת `terraform-provider-*` — HashiCorp Registry דורש אותה).
 
-GitHub Release חתום **v0.1.0** כבר קיים. הספק **עדיין לא** ב-`registry.terraform.io` עד שמישהו עם גישה לארגון HomeCloudLab לוחץ **Publish** באתר HashiCorp. עד אז בנו מקוד מקור ודלגו על `terraform init`.
+רשום ב-Terraform Registry כ-[`homecloudlab/homecloud`](https://registry.terraform.io/providers/homecloudlab/homecloud/latest) (**v0.1.0**). הריצו `terraform init` — בלי בנייה מקומית ובלי `dev.tfrc` לשימוש רגיל. ספקי קהילה מופיעים כ-**self-signed**; מזהה המפתח `4B8BCFED1A615BA9` הוא מפתח ה-GPG שלנו. זה צפוי.
 
 ## יצירת מפתח
 
@@ -81,17 +81,24 @@ provider "homecloud" {
 
 OpenTofu עובד אותו דבר (`tofu apply`).
 
-## התקנה (מקומית, עד ה-Registry)
+## התקנה
 
-העתיקו `dev.tfrc.example` ל-`dev.tfrc`, הפנו אותו לתיקיית הריפו, והגדירו `TF_CLI_CONFIG_FILE`. **דלגו על `terraform init`** — overrides לא משתמשים ב-Registry (`init` יחזיר 404). `terraform apply` מזהיר ש-overrides פעילים. זה צפוי.
-
-```bash
-git clone https://github.com/HomeCloudLab/terraform-provider-homecloud
-cd terraform-provider-homecloud
-go build -o terraform-provider-homecloud
+```hcl
+terraform {
+  required_providers {
+    homecloud = {
+      source  = "homecloudlab/homecloud"
+      version = "~> 0.1"
+    }
+  }
+}
 ```
 
-ב-Windows הבינארי הוא `terraform-provider-homecloud.exe`. CI בריפו הספק (`go test` / `go build` ב-push ל-`main`) כבר רץ; תגיות `v*` חתומות יוצאות עם GoReleaser.
+```bash
+terraform init
+```
+
+לעבוד על הספק עצמו: העתיקו `dev.tfrc.example` ל-`dev.tfrc`, הגדירו `TF_CLI_CONFIG_FILE`, ו**דלגו על `terraform init`** (overrides מתעלמים מה-Registry). אז `terraform apply` מזהיר ש-overrides פעילים.
 
 ## משאבי P1 / P1b
 
@@ -259,7 +266,7 @@ resource "homecloud_compute_machine" "web" {
 
 ## רישום ב-Registry
 
-תיעוד, `terraform-registry-manifest.json`, GoReleaser ו-GitHub Actions (CI + שחרורים חתומים ל-`v*`) נמצאים בריפו הספק. **v0.1.0** כבר GitHub Release חתום ב-GPG (מפתח ציבורי [`docs/signing-key.asc`](https://github.com/HomeCloudLab/terraform-provider-homecloud/blob/main/docs/signing-key.asc)). רישום חי ב-`registry.terraform.io` עדיין דורש לחיצת **Publish** ב-HashiCorp ל-namespace `homecloudlab`. ראו [`PUBLISHING.md`](https://github.com/HomeCloudLab/terraform-provider-homecloud/blob/main/PUBLISHING.md).
+חי: [`registry.terraform.io/providers/homecloudlab/homecloud`](https://registry.terraform.io/providers/homecloudlab/homecloud/latest). תגיות `v*` חדשות נחתמות במפתח ב-[`docs/signing-key.asc`](https://github.com/HomeCloudLab/terraform-provider-homecloud/blob/main/docs/signing-key.asc). הערות למפרסם: [`PUBLISHING.md`](https://github.com/HomeCloudLab/terraform-provider-homecloud/blob/main/PUBLISHING.md).
 
 הקונסול **לא** מציע copy-HCL או לשוניות curl ל-Queue API. Terraform חי כאן ובריפו הספק.
 

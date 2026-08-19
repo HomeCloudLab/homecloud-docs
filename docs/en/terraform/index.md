@@ -5,7 +5,7 @@ Provision HomeCloud **account resources** from Terraform or OpenTofu: queues, bu
 Architecture: [ADR-049](https://github.com/HomeCloudLab/homecloud-infra/blob/main/docs/adr/adr-049-terraform-provider.md).  
 Provider repo: [`terraform-provider-homecloud`](https://github.com/HomeCloudLab/terraform-provider-homecloud) (keep the `terraform-provider-*` name — HashiCorp Registry requires that prefix).
 
-Signed GitHub Release **v0.1.0** already exists. The provider is **not** on `registry.terraform.io` until someone with HomeCloudLab org access clicks **Publish** on HashiCorp’s site. Until then, build from source and skip `terraform init`.
+Listed on the Terraform Registry as [`homecloudlab/homecloud`](https://registry.terraform.io/providers/homecloudlab/homecloud/latest) (**v0.1.0**). Run `terraform init` — no local build and no `dev.tfrc` for normal use. Community providers show as **self-signed**; the key ID `4B8BCFED1A615BA9` is our GPG key. That is expected.
 
 ## Create a key
 
@@ -81,17 +81,24 @@ provider "homecloud" {
 
 OpenTofu works the same (`tofu apply`).
 
-## Install (local, until Registry)
+## Install
 
-Copy `dev.tfrc.example` to `dev.tfrc`, point it at the repo directory, and set `TF_CLI_CONFIG_FILE`. **Skip `terraform init`** — overrides do not use the Registry (`init` will 404). `terraform apply` warns that development overrides are in effect. That is expected.
-
-```bash
-git clone https://github.com/HomeCloudLab/terraform-provider-homecloud
-cd terraform-provider-homecloud
-go build -o terraform-provider-homecloud
+```hcl
+terraform {
+  required_providers {
+    homecloud = {
+      source  = "homecloudlab/homecloud"
+      version = "~> 0.1"
+    }
+  }
+}
 ```
 
-On Windows the binary is `terraform-provider-homecloud.exe`. CI on the provider repo (`go test` / `go build` on push to `main`) is already running; signed tags `v*` use GoReleaser.
+```bash
+terraform init
+```
+
+Hack on the provider itself: copy `dev.tfrc.example` to `dev.tfrc`, set `TF_CLI_CONFIG_FILE`, and **skip `terraform init`** (overrides ignore the Registry). `terraform apply` then warns that development overrides are in effect.
 
 ## P1 / P1b resources
 
@@ -259,7 +266,7 @@ State `id` is the control-plane `resources.id` UUID. `iam_arn` is the IAM-canoni
 
 ## Registry listing
 
-Docs, `terraform-registry-manifest.json`, GoReleaser, and GitHub Actions (CI + signed `v*` releases) live in the provider repo. **v0.1.0** is already a GPG-signed GitHub Release (public key [`docs/signing-key.asc`](https://github.com/HomeCloudLab/terraform-provider-homecloud/blob/main/docs/signing-key.asc)). A live listing on `registry.terraform.io` still needs a HashiCorp **Publish** click for namespace `homecloudlab`. See [`PUBLISHING.md`](https://github.com/HomeCloudLab/terraform-provider-homecloud/blob/main/PUBLISHING.md).
+Live: [`registry.terraform.io/providers/homecloudlab/homecloud`](https://registry.terraform.io/providers/homecloudlab/homecloud/latest). New `v*` tags are signed with the GPG key in [`docs/signing-key.asc`](https://github.com/HomeCloudLab/terraform-provider-homecloud/blob/main/docs/signing-key.asc). Publisher notes: [`PUBLISHING.md`](https://github.com/HomeCloudLab/terraform-provider-homecloud/blob/main/PUBLISHING.md).
 
 The console does **not** offer copy-HCL or Queue API curl tabs. Terraform lives here and in the provider repo.
 
