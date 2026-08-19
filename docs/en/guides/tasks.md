@@ -27,7 +27,7 @@ Tasks is a lightweight operational tracker for the account (Hebrew UI name: **מ
 
 ### Item page
 
-Open `TASK-12` to edit title and body, change status/assignee/due date, set labels, and continue the discussion. Type `@username` to mention someone in the thread (discussion messages do not send email). Type `#` in title, details, or discussion to insert a console reference (`#mail/noreply@example.com/inbox`).
+Open `TASK-12` to edit title and body, change status/assignee/due date, set labels, and continue the discussion. Consecutive comments from the same person on the same day (with no system line or other speaker in between) group as a cluster; the avatar and bubble tail sit on the last message. Type `@username` to mention someone in the thread (discussion messages do not send email). Type `#` in title, details, or discussion to insert a console reference (`#mail/noreply@example.com/inbox`).
 
 ### Labels
 
