@@ -5,16 +5,21 @@ Provision HomeCloud **account resources** from Terraform or OpenTofu: queues, bu
 Architecture: [ADR-049](https://github.com/HomeCloudLab/homecloud-infra/blob/main/docs/adr/adr-049-terraform-provider.md).  
 Provider repo: [`terraform-provider-homecloud`](https://github.com/HomeCloudLab/terraform-provider-homecloud) (keep the `terraform-provider-*` name — HashiCorp Registry requires that prefix).
 
-Listed on the Terraform Registry as [`homecloudlab/homecloud`](https://registry.terraform.io/providers/homecloudlab/homecloud/latest) (**v0.1.0**). Run `terraform init` — no local build and no `dev.tfrc` for normal use. Community providers show as **self-signed**; the key ID `4B8BCFED1A615BA9` is our GPG key. That is expected.
+Listed on the Terraform Registry as [`homecloudlab/homecloud`](https://registry.terraform.io/providers/homecloudlab/homecloud/latest) (**v0.1.1**). Run `terraform init` — no local build and no `dev.tfrc` for normal use. Workspaces already locked to v0.1.0: `terraform init -upgrade` (needed for `homecloud configure` / `~/.homecloud/credentials`). Community providers show as **self-signed**; the key ID `4B8BCFED1A615BA9` is our GPG key. That is expected.
 
 ## Create a key
 
-Use a dedicated IAM user with console role **developer** or **admin**, then an Access Key bound to that user. See [Access Keys](../getting-started/access-keys.md). Put the secret in the environment — never in `.tf` files.
+Use a dedicated IAM user with console role **developer** or **admin**, then an Access Key bound to that user. See [Access Keys](../getting-started/access-keys.md). Never put the secret in `.tf` files.
+
+Local laptop: `homecloud configure` once, then `terraform apply`. The provider reads the same `%USERPROFILE%\.homecloud\credentials` file as the CLI (`profile` / `HC_PROFILE` for other accounts).
+
+CI: set `HC_ACCESS_KEY_ID` + `HC_SECRET_ACCESS_KEY`, **or** `HC_ROLE_ARN` (GitHub OIDC). If `HC_ROLE_ARN` is set, a leftover credentials file on the runner is ignored.
 
 | Variable | Meaning |
 |----------|---------|
-| `HC_ACCESS_KEY_ID` | Access Key ID |
+| `HC_ACCESS_KEY_ID` | Access Key ID (overrides the credentials file) |
 | `HC_SECRET_ACCESS_KEY` | Secret |
+| `HC_PROFILE` | Named profile in the credentials file |
 | `HC_APEX` | Platform apex (default `holab.abrdns.com`) |
 | `HC_ACCOUNT_ID` | Optional account UUID (default: whoami) |
 | `HC_ENDPOINT` | Optional console URL override (tests) |
@@ -96,6 +101,7 @@ terraform {
 
 ```bash
 terraform init
+# existing .terraform.lock.hcl: terraform init -upgrade
 ```
 
 Hack on the provider itself: copy `dev.tfrc.example` to `dev.tfrc`, set `TF_CLI_CONFIG_FILE`, and **skip `terraform init`** (overrides ignore the Registry). `terraform apply` then warns that development overrides are in effect.

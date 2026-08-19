@@ -5,16 +5,21 @@
 ארכיטקטורה: [ADR-049](https://github.com/HomeCloudLab/homecloud-infra/blob/main/docs/adr/adr-049-terraform-provider.md).  
 ריפו הספק: [`terraform-provider-homecloud`](https://github.com/HomeCloudLab/terraform-provider-homecloud) (השאירו את הקידומת `terraform-provider-*` — HashiCorp Registry דורש אותה).
 
-רשום ב-Terraform Registry כ-[`homecloudlab/homecloud`](https://registry.terraform.io/providers/homecloudlab/homecloud/latest) (**v0.1.0**). הריצו `terraform init` — בלי בנייה מקומית ובלי `dev.tfrc` לשימוש רגיל. ספקי קהילה מופיעים כ-**self-signed**; מזהה המפתח `4B8BCFED1A615BA9` הוא מפתח ה-GPG שלנו. זה צפוי.
+רשום ב-Terraform Registry כ-[`homecloudlab/homecloud`](https://registry.terraform.io/providers/homecloudlab/homecloud/latest) (**v0.1.1**). הריצו `terraform init` — בלי בנייה מקומית ובלי `dev.tfrc` לשימוש רגיל. workspace שנעל כבר ל-v0.1.0: `terraform init -upgrade` (נדרש בשביל `homecloud configure` / `~/.homecloud/credentials`). ספקי קהילה מופיעים כ-**self-signed**; מזהה המפתח `4B8BCFED1A615BA9` הוא מפתח ה-GPG שלנו. זה צפוי.
 
 ## יצירת מפתח
 
-השתמשו במשתמש IAM ייעודי עם תפקיד קונסול **developer** או **admin**, ואז Access Key הקשור למשתמש הזה. ראו [Access Keys](../getting-started/access-keys.md). את הסוד שימו במשתני סביבה — לא בקבצי `.tf`.
+השתמשו במשתמש IAM ייעודי עם תפקיד קונסול **developer** או **admin**, ואז Access Key הקשור למשתמש הזה. ראו [Access Keys](../getting-started/access-keys.md). אל תשימו את הסוד בקבצי `.tf`.
+
+על הלפטופ: `homecloud configure` פעם אחת, ואז `terraform apply`. הספק קורא את אותו `%USERPROFILE%\.homecloud\credentials` כמו ה-CLI (`profile` / `HC_PROFILE` לחשבונות נוספים).
+
+ב-CI: `HC_ACCESS_KEY_ID` + `HC_SECRET_ACCESS_KEY`, **או** `HC_ROLE_ARN` (GitHub OIDC). אם `HC_ROLE_ARN` מוגדר, קובץ credentials שנשאר על ה-runner לא נקרא.
 
 | משתנה | משמעות |
 |--------|--------|
-| `HC_ACCESS_KEY_ID` | מזהה המפתח |
+| `HC_ACCESS_KEY_ID` | מזהה המפתח (גובר על קובץ ה-credentials) |
 | `HC_SECRET_ACCESS_KEY` | הסוד |
+| `HC_PROFILE` | פרופיל בקובץ ה-credentials |
 | `HC_APEX` | Apex של הפלטפורמה (ברירת מחדל `holab.abrdns.com`) |
 | `HC_ACCOUNT_ID` | UUID חשבון אופציונלי (ברירת מחדל: whoami) |
 | `HC_ENDPOINT` | כתובת console חלופית (בדיקות) |
@@ -96,6 +101,7 @@ terraform {
 
 ```bash
 terraform init
+# קובץ lock קיים: terraform init -upgrade
 ```
 
 לעבוד על הספק עצמו: העתיקו `dev.tfrc.example` ל-`dev.tfrc`, הגדירו `TF_CLI_CONFIG_FILE`, ו**דלגו על `terraform init`** (overrides מתעלמים מה-Registry). אז `terraform apply` מזהיר ש-overrides פעילים.
