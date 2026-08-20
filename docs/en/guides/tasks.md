@@ -23,15 +23,40 @@ Tasks is a lightweight operational tracker for the account (Hebrew UI name: **מ
 - **All** — every open and completed item in the account.  
 - **Mine** — assigned to you.  
 - **Watching** — items you follow.  
-- **Done** — completed items, as the same table (status can still be changed from the dropdown or **⋯**). There is no board on this tab, because other statuses never appear here.
+- **Done** — completed items, as the same table (status can still be changed from the dropdown or **⋯**). There is no board on this tab, because other statuses never appear here.  
+- **Archive** — items filed away after they finished. Table only, read-only, and the only tab that shows them. See [Archive](#archive).
 
-**All**, **Mine**, and **Watching** share one workspace: Kanban columns Open / In progress / Waiting/Blocked / Done (drag cards to change status), or one table. Right-click a card for open, copy link, status, watch, assign to me, and delete. Use the grid/list icon to switch layout; each table row has the same actions under **⋯**. Tabs only change which items appear.
+**All**, **Mine**, and **Watching** share one workspace: Kanban columns Open / In progress / Waiting/Blocked / Done (drag cards to change status), or one table. Right-click a card for open, copy link, status, watch, assign to me, archive, and delete. Use the grid/list icon to switch layout; each table row has the same actions under **⋯**. Tabs only change which items appear.
 
 Status is limited to the people who own the item — see [Who can change status](#who-can-change-status). Cards you may not move do not drag, and their status dropdown is disabled with a tooltip.
 
 ### Item page
 
 Open `TASK-12` to edit title and body, change status/assignee/due date, set labels, and continue the discussion. Details are Markdown: **Edit** shows the source (`#` headings, lists, tables); after save they render as formatted text, including `#so/…` console links, `https://` URLs, emails, and phone numbers. The title preview uses the same links. On a phone the discussion panel has a fixed height range so the thread stays readable; on a wide screen it sits beside the form. Consecutive comments from the same person on the same day (with no system line or other speaker in between) group as a cluster; the avatar and bubble tail sit on the last message. Type `@username` to mention someone in the thread (discussion messages do not send email). Type `#` in title, details, or discussion to insert a console reference (`#mail/noreply@example.com/inbox`).
+
+### Archive
+
+The archive is where finished work goes so the active lists stay short. It is not delete: the key, the details and the whole discussion survive, and an owner or admin can pull the item back.
+
+Only **Done** and **Cancelled** items can be archived. That keeps live work out of the archive, because an item that is still open has a proper way to end — cancel it, which is recorded in the discussion with who and when. For convenience the menu on an open item offers **Cancel and archive**, which does both in one request.
+
+Archive from **⋯** or right-click, on a board card or a table row. Archived items disappear from **All**, **Mine**, **Watching** and **Done**, and appear only under **Archive**. Search works inside whichever tab you are on, so the archive is searched from the archive tab.
+
+Archiving is a separate axis from status, not a status of its own. An item keeps the status it had, and restoring returns it with that same status — `done` comes back as `done`. The one case where the two meet is **Cancel and archive**: that really does change status to `cancelled` and records it in the discussion, so the item comes back cancelled, not at whatever it was before (a waiting item restored this way is `cancelled`, and from there the only move is back to `open`). If you want the original status preserved, archive without the cancel — which means finishing or cancelling it deliberately first.
+
+An archived item is frozen: status, assignees, labels, due date, details and new comments are all blocked until it is restored. The item page shows who archived it and when, with a **Restore from archive** button for those allowed. Editing anyway (for example from the API) answers `409` with code `tasks.archived`.
+
+Who may do what:
+
+| Action | Who |
+|--------|-----|
+| Archive | Assignees, creator, whoever assigned it, and account owners/admins — the same rule as [status](#who-can-change-status) |
+| Restore | Account owners and admins only |
+| Delete an archived item | `tasks.delete` (owners and admins), permanently |
+
+Restore is deliberately narrower than archive. Archiving is routine housekeeping that the people doing the work should not need to ask for, while bringing an item back into everyone's lists is a call for whoever runs the account. Archiving a non-terminal item without `cancel` answers `400` with code `tasks.archive_requires_terminal`; archiving an item you do not own answers `403` with `tasks.archive_requires_assignee`; restoring without the role answers `403` with `tasks.restore_requires_manager`.
+
+Archive and restore are recorded in the discussion and send no email.
 
 ### Labels
 
@@ -100,8 +125,8 @@ Autocomplete follows those stages. Invalid or unknown tokens stay as plain text.
 |------------|-------------|
 | `tasks.read` | See Tasks in the catalog and open items |
 | `tasks.create` | Create items |
-| `tasks.update` | Comments, labels, assignees, due date, and status on items you own |
-| `tasks.delete` | Delete items |
+| `tasks.update` | Comments, labels, assignees, due date, status and archive on items you own |
+| `tasks.delete` | Delete items, including archived ones |
 | `tasks.manage_labels` | Rename or archive labels (API) |
 
 Without `tasks.read` the service tile is hidden.
