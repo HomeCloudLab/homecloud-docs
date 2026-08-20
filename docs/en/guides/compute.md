@@ -1,6 +1,8 @@
 # Compute
 
-Compute is HomeCloud **IaaS**: virtual machines with a HomeCloud image, SSH, a volume (Standard class), and a platform Agent. HomeCloud is the cloud. Capacity providers (Hetzner first) stay behind the API — you never send a vendor name or a vendor image id.
+Compute is HomeCloud **IaaS**: you ask for a **machine concept** in a HomeCloud **region**. HomeCloud is the cloud. Capacity vendors stay behind the API — you never send a vendor name, a vendor SKU, or a vendor image id.
+
+You buy `hc.general.small` in `eu-central`, not “CX22 in Falkenstein”. The control plane picks a **Provider Offering** internally. Customer list price is on the concept. Wholesale cost is on the offering and is never returned to you.
 
 The console workspace is **`/console/compute`**: **Machines** and **SSH keys** tabs, plus a machine detail workspace (Overview, Terminal, Files, Performance, Snapshots). CLI/SDK commands will follow when this contract is soaked.
 
@@ -15,9 +17,9 @@ The console workspace is **`/console/compute`**: **Machines** and **SSH keys** t
 
 | Term | Meaning |
 |------|---------|
+| **Concept** | Product you buy (`hc.shared.small`, `hc.general.small`): sharing, architecture, disk kind, locality, **customer** price |
 | **Machine** | A VM in a HomeCloud region + AZ |
-| **Basic** | Local disk. Rebuild replaces the VM. |
-| **Standard** | Persistent boot volume. Recover attaches the same volume to a new VM. |
+| **Basic / Standard** | Compatibility aliases for persistence (`ephemeral` vs `volume`). Prefer `concept_id`. |
 | **Image** | HomeCloud id only: `ubuntu-24.04`, `debian-12`, `almalinux-9` |
 | **Agent** | Outbound node identity (token now, mTLS later). User JWT never enters the guest. |
 | **Health triad** | `desired_state`, `provider_state`, `agent_state` — three fields, never one status string |
@@ -34,7 +36,7 @@ Quota default is **10 machines** on the existing account quota table (`409 compu
 | `debian-12` | `homecloud-agent.deb` |
 | `almalinux-9` | `homecloud-agent.rpm` |
 
-No Windows. Create with `image_id` only — the adapter maps it (for example AlmaLinux → Hetzner `alma-9` internally).
+No Windows. Create with `image_id` only — the adapter maps it to a vendor image internally. The client never sends that native id.
 
 ## Create
 
@@ -45,7 +47,7 @@ Invoke-RestMethod -Method Post `
   -Uri "$env:HOMECLOUD_API/api/v1/accounts/$accountId/compute/machines" `
   -Headers @{ Authorization = "Bearer $token"; "Idempotency-Key" = "create-web-1" } `
   -ContentType "application/json" `
-  -Body '{"name":"web-1","class":"standard","image_id":"ubuntu-24.04","region_code":"eu-central","ssh_key_ids":["KEY_ID"]}'
+  -Body '{"name":"web-1","concept_id":"hc.general.small","image_id":"ubuntu-24.04","region_code":"eu-central","ssh_key_ids":["KEY_ID"]}'
 ```
 
 bash:
@@ -55,10 +57,12 @@ curl -sS -X POST "$HOMECLOUD_API/api/v1/accounts/$ACCOUNT_ID/compute/machines" \
   -H "Authorization: Bearer $TOKEN" \
   -H "Idempotency-Key: create-web-1" \
   -H "Content-Type: application/json" \
-  -d '{"name":"web-1","class":"standard","image_id":"ubuntu-24.04","region_code":"eu-central","ssh_key_ids":["KEY_ID"]}'
+  -d '{"name":"web-1","concept_id":"hc.general.small","image_id":"ubuntu-24.04","region_code":"eu-central","ssh_key_ids":["KEY_ID"]}'
 ```
 
-`region_code=eu-central` is Hetzner capacity (`fsn1`). A live create needs `HETZNER_API_TOKEN` on the API. Without the token the operation completes as **FAILED** (still HTTP 202) and no vendor call is made.
+`region_code` is geography, not a vendor. `eu-central` can be fulfilled by more than one offering. A live create needs the matching vendor token on the API (`HETZNER_API_TOKEN` and/or `SCALEWAY_API_TOKEN` + `SCALEWAY_PROJECT_ID`). Without capacity configured the operation completes as **FAILED** (still HTTP 202) with a HomeCloud error — never a vendor name. `class` remains accepted as an alias (`basic` → `hc.shared.small`, `standard` → `hc.general.small`).
+
+List concepts: `GET /api/v1/accounts/{id}/compute/concepts` (customer prices only).
 
 Same `Idempotency-Key` + same body returns the original `machine_id` / `operation_id`.
 
@@ -114,7 +118,7 @@ Otherwise `409 compute.agent_offline`.
 
 ## Providers
 
-HomeCloud is the cloud. **Hetzner** is the first capacity adapter (then Scaleway, then OVH). Do not put customer VMs on the homelab control-plane host. MDB, Mail, SO, and MQ do not run on Compute.
+HomeCloud is the cloud. You choose a **concept** and a **region**. Offerings (Hetzner, Scaleway, later OVH) are internal. Do not put customer VMs on the homelab control-plane host. MDB, Mail, SO, and MQ do not run on Compute.
 
 ## Console
 

@@ -1,6 +1,8 @@
 # Compute
 
-Compute הוא שכבת ה-**IaaS** של HomeCloud: מכונות וירטואליות עם image של HomeCloud, SSH, volume (במחלקת Standard), ו-Agent של הפלטפורמה. HomeCloud הוא הענן. ספקי קיבולת (Hetzner ראשון) נשארים מאחורי ה-API — לא שולחים שם ספק ולא image id של ספק.
+Compute הוא שכבת ה-**IaaS** של HomeCloud: קונים **קונספט מכונה** באזור HomeCloud. HomeCloud הוא הענן. ספקי קיבולת נשארים מאחורי ה-API — לא שולחים שם ספק, SKU של ספק, או image id של ספק.
+
+קונים `hc.general.small` ב-`eu-central`, לא “CX22 ב-Falkenstein”. מישור הבקרה בוחר **Provider Offering** בפנים. מחיר הלקוח חי על הקונספט. עלות הספק חיה על ה-Offering ואינה חוזרת ללקוח.
 
 Workspace בקונסול: **`/console/compute`** — טאבים **מכונות** ו-**מפתחות SSH**, ו-workspace לפרטי מכונה (סקירה, טרמינל, קבצים, ביצועים, Snapshots). פקודות CLI/SDK יגיעו אחרי שהחוזה יתייצב.
 
@@ -15,9 +17,9 @@ Workspace בקונסול: **`/console/compute`** — טאבים **מכונות**
 
 | מונח | משמעות |
 |------|--------|
+| **קונספט** | המוצר שקונים (`hc.shared.small`, `hc.general.small`): שיתוף CPU, ארכיטקטורה, סוג דיסק, locality, **מחיר לקוח** |
 | **Machine** | VM באזור + AZ של HomeCloud |
-| **Basic** | דיסק מקומי. Rebuild מחליף את ה-VM. |
-| **Standard** | volume אתחול קבוע. Recover מצמיד את אותו volume ל-VM חדש. |
+| **Basic / Standard** | כינויי תאימות ל-persistence (`ephemeral` מול `volume`). עדיף `concept_id`. |
 | **Image** | מזהה HomeCloud בלבד: `ubuntu-24.04`, `debian-12`, `almalinux-9` |
 | **Agent** | זהות צומת יוצאת (טוקן כרגע, mTLS בהמשך). JWT של המשתמש לא נכנס לאורח. |
 | **Health triad** | `desired_state`, `provider_state`, `agent_state` — שלושה שדות, לא מחרוזת status אחת |
@@ -45,7 +47,7 @@ Invoke-RestMethod -Method Post `
   -Uri "$env:HOMECLOUD_API/api/v1/accounts/$accountId/compute/machines" `
   -Headers @{ Authorization = "Bearer $token"; "Idempotency-Key" = "create-web-1" } `
   -ContentType "application/json" `
-  -Body '{"name":"web-1","class":"standard","image_id":"ubuntu-24.04","region_code":"eu-central","ssh_key_ids":["KEY_ID"]}'
+  -Body '{"name":"web-1","concept_id":"hc.general.small","image_id":"ubuntu-24.04","region_code":"eu-central","ssh_key_ids":["KEY_ID"]}'
 ```
 
 bash:
@@ -55,10 +57,12 @@ curl -sS -X POST "$HOMECLOUD_API/api/v1/accounts/$ACCOUNT_ID/compute/machines" \
   -H "Authorization: Bearer $TOKEN" \
   -H "Idempotency-Key: create-web-1" \
   -H "Content-Type: application/json" \
-  -d '{"name":"web-1","class":"standard","image_id":"ubuntu-24.04","region_code":"eu-central","ssh_key_ids":["KEY_ID"]}'
+  -d '{"name":"web-1","concept_id":"hc.general.small","image_id":"ubuntu-24.04","region_code":"eu-central","ssh_key_ids":["KEY_ID"]}'
 ```
 
-`region_code=eu-central` הוא קיבולת Hetzner (`fsn1`). יצירה חיה דורשת `HETZNER_API_TOKEN` על ה-API. בלי טוקן ה-Operation מסתיים ב-**FAILED** (עדיין HTTP 202) בלי קריאה לספק.
+`region_code` הוא מיקום, לא ספק. `eu-central` יכול להתמלא על ידי יותר מ-Offering אחד. יצירה חיה דורשת טוקן מתאים ב-API. בלי קיבולת מוגדרת ה-Operation מסתיים ב-**FAILED** (עדיין HTTP 202) עם שגיאת HomeCloud — בלי שם ספק. `class` נשאר כינוי (`basic` → `hc.shared.small`, `standard` → `hc.general.small`).
+
+רשימת קונספטים: `GET /api/v1/accounts/{id}/compute/concepts` (מחירי לקוח בלבד).
 
 אותו `Idempotency-Key` + אותו גוף מחזירים את אותו `machine_id` / `operation_id`.
 
@@ -114,7 +118,7 @@ Exec וקבצים דורשים Agent **ONLINE**:
 
 ## ספקים
 
-HomeCloud הוא הענן. **Hetzner** הוא מתאם הקיבולת הראשון (אחר כך Scaleway, אחר כך OVH). לא מריצים מכונות לקוח על שרת ה-control-plane ב-homelab. MDB, Mail, SO ו-MQ לא רצים על Compute.
+HomeCloud הוא הענן. בוחרים **קונספט** ו**אזור**. Offerings (Hetzner, Scaleway, בהמשך OVH) הם פנימיים. לא מריצים מכונות לקוח על שרת ה-control-plane ב-homelab. MDB, Mail, SO ו-MQ לא רצים על Compute.
 
 ## קונסול
 
