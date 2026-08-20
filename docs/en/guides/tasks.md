@@ -27,6 +27,8 @@ Tasks is a lightweight operational tracker for the account (Hebrew UI name: **מ
 
 **All**, **Mine**, and **Watching** share one workspace: Kanban columns Open / In progress / Waiting/Blocked / Done (drag cards to change status), or one table. Right-click a card for open, copy link, status, watch, assign to me, and delete. Use the grid/list icon to switch layout; each table row has the same actions under **⋯**. Tabs only change which items appear.
 
+Status is limited to the people who own the item — see [Who can change status](#who-can-change-status). Cards you may not move do not drag, and their status dropdown is disabled with a tooltip.
+
 ### Item page
 
 Open `TASK-12` to edit title and body, change status/assignee/due date, set labels, and continue the discussion. Details are Markdown: **Edit** shows the source (`#` headings, lists, tables); after save they render as formatted text, including `#so/…` console links, `https://` URLs, emails, and phone numbers. The title preview uses the same links. On a phone the discussion panel has a fixed height range so the thread stays readable; on a wide screen it sits beside the form. Consecutive comments from the same person on the same day (with no system line or other speaker in between) group as a cluster; the avatar and bubble tail sit on the last message. Type `@username` to mention someone in the thread (discussion messages do not send email). Type `#` in title, details, or discussion to insert a console reference (`#mail/noreply@example.com/inbox`).
@@ -40,6 +42,8 @@ Only labels attached to the item are shown as chips. **Add** opens a searchable 
 The person who made the change is **never** emailed. One save sends at most one email per recipient. Watchers are not emailed for status or comments.
 
 System copy (status names such as Open / In progress / Done, the change summary, and chrome) follows the **recipient's** console language. Item title, details, comments, and usernames stay as written.
+
+Details keep their Markdown formatting in the mail. Headings, **bold**, *italic*, `code`, fenced blocks, bullet and numbered lists, quotes, rules, links and GFM tables are converted to mail-safe HTML with inline styles, so they look the same in Gmail, Outlook and Apple Mail. Anything outside that subset (raw HTML, images, footnotes) is shown as plain text, and only `http`, `https` and `mailto` links are clickable. Long details are shortened at a line boundary with a note pointing to **Open in console**; `#so/…` console references stay as text in mail, because they only resolve inside the console.
 
 | Change | Who gets mail |
 |--------|----------------|
@@ -96,11 +100,24 @@ Autocomplete follows those stages. Invalid or unknown tokens stay as plain text.
 |------------|-------------|
 | `tasks.read` | See Tasks in the catalog and open items |
 | `tasks.create` | Create items |
-| `tasks.update` | Status, comments, labels on items, watchers |
+| `tasks.update` | Comments, labels, assignees, due date, and status on items you own |
 | `tasks.delete` | Delete items |
 | `tasks.manage_labels` | Rename or archive labels (API) |
 
 Without `tasks.read` the service tile is hidden.
+
+### Who can change status
+
+`tasks.update` is not enough on its own. Status belongs to the people who own the work, so the API accepts a status change only from:
+
+- an **assignee** of the item (primary or additional),
+- the **creator**,
+- whoever **assigned** the current assignees,
+- an account **owner** or **admin** (and platform admins), on any item.
+
+Everyone else with `tasks.update` can still edit the title, details, labels, due date, watchers and comments, and can assign the item to themselves — one click on **Assign to me** — after which status opens up. An unassigned item therefore has to be picked up before it can move, unless you are the creator or a manager.
+
+The console shows this rather than failing silently: the status dropdown is disabled with a tooltip that names the rule, board cards you may not move are not draggable, and the status entries disappear from the right-click and **⋯** menus. A single request may assign and set status together, so **Assign to me** followed by a status change works in one step. If the rule is hit anyway (for example from the API), the server answers `403` with code `tasks.status_requires_assignee`.
 
 ## Tips
 
