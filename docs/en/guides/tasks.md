@@ -42,7 +42,11 @@ Only **Done** and **Cancelled** items can be archived. That keeps live work out 
 
 Archive from **⋯** or right-click, on a board card or a table row. Archived items disappear from **All**, **Mine**, **Watching** and **Done**, and appear only under **Archive**. Search works inside whichever tab you are on, so the archive is searched from the archive tab.
 
-Archiving is a separate axis from status, not a status of its own. An item keeps the status it had, and restoring returns it with that same status — `done` comes back as `done`. The one case where the two meet is **Cancel and archive**: that really does change status to `cancelled` and records it in the discussion, so the item comes back cancelled, not at whatever it was before (a waiting item restored this way is `cancelled`, and from there the only move is back to `open`). If you want the original status preserved, archive without the cancel — which means finishing or cancelling it deliberately first.
+Archiving is a separate axis from status, not a status of its own. An item keeps the status it had, and restoring returns it with that same status — `done` comes back as `done`.
+
+**Cancel and archive** is the one action that touches both, and restoring reverses both. The cancel there exists only to make the item archivable, so restore undoes it and puts the item back where it actually was: a `waiting` item filed this way comes back as `waiting`, not as `cancelled`. Nothing is rewritten quietly — the discussion keeps the original `waiting → cancelled` line and adds a `cancelled → waiting` line on restore. The item page names the status it will return to before you press **Restore from archive**, and the API sends it as `restore_status`.
+
+An item that was already `done` or `cancelled` when you archived it has no cancel to undo, so it simply comes back as it was.
 
 An archived item is frozen: status, assignees, labels, due date, details and new comments are all blocked until it is restored. The item page shows who archived it and when, with a **Restore from archive** button for those allowed. Editing anyway (for example from the API) answers `409` with code `tasks.archived`.
 
