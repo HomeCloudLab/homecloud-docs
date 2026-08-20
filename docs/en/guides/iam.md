@@ -1,6 +1,6 @@
 # IAM
 
-IAM controls **who can do what** in your account: console users and roles, data-plane policies, and Access Keys used by CLI/SDK.
+IAM controls **who can do what** in your account: console principals (users + groups + policies), data-plane Roles/Policies, and Access Keys used by CLI/SDK/Terraform.
 
 | Item | Value |
 |------|--------|
@@ -8,22 +8,24 @@ IAM controls **who can do what** in your account: console users and roles, data-
 
 ## Two layers (do not mix them up)
 
-### 1. Console access (people)
+### 1. Console access (people) — Groups + policies (ADR-053)
 
-Roles such as **Owner**, **Admin**, **Developer**, **Viewer** decide who can open the console and call management APIs.
+People get permissions from **policy attachments** and **group membership**, not from a four-role matrix.
 
-| Role (typical) | Intent |
-|----------------|--------|
-| Owner | Full control, including dangerous account operations |
-| Admin | Manage resources and members |
-| Developer | Build and deploy; limited admin |
-| Viewer | Read-only |
+| Access template (invite / create UX) | System group |
+|--------------------------------------|--------------|
+| Owner | `AccountOwners` |
+| Admin | `AccountAdmins` |
+| Builder | `Builders` |
+| Reader | `Readers` |
 
-Invite people under **Account → Members**. Details: [Account & team](account.md).
+Fine-grained custom groups and policies can be added under **IAM → Groups / Policies**. Evaluation is **Deny > Allow > implicit Deny**. Granting to others requires **CanDelegate** (subset of what you can perform).
+
+Invite people under **Account → Members** with an access template. Use **IAM → Effective** and **Simulator** to debug Allows.
 
 ### Workspace catalog
 
-The console lists services from `GET /api/v1/accounts/{id}/catalog` (released catalog ∩ IAM). Unreleased products are omitted (they look unavailable). A released service you are not granted opens as an empty workspace — not an Access Denied screen. API: unreleased → `404 identity.service_unreleased`; ungranted → `403 identity.service_not_granted`.
+The console lists services from `GET /api/v1/accounts/{id}/catalog` (released catalog ∩ IAM). Unreleased products are omitted. A released service you are not granted opens as an empty workspace — not an Access Denied screen.
 
 ### 2. Data-plane IAM (automation)
 
@@ -31,15 +33,15 @@ The console lists services from `GET /api/v1/accounts/{id}/catalog` (released ca
 |--------|---------|
 | **Policies** | Documents of `service:Action` + resource ARNs (`Deny` wins over `Allow`) |
 | **Roles** | Assumeable identities (Functions use a Role ARN as `execution_role`) |
-| **Access Keys** | Long-lived credentials for a user; permissions come from attached policies |
+| **Access Keys** | Long-lived credentials for a user; permissions come from attached policies / groups |
 
 Account IDs in ARNs are the **12-digit account number**.
 
-## Access Keys
+## Access Keys (credentials-first)
 
 Create and revoke under **IAM → Access Keys**. Full how-to: [Access Keys](../getting-started/access-keys.md).
 
-Root / owner-scoped keys may have broad power — prefer scoped keys for CI.
+User Access Keys can call **management** APIs (list buckets, queues, …) with SigV1 when policies Allow — no console JWT required. Interactive `homecloud login` is for the browser and rare CLI step-up. See [CLI authentication](../cli/authentication.md).
 
 Roles can also trust **GitHub Actions OIDC** (`Principal.Federated` + `Condition` on `sub` / `aud`). Terraform then uses `HC_ROLE_ARN` instead of a long-lived Access Key. Assumed-role sessions can Create/Delete/Get queues, buckets, and secrets; other console routes return `403 iam.management_role_not_enabled`. See [Terraform — GitHub OIDC](../terraform/index.md#github-oidc-no-long-lived-key).
 
@@ -47,7 +49,7 @@ Roles can also trust **GitHub Actions OIDC** (`Principal.Federated` + `Condition
 
 1. Open **Policies** → create or clone a managed starter.  
 2. Useful starters often include patterns like MQ consumer, SO read/write, Function basic execution.  
-3. Attach the policy to a user or role.
+3. Attach the policy to a user, group, or role.
 
 Example SO deploy policy:
 
@@ -78,23 +80,13 @@ Functions must use an **execution Role ARN** (not an Access Key name).
 ## Security settings
 
 Under IAM / Account security:
-
-- Enable **MFA** (TOTP or passkeys) for humans  
-- Review sessions and revoke stolen sessions  
-- Prefer short-lived console sessions; keep Access Keys only where automation needs them  
-
-See also platform MFA notes if your operator published a security page for passkeys / impersonation support.
-
-## Tips
-
-- Start from managed policies, then narrow.  
-- Separate keys per environment (dev/stage/prod).  
-- Rotate keys when people leave or CI logs may have leaked them.  
-- Viewer console role ≠ empty data-plane policy — set both intentionally.
+- MFA / passkeys for console login
+- Session devices and revoke
 
 ## Related
 
-- [Access Keys](../getting-started/access-keys.md)  
-- [Functions](functions.md)  
-- [Account & team](account.md)  
-- [Terraform](../terraform/index.md) (`homecloud_iam_policy` / `homecloud_iam_role` / `homecloud_iam_policy_attachment`, plus GitHub OIDC trust)  
+- [Account & team](account.md)
+- [Access Keys](../getting-started/access-keys.md)
+- [CLI authentication](../cli/authentication.md)
+- [SDK](../sdk/index.md)
+- [Terraform](../terraform/index.md)

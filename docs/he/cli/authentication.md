@@ -1,15 +1,17 @@
 # אימות
 
-ה-CLI משתמש ב**שני** סוגי אישורים. בחרו את זה שמתאים לפקודה.
+ה-CLI משתמש ב**שני** סוגי אישורים. העדיפו Access Keys לאוטומציה; התחברות לקונסול לבני אדם אינטראקטיביים.
 
-## מתי להשתמש במה
+## מתי להשתמש במה (credentials-first)
 
 | רוצים… | השתמשו ב |
 |--------|----------|
-| ליצור משאבים בממשק, לרשום תורים/buckets/apps, לנהל Function URLs | **התחברות לקונסול** (`homecloud login`) |
-| להעלות/לסנכרן אובייקטים, לשלוח/לקבל הודעות, לעשות invoke ל-Function URLs | **Access Key** (`homecloud configure`) |
+| רשימה/יצירת buckets, רשימת תורים, Terraform, APIs ניהוליים שמותרים במדיניות | **Access Key** (`homecloud configure`) — SigV1, בלי JWT |
+| העלאה/סנכרון אובייקטים, שליחה/קבלה של הודעות, invoke ל-Function URLs | **Access Key** |
+| דפדפן קונסול, MFA step-up, bootstrap נדיר ב-CLI | **התחברות לקונסול** (`homecloud login`) |
+| פרוטוקולים מיוחדים (למשל IR ↔ Docker login) | התחברות לקונסול / זרימה ייעודית |
 
-הרבה זרימות משתמשות בשניהם באותו סשן shell.
+ההרשאות תמיד מגיעות מ**מדיניות וקבוצות IAM** של הזהות (ADR-053). ה-Access Key עצמו לא נושא מטריצת הרשאות.
 
 ## התחברות לקונסול (JWT)
 
@@ -36,7 +38,7 @@ homecloud login --browser
 
 קובץ סשן: `~/.homecloud/session` (לפי פרופיל).
 
-## Access Key (data plane)
+## Access Key (ברירת מחדל ל-CLI/SDK)
 
 ```bash
 homecloud configure
@@ -48,14 +50,21 @@ homecloud configure
 homecloud \
   --access-key-id "$HOMECLOUD_ACCESS_KEY_ID" \
   --secret-access-key "$HOMECLOUD_SECRET_ACCESS_KEY" \
-  so sync ./dist so://my-bucket/ --delete
+  so ls-buckets
 ```
 
-אין צורך בדגל `account_id` — המפתח כבר מוגבל לחשבון אחד.
+דוגמאות שעובדות עם Access Key בלבד (כשהמדיניות Allow):
 
-Access Keys אף פעם לא מבקשים MFA בכל בקשה. צרו אותם פעם אחת בקונסול (עם MFA אם מופעל): [Access Keys](../getting-started/access-keys.md).
+```bash
+homecloud so ls-buckets
+homecloud queues list
+```
 
-## פרופילים
+אין צורך ב-`account_id` — המפתח כבר מוגבל לחשבון אחד.
+
+Access Keys לא מבקשים MFA בכל בקשה. יצירה חד־פעמית בקונסול (עם MFA אם מופעל): [Access Keys](../getting-started/access-keys.md).
+
+## Profiles
 
 ```bash
 homecloud configure --profile production
@@ -64,9 +73,9 @@ homecloud --profile production so ls media
 
 קובץ אישורים: `~/.homecloud/credentials`
 
-## קשור
+## Related
 
-- [התקנה](install.md)  
-- [מפת פקודות](commands/index.md)  
+- [Install](install.md)  
+- [Command map](commands/index.md)  
 - [IAM](../guides/iam.md)  
 - [Terraform](../terraform/index.md)  

@@ -78,7 +78,7 @@ client.so.sync("so://docs/", "./site")
 client.so.sync("so://photos/", "so://backup/photos/", delete=True)
 ```
 
-עוזרי ניהול (`list_buckets`, `create_bucket`) מצפים לסשן JWT קונסול — השתמשו בהם מכלי אחרי `login`, לא מ-workers ללא השגחה, אלא אם מצרפים סשן במכוון.
+עוזרי ניהול (`list_buckets`, `create_bucket`) תומכים ב-**Access Key (SigV1)** — אותן הרשאות אפקטיביות של המשתמש (כולל קבוצות מערכת). `homecloud login` נדרש בעיקר לסשן קונסול אינטראקטיבי או למקרים מיוחדים (למשל IR ↔ Docker), לא לרשימת באקטים כשיש credentials.
 
 ## Message Queues
 

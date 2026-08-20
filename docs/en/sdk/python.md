@@ -79,7 +79,7 @@ client.so.sync("so://docs/", "./site")
 client.so.sync("so://photos/", "so://backup/photos/", delete=True)
 ```
 
-Management helpers (`list_buckets`, `create_bucket`) expect a console JWT session — use them from tools after `login`, not from unattended workers, unless you intentionally attach a session.
+Management helpers (`list_buckets`, `create_bucket`) support **Access Key (SigV1)** using the user’s effective policies (including system groups). `homecloud login` is mainly for interactive console sessions or special cases (e.g. IR ↔ Docker), not for listing buckets when credentials are present.
 
 ## Message Queues
 

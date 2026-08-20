@@ -30,7 +30,8 @@ Create keys in the console: [Access Keys](../getting-started/access-keys.md).
 | Mail | mailboxes, messages, get, attachment | Access Key / session |
 | Image Registry (`ir`) | list/create repos, usage | Session / key as documented |
 | Secrets | list | Access Key |
-| Management helpers | `queues.list`, `apps.list`, `accounts.*`, create bucket | Console JWT |
+| Management helpers | `so.list_buckets` / `create_bucket` / `delete_bucket`, `queues.list` / `get` | **Access Key SigV1** (preferred); Console JWT fallback |
+| Other console helpers | `apps.list`, `accounts.*`, IR create, Functions management | Console JWT (for now) |
 
 ## Minimal examples
 

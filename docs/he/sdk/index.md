@@ -30,7 +30,8 @@
 | Mail | mailboxes, messages, get, attachment | Access Key / session |
 | Image Registry (`ir`) | list/create repos, usage | Session / key as documented |
 | Secrets | list | Access Key |
-| עוזרי ניהול | `queues.list`, `apps.list`, `accounts.*`, create bucket | JWT קונסול |
+| עוזרי ניהול | `so.list_buckets` / `create_bucket` / `delete_bucket`, `queues.list` / `get` | **Access Key SigV1** (מועדף); JWT קונסול כגיבוי |
+| עוזרי קונסול אחרים | `apps.list`, `accounts.*`, יצירת IR, ניהול Functions | JWT קונסול (לעת עתה) |
 
 ## דוגמאות מינימליות
 

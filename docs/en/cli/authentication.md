@@ -1,15 +1,17 @@
 # Authentication
 
-The CLI uses **two** credential types. Pick the one that matches the command.
+The CLI uses **two** credential types. Prefer Access Keys for automation; use console login for interactive humans.
 
-## When to use which
+## When to use which (credentials-first)
 
 | You want to… | Use |
 |--------------|-----|
-| Create resources in the UI, list queues/buckets/apps, manage Function URLs | **Console login** (`homecloud login`) |
-| Upload/sync objects, send/receive messages, invoke Function URLs | **Access Key** (`homecloud configure`) |
+| List/create buckets, list queues, Terraform, CI/CD management APIs allowed by your policies | **Access Key** (`homecloud configure`) — SigV1, no JWT |
+| Upload/sync objects, send/receive messages, invoke Function URLs | **Access Key** |
+| Interactive console browser, MFA step-up, rare CLI bootstrap | **Console login** (`homecloud login`) |
+| Special tool protocols (e.g. IR ↔ Docker login) | Console login / tool-specific flow |
 
-Many workflows use both in the same shell session.
+Permissions always come from **IAM policies and groups** attached to the principal (ADR-053). The Access Key does not carry its own permission matrix.
 
 ## Console login (JWT)
 
@@ -36,7 +38,7 @@ homecloud login --browser
 
 Session file: `~/.homecloud/session` (per profile).
 
-## Access Key (data plane)
+## Access Key (default for CLI/SDK)
 
 ```bash
 homecloud configure
@@ -48,7 +50,15 @@ Or inline for CI:
 homecloud \
   --access-key-id "$HOMECLOUD_ACCESS_KEY_ID" \
   --secret-access-key "$HOMECLOUD_SECRET_ACCESS_KEY" \
-  so sync ./dist so://my-bucket/ --delete
+  so ls-buckets
+```
+
+Examples that work with Access Key alone (when policy Allows):
+
+```bash
+homecloud so ls-buckets
+homecloud so create-bucket my-bucket   # when wired via management SigV1
+homecloud queues list                  # when policy Allows
 ```
 
 No `account_id` flag is required — the key is already scoped to one account.
