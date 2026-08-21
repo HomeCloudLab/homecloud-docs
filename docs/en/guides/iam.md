@@ -41,7 +41,7 @@ Account IDs in ARNs are the **12-digit account number**.
 
 Create and revoke under **IAM → Access Keys**. Full how-to: [Access Keys](../getting-started/access-keys.md).
 
-User Access Keys can call **management** APIs (list buckets, queues, …) with SigV1 when policies Allow — no console JWT required. Interactive `homecloud login` is for the browser and rare CLI step-up. See [CLI authentication](../cli/authentication.md).
+User Access Keys can call **management** APIs (list buckets, queues, …) with SigV1 when policies Allow — no console JWT required. Interactive `homecloud login` is for the browser and rare CLI step-up. See [CLI authentication](../cli/authentication.md) and [Authentication architecture](authentication-architecture.md).
 
 Roles can also trust **GitHub Actions OIDC** (`Principal.Federated` + `Condition` on `sub` / `aud`). Terraform then uses `HC_ROLE_ARN` instead of a long-lived Access Key. Assumed-role sessions can Create/Delete/Get queues, buckets, and secrets; other console routes return `403 iam.management_role_not_enabled`. See [Terraform — GitHub OIDC](../terraform/index.md#github-oidc-no-long-lived-key).
 

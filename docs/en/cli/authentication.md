@@ -11,7 +11,7 @@ The CLI uses **two** credential types. Prefer Access Keys for automation; use co
 | Interactive console browser, MFA step-up, rare CLI bootstrap | **Console login** (`homecloud login`) |
 | Special tool protocols (e.g. IR ↔ Docker login) | Console login / tool-specific flow |
 
-Permissions always come from **IAM policies and groups** attached to the principal (ADR-053). The Access Key does not carry its own permission matrix.
+Permissions always come from **IAM policies and groups** attached to the principal (ADR-053). The Access Key does not carry its own permission matrix. Platform overview: [Authentication architecture](../guides/authentication-architecture.md).
 
 ## Console login (JWT)
 

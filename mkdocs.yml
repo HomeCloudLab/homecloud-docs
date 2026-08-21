@@ -100,6 +100,7 @@ nav:
       - guides/mail.md
       - guides/secrets.md
       - guides/iam.md
+      - guides/authentication-architecture.md
       - guides/domains.md
       - guides/ssl.md
       - guides/billing.md

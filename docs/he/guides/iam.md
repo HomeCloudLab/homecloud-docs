@@ -41,7 +41,7 @@ IAM שולט **מי יכול לעשות מה** בחשבון: זהויות קונ
 
 יצירה וביטול תחת **IAM → Access Keys**. מדריך מלא: [Access Keys](../getting-started/access-keys.md).
 
-מפתחות משתמש יכולים לקרוא ל-APIs **ניהוליים** (רשימת buckets, תורים, …) ב-SigV1 כשהמדיניות Allow — בלי JWT של קונסול. `homecloud login` לדפדפן ול-step-up נדיר. ראו [אימות CLI](../cli/authentication.md).
+מפתחות משתמש יכולים לקרוא ל-APIs **ניהוליים** (רשימת buckets, תורים, …) ב-SigV1 כשהמדיניות Allow — בלי JWT של קונסול. `homecloud login` לדפדפן ול-step-up נדיר. ראו [אימות CLI](../cli/authentication.md) ו-[ארכיטקטורת אימות](authentication-architecture.md).
 
 Roles יכולים גם לסמוך על **GitHub Actions OIDC**. Terraform אז משתמש ב-`HC_ROLE_ARN` במקום מפתח ארוך־חיים. ראו [Terraform — GitHub OIDC](../terraform/index.md#github-oidc-no-long-lived-key).
 
