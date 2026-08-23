@@ -27,6 +27,8 @@ Create users under **IAM → Users** (email invite or username/password). Grants
 
 The visual policy builder accumulates statements across services (it does not replace the document when you switch service). Opening a policy never mutates it; Visual ↔ JSON tab switches never generate a new document. The console groups the document **by service for display** even when one statement lists many services.
 
+**Create policy** opens a bottom drawer. Selected permissions stay in a compact service list (capability tags such as Read / Write — not every action). Click a service to edit that slice: effect, multiple resource rows, actions, and optional slice JSON (`Sid` / `Condition`). Resource fields are free text with catalog suggestions as you type (no `#` required). Editing a mixed statement updates only that service; a resource or effect change splits it out so siblings stay untouched.
+
 ### Workspace catalog
 
 The console lists services from `GET /api/v1/accounts/{id}/catalog` (released catalog ∩ IAM). Unreleased products are omitted. A released service you are not granted opens as an empty workspace — not an Access Denied screen.
