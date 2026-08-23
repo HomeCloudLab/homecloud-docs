@@ -9,13 +9,24 @@ The console is the primary UI for creating resources, inviting people, and inspe
 | **Top bar** | Account switcher, user menu, language, help |
 | **Left sidebar** | Service list (Storage, Queues, Databases, Functions, …) and Account hub |
 | **Main pane** | List pages and resource detail tabs |
-| **Status footer** | Path control (hover/click for the full path), notification bell (`events` + billing attention), and background activity (uploads, SO copy/move) |
+| **Status footer** | Path control (hover/click for the full path), notification bell (red count of waiting items), and background activity (uploads, SO copy/move) |
 | **Info (ⓘ)** | Contextual help for the current page or tab |
 
 Most services follow the same pattern:
 
 1. **List** — create, search, open a resource.  
 2. **Detail** — tabs for overview, settings, logs, API examples, and so on.
+
+## Notifications
+
+The footer bell is an aggregator, not a second inbox:
+
+- **Badge** (red number on the bell, no click needed) = waiting items: assignment/complete events, unpaid invoices, unseen task discussions, and unread mail (one for any unread mail).
+- **Mail** — one row per mailbox (count only) → that mailbox inbox.
+- **Tasks** — one row per unseen discussion → that item (`?focus=discussion`). Create / assign / done also write a thin per-recipient event.
+- **See all** opens `/console/notifications` (waiting items + recently seen events). The popover stays a short unread preview.
+
+The UI refetches counts only when the Realtime Gateway signals a relevant change (debounced). Comments and mail messages are not copied into a notifications table.
 
 ## Service catalog
 
@@ -39,6 +50,7 @@ Open **Services** in the sidebar (or `/console/services`) for the full catalog w
 | Bring your own domain | **Account → Domains** (or **Domains** in the catalog) |
 | View TLS certificates | **SSL** |
 | Invite members, audit log, projects | **Account** hub |
+| See waiting notifications | Footer bell → **See all** (`/console/notifications`) |
 
 ## Account hub
 

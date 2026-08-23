@@ -25,7 +25,21 @@ Older `ConsoleSystem*` policy names and ARNs still resolve after rename. The `*`
 
 Fine-grained custom groups and policies live under **IAM → Groups / Policies**. Evaluation is **Deny > Allow > implicit Deny**. Granting to others requires **CanDelegate**: a subset of concrete actions you can perform. Owner/admin packs store `Action: *` for **perform** (new catalog actions apply automatically). That star does **not** let an admin hand out `*` or `so:*` — only an owner (or someone who already holds that wildcard) may grant wildcards.
 
-Create users under **IAM → Users** (email invite or username/password). Grants at creation are optional — a user with none authenticates but has no meaningful access until you attach groups or policies. Use **IAM → Diagnostics** to debug Allows: simulator first, then effective access cards by service.
+Create users under **IAM → Users** (email invite or username/password). Grants at creation are optional — a user with none authenticates but has no meaningful access until you attach groups or policies. Open a user to manage **Groups** and **Direct policies** as tabs. The breadcrumb shows the **username**, not the internal user id. Each tab has an add control at the top and a **table** of current memberships or attachments below. Search filters that table (and the add picker). Use **IAM → Diagnostics** to debug Allows: simulator first, then effective access cards by service.
+
+Open a group for a **members** table like IAM Users: username, email, Access, status, and a ⋮ menu (open the user, or remove them from the group). Multi-select plus **Remove from group** works on custom groups and built-in packs. A remove from `Builders` (or any pack) **stays removed** — the console no longer puts the user back from `account_role` on the next request.
+
+### Account root
+
+The account root has **implicit full access** (no policy document required). You do not need to put root in any group.
+
+| Action | Allowed? |
+|--------|----------|
+| Disable, delete, or change role | No |
+| Attach or detach a **user** policy | No — `403 identity.root_permissions_immutable` |
+| Add or remove from a group | Yes |
+
+The user page hides attach/detach for root. Existing attachments stay visible and read-only.
 
 The visual policy builder accumulates statements across services (it does not replace the document when you switch service). Opening a policy never mutates it; Visual ↔ JSON tab switches never generate a new document. The console groups the document **by service for display** even when one statement lists many services. Permission cards sit in a four-across grid; click anywhere on a card to open that slice.
 

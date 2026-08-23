@@ -7,7 +7,7 @@ Tasks is a lightweight operational tracker for the account (Hebrew UI name: **מ
 | Console | **Tasks** → `/console/tasks` |
 | Keys | `TASK-{n}` per account |
 | Storage | Control-plane Postgres (not an Orchestrator resource) |
-| Notify | Email via platform **noreply** — only people with a role on the item. The console bell also rolls up unseen discussion comments (not a copy of each comment). |
+| Notify | Email via platform **noreply** to people with a role on the item (assignees on create/assign; creator **and** assignees on done/cancelled). The console bell stores those lifecycle events and lists **one row per unseen discussion** (not a copy of each comment). |
 | Live UI | Realtime Gateway SSE hint; REST is source of truth. Opening a task sets `last_seen_at` for you (WhatsApp-style). |
 
 ## Console walkthrough
@@ -151,7 +151,7 @@ The console shows this rather than failing silently: the status dropdown is disa
 ## Tips
 
 - Tasks is not Account **Projects** (resource folders) and not **Operations** (async provision jobs).  
-- There is no notification bell in V1 — check **My Tasks** and email.  
+- Footer **Notifications** (and `/console/notifications`) list assignment/complete events and unseen comments per task — click opens that item, not the board.  
 - Open Tasks pages refresh live while you stay on the page.
 
 ## Related

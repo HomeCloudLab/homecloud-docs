@@ -12,7 +12,7 @@ HomeCloud Mail gives your account **mailboxes**, a full webmail client, **templa
 ## Console map
 
 1. **Mailboxes / Contacts / Templates tabs** — URL-synced (`?tab=`). Header **Refresh** is always there; **Create mailbox / contact / template** follows the active tab. Create contact is a dialog.  
-2. **Mailbox client** — folders (Inbox, Sent, Drafts, Trash, Archive), search, compose, settings.  
+2. **Mailbox client** — folders (Inbox, Sent, Drafts, Trash, Archive), search, compose, settings. The footer bell shows **one unread row per mailbox** (count only) and opens that inbox (`/console/mail/{email}`).  
 3. **Template Studio** — visual email builder with preview and code.  
 4. **Contacts** — address book for compose.
 

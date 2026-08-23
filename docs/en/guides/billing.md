@@ -93,6 +93,19 @@ Returns `timezone`, `estimate`, `daily_series`, `by_service`, `prices_are_placeh
 
 Spend alerts **notify only**. Crossing a threshold never stops Compute or suspends resources. There is **no hard spend limit** in v1. Resource quotas (machine count, etc.) remain a separate Identity/quotas control.
 
+A background check runs about every **15 minutes** (`billing_alert_interval_seconds`). When the estimate is at or above the threshold:
+
+1. Owners and admins get one **in-app** notification (bell + Notifications, source Billing) linking to **Billing → Alerts**.
+2. The same people get **one email** (system mail). A failed send is not retried for that period.
+3. SSE `spend.alert` refreshes the bell. The same fire does not write a second event type.
+
+**Do not send twice in the same period.** Each alert stores `last_fired_period`. A **month** window fires at most once per UTC calendar month (`YYYY-MM`). A **week** window compares the last 7 days and fires at most once per ISO week (`YYYY-Www`). Two different alerts (week + month) can each fire independently.
+
+| Window | Spend compared | Dedup period |
+|--------|----------------|--------------|
+| Calendar month (UTC) | Month-to-date estimate | Once that month |
+| Last 7 days | Rolling 7-day estimate | Once that ISO week |
+
 ## CLI
 
 ```bash
