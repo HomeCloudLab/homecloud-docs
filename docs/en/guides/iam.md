@@ -4,24 +4,28 @@ IAM controls **who can do what** in your account: console principals (users + gr
 
 | Item | Value |
 |------|--------|
-| Console | **IAM** → `/console/iam` (+ Account members / users) |
+| Console | **IAM → Users** (create / edit) · **Account → Users** (read-only preview) |
 
 ## Two layers (do not mix them up)
 
 ### 1. Console access (people) — Groups + policies (ADR-053)
 
-People get permissions from **policy attachments** and **group membership**, not from a four-role matrix.
+People get permissions from **policy attachments** and **group membership**, not from a four-role matrix. The console Access column shows those attachments (any group or policy). `account_role` remains in the API for compatibility and is not used for display.
 
-| Access template (invite / create UX) | System group |
-|--------------------------------------|--------------|
-| Owner | `AccountOwners` |
-| Admin | `AccountAdmins` |
-| Builder | `Builders` |
-| Reader | `Readers` |
+The four system groups still exist and can be attached like any other group:
 
-Fine-grained custom groups and policies can be added under **IAM → Groups / Policies**. Evaluation is **Deny > Allow > implicit Deny**. Granting to others requires **CanDelegate** (subset of what you can perform).
+| System group | Typical use |
+|--------------|-------------|
+| `AccountOwners` | Full account administration |
+| `AccountAdmins` | Admin pack |
+| `Builders` | Build / operate workloads |
+| `Readers` | Read-only |
 
-Invite people under **Account → Members** with an access template. Use **IAM → Effective** and **Simulator** to debug Allows.
+Fine-grained custom groups and policies live under **IAM → Groups / Policies**. Evaluation is **Deny > Allow > implicit Deny**. Granting to others requires **CanDelegate** (subset of what you can perform).
+
+Create users under **IAM → Users** (email invite or username/password). Grants at creation are optional — a user with none authenticates but has no meaningful access until you attach groups or policies. Use **IAM → Diagnostics** to debug Allows: simulator first, then effective access cards by service.
+
+The visual policy builder accumulates statements across services (it does not replace the document when you switch service). Opening a policy never mutates it; Visual ↔ JSON tab switches never generate a new document.
 
 ### Workspace catalog
 
@@ -76,6 +80,15 @@ Functions must use an **execution Role ARN** (not an Access Key name).
 1. Create a Role with the permissions the function needs (SO, MQ, Secrets, …).  
 2. Ensure the trust policy allows the Functions service account to assume it (`arn:…:service-account/functions` style principal — copy the exact principal from the console helper if shown).  
 3. Set that Role ARN on the function configuration.
+
+## Diagnostics
+
+Open **IAM → Diagnostics**.
+
+1. **Simulator** (top) — ask whether `service:Action` is allowed on a resource ARN without performing it.
+2. **Effective access** (below) — cards by service with Read / Write / Create chips. Click a chip or `+N` for exact action names.
+
+The simulator answers the question you arrived with. The cards summarize what is attached after Deny wins.
 
 ## Security settings
 
