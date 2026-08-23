@@ -14,12 +14,14 @@ People get permissions from **policy attachments** and **group membership**, not
 
 The four system groups still exist and can be attached like any other group:
 
-| System group | Typical use |
-|--------------|-------------|
-| `AccountOwners` | Full account administration |
-| `AccountAdmins` | Admin pack |
-| `Builders` | Build / operate workloads |
-| `Readers` | Read-only |
+| System group | Managed policy | Typical use |
+|--------------|----------------|-------------|
+| `AccountOwners` | `SystemAccountOwners` (`Action: *`) | Full account administration; new catalog actions apply automatically |
+| `AccountAdmins` | `SystemAccountAdmins` (`Action: *`) | Admin pack; new catalog actions apply automatically |
+| `Builders` | `SystemBuilders` | Build / operate workloads (`service:*` when that service is fully granted) |
+| `Readers` | `SystemReaders` | Read-only |
+
+Older `ConsoleSystem*` policy names and ARNs still resolve after rename. The `*` is stored on the policy version row (authorize reads that document). The console does not rewrite a long action list into `*` only for display. Owner-only console actions (delete account, transfer ownership) stay gated by the owner role.
 
 Fine-grained custom groups and policies live under **IAM → Groups / Policies**. Evaluation is **Deny > Allow > implicit Deny**. Granting to others requires **CanDelegate** (subset of what you can perform).
 
