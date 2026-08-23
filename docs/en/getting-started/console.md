@@ -9,7 +9,7 @@ The console is the primary UI for creating resources, inviting people, and inspe
 | **Top bar** | Account switcher, user menu, language, help |
 | **Left sidebar** | Service list (Storage, Queues, Databases, Functions, …) and Account hub |
 | **Main pane** | List pages and resource detail tabs |
-| **Status footer** | API health and background activity (for example multi-file uploads) |
+| **Status footer** | Path control (hover/click for the full path), notification bell (`events` + billing attention), and background activity (uploads, SO copy/move) |
 | **Info (ⓘ)** | Contextual help for the current page or tab |
 
 Most services follow the same pattern:

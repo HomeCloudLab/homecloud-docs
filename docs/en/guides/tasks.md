@@ -7,8 +7,8 @@ Tasks is a lightweight operational tracker for the account (Hebrew UI name: **מ
 | Console | **Tasks** → `/console/tasks` |
 | Keys | `TASK-{n}` per account |
 | Storage | Control-plane Postgres (not an Orchestrator resource) |
-| Notify | Email via platform **noreply** — only people with a role on the item |
-| Live UI | Realtime Gateway SSE hint; REST is source of truth |
+| Notify | Email via platform **noreply** — only people with a role on the item. The console bell also rolls up unseen discussion comments (not a copy of each comment). |
+| Live UI | Realtime Gateway SSE hint; REST is source of truth. Opening a task sets `last_seen_at` for you (WhatsApp-style). |
 
 ## Console walkthrough
 

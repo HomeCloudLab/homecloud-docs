@@ -24,7 +24,8 @@ Use SO for backups, build artifacts, media, and **static websites** served at `h
 1. Open the **Objects** tab.  
 2. Navigate by prefix (the UI presents prefixes like folders).  
 3. **Upload** one or many files. Multi-file uploads use a concurrency queue (1 / 5 / 10 workers) with pause, resume, and auto-retry. Large single files use multipart upload.  
-4. Progress appears in the console **footer** — you can minimize it and keep working. Closing the tab while uploads run will warn you; cancel aborts uploaded parts.
+4. Progress appears in the console **footer** — you can minimize it and keep working. Closing the tab while uploads run will warn you; cancel aborts uploaded parts.  
+5. **Copy / cut / paste** (and drag between folders) runs as a **server job**. Move is atomic per object (copy + delete on SO). Closing the console does not turn a move into a leftover copy. Progress uses the same minimizable footer panel as uploads.
 
 ### Object properties
 
