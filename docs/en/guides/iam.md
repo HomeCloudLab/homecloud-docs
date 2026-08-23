@@ -23,7 +23,7 @@ The four system groups still exist and can be attached like any other group:
 
 Older `ConsoleSystem*` policy names and ARNs still resolve after rename. The `*` is stored on the policy version row (authorize reads that document). The console does not rewrite a long action list into `*` only for display. Owner-only console actions (delete account, transfer ownership) stay gated by the owner role.
 
-Fine-grained custom groups and policies live under **IAM → Groups / Policies**. Evaluation is **Deny > Allow > implicit Deny**. Granting to others requires **CanDelegate** (subset of what you can perform).
+Fine-grained custom groups and policies live under **IAM → Groups / Policies**. Evaluation is **Deny > Allow > implicit Deny**. Granting to others requires **CanDelegate**: a subset of concrete actions you can perform. Owner/admin packs store `Action: *` for **perform** (new catalog actions apply automatically). That star does **not** let an admin hand out `*` or `so:*` — only an owner (or someone who already holds that wildcard) may grant wildcards.
 
 Create users under **IAM → Users** (email invite or username/password). Grants at creation are optional — a user with none authenticates but has no meaningful access until you attach groups or policies. Use **IAM → Diagnostics** to debug Allows: simulator first, then effective access cards by service.
 
