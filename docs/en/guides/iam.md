@@ -25,7 +25,7 @@ Fine-grained custom groups and policies live under **IAM → Groups / Policies**
 
 Create users under **IAM → Users** (email invite or username/password). Grants at creation are optional — a user with none authenticates but has no meaningful access until you attach groups or policies. Use **IAM → Diagnostics** to debug Allows: simulator first, then effective access cards by service.
 
-The visual policy builder accumulates statements across services (it does not replace the document when you switch service). Opening a policy never mutates it; Visual ↔ JSON tab switches never generate a new document.
+The visual policy builder accumulates statements across services (it does not replace the document when you switch service). Opening a policy never mutates it; Visual ↔ JSON tab switches never generate a new document. The console groups the document **by service for display** even when one statement lists many services.
 
 ### Workspace catalog
 
