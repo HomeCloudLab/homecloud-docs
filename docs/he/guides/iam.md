@@ -61,7 +61,7 @@ IAM שולט **מי יכול לעשות מה** בחשבון: זהויות קונ
 
 ## Access Keys (credentials-first)
 
-יצירה וביטול תחת **IAM → Access Keys**. מדריך מלא: [Access Keys](../getting-started/access-keys.md).
+יצירה והחלפה תחת **IAM → Users** (המפתח שייך ליוזר). מלאי מנהל: **IAM → Access Keys**. מדריך מלא: [Access Keys](../getting-started/access-keys.md).
 
 מפתחות משתמש יכולים לקרוא ל-APIs **ניהוליים** (רשימת buckets, תורים, …) ב-SigV1 כשהמדיניות Allow — בלי JWT של קונסול. `homecloud login` לדפדפן ול-step-up נדיר. ראו [אימות CLI](../cli/authentication.md) ו-[ארכיטקטורת אימות](authentication-architecture.md).
 

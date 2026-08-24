@@ -61,7 +61,7 @@ Account IDs in ARNs are the **12-digit account number**.
 
 ## Access Keys (credentials-first)
 
-Create and revoke under **IAM → Access Keys**. Full how-to: [Access Keys](../getting-started/access-keys.md).
+Create and rotate under **IAM → Users** (the key belongs to the user). Admin inventory: **IAM → Access Keys**. Full how-to: [Access Keys](../getting-started/access-keys.md).
 
 User Access Keys can call **management** APIs (list buckets, queues, …) with SigV1 when policies Allow — no console JWT required. Interactive `homecloud login` is for the browser and rare CLI step-up. See [CLI authentication](../cli/authentication.md) and [Authentication architecture](authentication-architecture.md).
 

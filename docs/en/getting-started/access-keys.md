@@ -6,15 +6,18 @@ They are **not** your console password. Create them once, store the secret safel
 
 ## Create a key in the console
 
-1. Open **IAM → Access Keys** (or **Account → Access keys**).  
-2. Click **Create**.  
-3. Choose a name and permissions (for example `*` for full access in a lab, or scoped actions like `so:*` / `mq:*`).  
-4. Copy:
+1. Open **IAM → Users → [user] → Access keys**, or the account inventory **IAM → Access Keys**.  
+2. Each user has **one active key**. If they already have one, use **Rotate** (this mints a new pair and immediately revokes every previous active key for that user).  
+3. Copy **once**:
 
    - **Access Key ID** — starts with `HCAK…`  
-   - **Secret access key** — shown **once**
+   - **Secret access key** — shown only on create/rotate
 
-If you lose the secret, revoke the key and create a new one. You cannot recover the secret later.
+The table lists **user, name, created, last used, status**. It does not keep showing the `HCAK` id.
+
+Permissions come from the **user’s IAM** (groups and policies), not from the key. Existing extra keys on old accounts keep working until that user rotates.
+
+If you lose the secret, rotate (or revoke) the key. You cannot recover the secret later.
 
 ## Configure the CLI
 
