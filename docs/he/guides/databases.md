@@ -40,8 +40,22 @@ MDB נותן לכם מופעי **PostgreSQL**, **MySQL** או **MongoDB** מנו
 
 | מצב | שימוש טיפוסי |
 |-----|--------------|
-| **Connector** על `*.mdb.{apex}:443` | מנהרת TLS — ברירת מחדל טובה מבחוץ לאשכול |
-| **Direct TCP** | פורטים native (`5432` / `3306` / `27017`) כשמופעל למופע |
+| **Direct TCP** על פורטים native (`5432` / `3306` / `27017`) | ברירת מחדל כשגישה מהאינטרנט מופעלת — `psql`, DBeaver, pgAdmin |
+| **Connector** על `*.mdb.{apex}:443` | מנהרת TLS עם agent מקומי כשפורטי DB חסומים |
+
+### PostgreSQL מהמחשב
+
+גישה מהאינטרנט מפרסמת `{instance}.mdb.{apex}:5432` עם TLS חובה. העתיקו host, משתמש, database וסיסמה מלשונית **חיבור**, ואז:
+
+```bash
+psql "postgresql://app@INSTANCE.mdb.holab.abrdns.com:5432/app?sslmode=require"
+```
+
+ב-PowerShell אותה מחרוזת. `sslmode=require` מספיק ב-Direct TCP הנוכחי (גם STARTTLS וגם `sslnegotiation=direct`). אל תשתמשו ב-host של `.holab.internal` מחוץ לאשכול.
+
+חובה להשתמש בסיסמה מ-**חשוף** — ה-pooler מאמת ב-SCRAM. אם `psql` לא מבקש סיסמה, אתם לא על נתיב Direct TCP העדכני.
+
+ב-DBeaver: PostgreSQL → Host `INSTANCE.mdb.holab.abrdns.com`, Port `5432`, Database `app`, Username `app`, סיסמה מ-חשוף, SSL Mode **require**.
 
 ### MySQL TCP ישיר — שם משתמש מיוחד
 

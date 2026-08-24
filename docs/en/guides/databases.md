@@ -40,8 +40,22 @@ Connection modes you may see:
 
 | Mode | Typical use |
 |------|-------------|
-| **Connector** on `*.mdb.{apex}:443` | TLS tunnel — good default from outside the cluster |
-| **Direct TCP** | Native ports (`5432` / `3306` / `27017`) when enabled for the instance |
+| **Direct TCP** on native ports (`5432` / `3306` / `27017`) | Default when internet access is enabled — use this from `psql`, DBeaver, pgAdmin |
+| **Connector** on `*.mdb.{apex}:443` | TLS tunnel via local agent when standard DB ports are blocked |
+
+### PostgreSQL from your laptop
+
+Internet access publishes `{instance}.mdb.{apex}:5432` with TLS required. Copy host, user, database, and password from **Connection**, then:
+
+```bash
+psql "postgresql://app@INSTANCE.mdb.holab.abrdns.com:5432/app?sslmode=require"
+```
+
+PowerShell is the same string. `sslmode=require` is enough on current Direct TCP (STARTTLS and `sslnegotiation=direct` both work). Do not use the `.holab.internal` host from outside the cluster.
+
+The client **must** use the password from **Reveal** — the pooler authenticates with SCRAM. If `psql` does not prompt, you are not on the current Direct TCP path.
+
+In DBeaver: PostgreSQL → Host `INSTANCE.mdb.holab.abrdns.com`, Port `5432`, Database `app`, Username `app`, Password from Reveal, SSL Mode **require**.
 
 ### MySQL direct TCP — special username
 
