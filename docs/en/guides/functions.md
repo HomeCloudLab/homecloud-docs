@@ -80,6 +80,8 @@ Attach shared dependency layers on the **Layers** tab. For Python layers, includ
 
 Enable a Function URL from the dedicated control when you need a stable HTTP entrypoint. Disable it when the endpoint should no longer be reachable. CLI: `homecloud fn url`.
 
+A custom hostname for that URL is connected from [Domains](domains.md) → **Services**, not from the function page.
+
 ### Configuration
 
 Set memory, timeout, environment variables, and **execution role** (IAM Role ARN) from configuration tabs. Functions should assume a **Role**, not an Access Key name.

@@ -18,8 +18,8 @@ Renewal is automatic. Platform edge wildcards (`*.app.{apex}` and similar) are n
 ## Typical flow
 
 1. Add and verify the domain under [Domains](domains.md).  
-2. Attach a hostname to an Application, Function, or website.  
-3. Wait until the certificate is Ready.  
+2. On the domain **Services** tab, connect an Application, Function URL, or SO website.  
+3. Wait until the SSL tab shows **Active** (Refresh re-reads status; issue/renew is automatic).  
 4. Open `https://your-host` in the browser.
 
 ## Troubleshooting

@@ -40,7 +40,8 @@ homecloud so cp "so://media/watch/spider noir/1/file.mkv" ".\file.mkv"
 1. Open the bucket → **Website**.  
 2. Enable website hosting and set index / error documents (for example `index.html`, `404.html`).  
 3. Upload your site files (or `homecloud so sync ./dist so://my-website/ --delete`).  
-4. Open `https://{bucket}.web.{apex}`.
+4. Open `https://{bucket}.web.{apex}`.  
+5. Optional custom hostname: [Domains](domains.md) → **Services** → **SO website**.
 
 ### Lifecycle, versioning, permissions
 

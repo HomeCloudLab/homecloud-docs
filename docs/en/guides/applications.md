@@ -36,7 +36,7 @@ After open, you typically get:
 | **Overview** | Status, endpoints, summary |
 | **Components** | Pieces of the stack |
 | **Resources** | CPU/memory and related knobs |
-| **Domains** | Attach custom hostnames |
+| **Domains** | Shows custom hostnames managed in [Domains](domains.md) |
 | **Metrics** | Runtime charts when enabled |
 | **Logs** | Stream or fetch recent logs |
 | **Settings** | Configuration edits |
@@ -46,7 +46,7 @@ Use **Operations** actions (restart, sync, etc.) from the UI when offered — pr
 
 ### Domains
 
-Attach a verified domain from [Domains](domains.md) so the app is reachable on your hostname. SSL certificates appear under [SSL](ssl.md) once issued.
+Connect a verified hostname from [Domains](domains.md) → **Services**. The application page lists attached hostnames as managed in Domains (no free-text custom domain field). SSL certificates appear under [SSL](ssl.md) once issued.
 
 ### Logs and metrics
 

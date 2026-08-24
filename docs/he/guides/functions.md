@@ -80,6 +80,8 @@ Rollback זמין מלשונית **Versions** / API כשצריך חבילה קו
 
 הפעילו Function URL מהבקרה הייעודית כשצריך נקודת כניסה HTTP יציבה. השביתו אותה כשהנקודה לא צריכה להיות נגישה יותר. CLI: `homecloud fn url`.
 
+hostname מותאם לכתובת הזו מחובר מ-[Domains](domains.md) → **שירותים**, לא מדף הפונקציה.
+
 ### Configuration
 
 הגדירו זיכרון, timeout, משתני סביבה ו**execution role** (ARN של תפקיד IAM) מלשוניות תצורה. Functions צריכות להניח **Role**, לא שם Access Key.

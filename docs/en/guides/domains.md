@@ -1,51 +1,55 @@
 # Domains & DNS
 
-Bring a domain you already own (any registrar). HomeCloud is the control plane; DNS and TLS are published by the platform backends.
+Bring a hostname you already own (any registrar). HomeCloud verifies ownership, then you connect it to a service. This is **not** a registrar — there is no purchase, transfer, or TLD renewal.
 
 | Item | Value |
 |------|--------|
-| Console | **Domains** (account catalog) |
+| Console | **Account → Domains** (`/console/account/domains`) |
 
-## Two setup modes
+The platform apex (today `holab.abrdns.com`) is a different DNS system. Tenant domains are **your** hostnames.
 
-### External DNS
+## Add a domain
 
-Keep DNS at your current registrar.
+1. **Domains** → **Add domain**.
+2. Enter the hostname (`example.com` or `app.example.com`).
+3. Choose **External DNS** (keep records at your registrar) or **HomeCloud DNS**.
+4. Click **Verify** when the TXT or nameservers match.
 
-1. **Domains** → **Add domain** → **External DNS**.
-2. Create the **TXT** record shown in the console.
-3. Click **Verify**.
-4. When you attach a hostname to an Application, create the **CNAME** the console shows.
+If HomeCloud DNS is not enabled in this environment, that option is visible but disabled. External DNS still works.
 
-SSL for that hostname uses HTTP-01 after the CNAME points at the platform.
+## External DNS
 
-### HomeCloud DNS
+Keep DNS at your registrar.
 
-HomeCloud hosts the zone. You only change nameservers at the registrar (GoDaddy, Namecheap, Google, or anywhere else). Nameservers look like `ns1.{apex}` and `ns2.{apex}` (today the lab apex is `holab.abrdns.com` until the production domain is purchased).
+1. Create the **TXT** record shown in the console.
+2. Click **Verify**.
+3. On the domain **Services** tab, connect an Application, Function URL, or SO website.
+4. Create the **CNAME** the console shows.
+5. SSL is issued automatically after the CNAME points at the platform. The **SSL** tab shows Active / Pending / Failed / Expiring / Expired and **Refresh**.
 
-1. **Add domain** → **HomeCloud DNS**.
-2. Set the nameservers the console lists.
-3. Click **Verify** (or wait for the background poll).
-4. Manage records in the console (A, AAAA, CNAME, TXT, MX, CAA, SRV).
-5. Attach Applications, Function URLs, websites, or Mail — records and certificates are applied for you.
+## HomeCloud DNS
 
-Apex (`example.com` → an Application) is an attachment, not a user-facing ALIAS record.
+When enabled, point nameservers at `ns1.{apex}` and `ns2.{apex}`, then Verify. Manage A, AAAA, CNAME, TXT, MX, CAA, and SRV on the **DNS** tab. Apex → a service is an **attachment**, not a record type named ALIAS.
 
-## Attach to a service
+## Domain page
 
-- **Applications → Domains** — custom hostname  
-- **SO website** — custom hostname in addition to `{bucket}.web.{apex}`  
-- **Mail** — on HomeCloud DNS, deliverability records can be applied from the Mail panel  
+Each domain has **Overview**, **DNS**, **SSL**, **Services**, **Mail**, and **Settings**.
+
+- **Services** — connect or detach Application, Function URL, or SO website. Compute cannot use a custom domain. One HTTP connection per domain.
+- **Mail** — opens [Mail Deliverability](mail.md) (one place for MX / SPF / DKIM / DMARC).
+- **Settings** — delete the domain after you detach services.
+
+Applications, Function URLs, and SO websites show attached hostnames as **Managed in Domains**. Connect only from the domain page.
 
 ## Tips
 
-- Nameserver changes can take minutes to hours.  
-- External DNS cannot map the zone apex with a CNAME; use `www` or switch to HomeCloud DNS.  
-- Detach a hostname from an app before deleting the domain.
+- Nameserver changes can take minutes to hours.
+- External DNS cannot map the zone apex with a CNAME; use `www` or HomeCloud DNS when that mode is enabled.
+- Detach the hostname before deleting the domain.
 
 ## Related
 
-- [Applications](applications.md)  
-- [SSL certificates](ssl.md)  
-- [Mail](mail.md)  
-- [Terraform](../terraform/index.md) (`homecloud_domain` — create does not wait for DNS verify)  
+- [Applications](applications.md)
+- [SSL certificates](ssl.md)
+- [Mail](mail.md)
+- [Terraform](../terraform/index.md) (`homecloud_domain` — create does not wait for DNS verify)

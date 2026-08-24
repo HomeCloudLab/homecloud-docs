@@ -40,7 +40,8 @@ homecloud so cp "so://media/watch/spider noir/1/file.mkv" ".\file.mkv"
 1. פתחו את ה-bucket → **Website**.  
 2. הפעילו אירוח אתר והגדירו מסמכי index / error (למשל `index.html`, `404.html`).  
 3. העלו את קבצי האתר (או `homecloud so sync ./dist so://my-website/ --delete`).  
-4. פתחו `https://{bucket}.web.{apex}`.
+4. פתחו `https://{bucket}.web.{apex}`.  
+5. hostname מותאם אופציונלי: [Domains](domains.md) → **שירותים** → **אתר SO**.
 
 ### Lifecycle, versioning, permissions
 
