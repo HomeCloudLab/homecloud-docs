@@ -127,15 +127,17 @@ Exec and files require Agent **ONLINE**. When the channel is up they run as RPC 
 - `GET .../machines/{id}/files/content?path=` — read text
 - `PUT .../machines/{id}/files` `{"path","content"}` — create or overwrite text
 - `GET .../machines/{id}/files/blob?path=` — download (up to 1 MiB)
+- `POST .../machines/{id}/files/blob?path=` — upload binary (chunked `write_b64`, up to 32 MiB)
 - `POST .../machines/{id}/files/mkdir` `{"path"}` — create a folder
+- `GET .../machines/{id}/metrics/history?range=1h|24h|7d|30d` — downsampled series (Compute Postgres, not the guest)
 
 Otherwise `409 compute.agent_offline`.
 
 The console **Session** tab does not connect until you choose a method and click Connect. Linux guests offer **Agent shell** (PTY). Windows guests also show **Guest desktop** (not shipped yet). SSH `:22` stays break-glass and is not a Session method.
 
-Full screen covers the **entire browser**: no Session title, no side padding. Esc or Exit full screen returns. The session stays connected while the browser tab is visible (WebSocket protocol pings every 20s so idle proxies do not drop it). Leaving the tab for **2 minutes** disconnects and shows Reconnect. Copy/paste: right-click menu or Ctrl+C / Ctrl+V / Ctrl+X (Ctrl+C copies when text is selected; otherwise it is SIGINT).
+Full screen covers the **entire browser**: no Session title, no side padding. The live-session toolbar uses console **chrome** tokens and themed `Button` variants (same as the top bar — AWS theme is orange primary, not unthemed white rectangles). Esc or Exit full screen returns. The session stays connected while the browser tab is visible (WebSocket protocol pings every 20s so idle proxies do not drop it). Leaving the tab for **2 minutes** disconnects and shows Reconnect. Copy/paste: right-click menu or Ctrl+C / Ctrl+V / Ctrl+X (Ctrl+C copies when text is selected; otherwise it is SIGINT).
 
-The **Explorer** tab lists folders and files (list or grid). Create, upload, mkdir, download, and delete; open text in the editor and images as a preview. Rebuild the VM to pick up the Agent channel (existing VMs keep HTTP heartbeat until rebuild).
+The **Explorer** tab lists folders and files (list or grid). Create, upload (drag-and-drop, up to 32 MiB), mkdir, download, and delete files. Folder move/rename is not in this release. Rebuild the VM to pick up `write_b64` chunked upload.
 
 ## Providers
 
@@ -157,6 +159,12 @@ Compute publishes `machine.updated` and `operation.updated` to the API Event Bus
 Agent heartbeats (every ~2s) do **not** publish `machine.updated` unless Agent visibility actually changes (`ONLINE` / `OFFLINE` / error). Routine heartbeats must not reopen SSE or poll the machine list.
 
 HTTP polling is only a fallback when the SSE stream is down, and only while a machine is busy (provisioning, deleting, or booting until Agent is ONLINE).
+
+## Performance history
+
+The Agent stays stateless: `/proc` → snapshot → heartbeat. Compute owns history (`MetricsRepository` → Postgres). Logs are a different store later (ADR-046). Do not write time series on the guest.
+
+Retention: 15s raw for 24h, 1m for 7d, 5m for 30d, 1h for 90d (min/max/avg). Network is stored as bytes/sec derived at ingest, not cumulative counters. The Performance tab shows four charts (CPU, memory, network, disk) with range buttons.
 
 ## Breaking changes
 
