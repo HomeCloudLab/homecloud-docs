@@ -34,7 +34,9 @@ The console keeps **one SSE connection per browser tab**. Tasks, Compute, Mail, 
 
 ## Service catalog
 
-Open **Services** in the sidebar (or `/console/services`) for the full catalog with short descriptions. Enabled services open their console pages; items marked coming soon are not clickable yet.
+The full catalog is on **console home** (`/console`). Cards are equal height, with a short description, featured tab links, and a resource count in the **end** panel (right in English, left in Hebrew). Each service uses its own color as a wash on that end panel — not a full-card fill.
+
+Open `/console/services` only if you still have a bookmark; it redirects home.
 
 ## Where to find common tasks
 
