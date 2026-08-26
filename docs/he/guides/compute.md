@@ -68,13 +68,15 @@ curl -sS -X POST "$HOMECLOUD_API/api/v1/accounts/$ACCOUNT_ID/compute/machines" \
 
 ## מפתחות SSH
 
-מפתחות SSH הם **ברמת החשבון**, לא פר-מכונה. HomeCloud מייצר מפתחות Ed25519. הקובץ **הפרטי** מוחזר **פעם אחת** ב-`POST .../compute/ssh-keys` ואינו נשמר. רשימה מחזירה שם, fingerprint ומפתח ציבורי בלבד. אותו מפתח אפשר להזריק לכמה מכונות דרך `ssh_key_ids`.
+מפתחות SSH הם **ברמת החשבון**, לא פר-מכונה. HomeCloud מייצר את זוג המפתחות. בוחרים **ED25519** (ברירת מחדל, מומלץ) או **RSA** (2048 / 3072 / 4096 ביט), כמו באופציות של AWS EC2. הקובץ **הפרטי** מוחזר **פעם אחת** ב-`POST .../compute/ssh-keys` ואינו נשמר. רשימה מחזירה שם, fingerprint, סוג ומפתח ציבורי בלבד. אותו מפתח אפשר להזריק לכמה מכונות דרך `ssh_key_ids`.
 
 | Method | Path |
 |--------|------|
 | GET | `/api/v1/accounts/{id}/compute/ssh-keys` |
-| POST | `/api/v1/accounts/{id}/compute/ssh-keys` `{"name":"laptop"}` → כולל `private_key` **פעם אחת** |
+| POST | `/api/v1/accounts/{id}/compute/ssh-keys` `{"name":"laptop","key_type":"ed25519"}` → כולל `private_key` **פעם אחת** |
 | DELETE | `/api/v1/accounts/{id}/compute/ssh-keys/{key_id}` |
+
+`key_type` הוא `ed25519` (ברירת מחדל) או `rsa`. ל-RSA, `rsa_bits` יכול להיות `2048` (ברירת מחדל), `3072` או `4096`.
 
 יצירת מכונה עם `"ssh_key_ids": ["<uuid>"]`. מחרוזות `ssh_keys` ציבוריות עדיין מתקבלות לאוטומציה.
 
@@ -112,9 +114,16 @@ Stop / reboot / delete עוברים בספק גם כש-`agent_state=OFFLINE`.
 Exec וקבצים דורשים Agent **ONLINE**:
 
 - `POST .../machines/{id}/exec` `{"command":"hostname"}`
-- `GET/PUT .../machines/{id}/files`
+- `GET .../machines/{id}/files?path=/` — רשימה (שם, גודל, שינוי, תיקייה/קובץ)
+- `GET .../machines/{id}/files/content?path=` — קריאת טקסט
+- `PUT .../machines/{id}/files` `{"path","content"}` — יצירה או דריסה של טקסט
+- `DELETE .../machines/{id}/files?path=` — מחיקת קובץ (לא תיקייה)
 
 אחרת `409 compute.agent_offline`.
+
+טאב **סשן** הוא PTY ב-P2P. החיבור נשאר כל עוד כרטיסיית הדפדפן גלויה (פינגים בפרוטוקול כל 20 שניות כדי שפרוקסי IDLE לא ינתק). עזיבת הכרטיסייה ל־**2 דקות** מנתקת ומציגה מסך שחור עם התחבר מחדש. מסך מלא כמו לוגים של Pod בקוברנטיס. העתקה/הדבקה: תפריט ימני או Ctrl+C / Ctrl+V / Ctrl+X (Ctrl+C מעתיק כשיש בחירה; אחרת SIGINT).
+
+טאב **סייר** מציג תיקיות וקבצים (רשימה או רשת, כמו SO). יצירה, העלאה ומחיקה של קבצים; פתיחת קבצי טקסט בעורך. rebuild למכונה אם ה-Agent קדם למטא-דאטה של הסייר / jobs של מחיקה.
 
 ## ספקים
 
@@ -127,7 +136,7 @@ HomeCloud הוא הענן. בוחרים **קונספט** ו**אזור**. Offerin
 | מכונות + מפתחות SSH | `/console/compute` |
 | Workspace | `/console/compute/{machine_id}` |
 
-טאבי שירות: **מכונות**, **מפתחות SSH**. טאבי מכונה: **סקירה** (משולש בריאות, מחזור חיים, firewall), **טרמינל** (exec של Agent), **קבצים**, **ביצועים**, **Snapshots**. טרמינל וקבצים דורשים `agent_state=ONLINE`. בלי `HETZNER_API_TOKEN` יצירה עדיין מחזירה HTTP 202; ה-Operation הוא **FAILED**.
+טאבי שירות: **מכונות**, **מפתחות SSH**. טאבי מכונה: **סקירה** (משולש בריאות, מחזור חיים, firewall), **סשן** (PTY של Agent, מסך מלא, העתקה/הדבקה), **סייר**, **ביצועים**, **Snapshots**. סשן וסייר דורשים `agent_state=ONLINE`. בלי `HETZNER_API_TOKEN` יצירה עדיין מחזירה HTTP 202; ה-Operation הוא **FAILED**.
 
 ## שינויים שוברים
 

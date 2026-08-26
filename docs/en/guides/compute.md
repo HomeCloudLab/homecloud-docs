@@ -68,13 +68,15 @@ Same `Idempotency-Key` + same body returns the original `machine_id` / `operatio
 
 ## SSH keys
 
-SSH keys are **account-wide**, not per machine. HomeCloud generates Ed25519 keys. The **private** file is returned **once** on `POST .../compute/ssh-keys` and is never stored. List/get return name, fingerprint, and public key only. The same key can be injected into many machines via `ssh_key_ids`.
+SSH keys are **account-wide**, not per machine. HomeCloud generates the key pair. Choose **ED25519** (default, recommended) or **RSA** (2048 / 3072 / 4096 bit), same options as AWS EC2 key pairs. The **private** file is returned **once** on `POST .../compute/ssh-keys` and is never stored. List/get return name, fingerprint, type, and public key only. The same key can be injected into many machines via `ssh_key_ids`.
 
 | Method | Path |
 |--------|------|
 | GET | `/api/v1/accounts/{id}/compute/ssh-keys` |
-| POST | `/api/v1/accounts/{id}/compute/ssh-keys` `{"name":"laptop"}` → includes `private_key` **once** |
+| POST | `/api/v1/accounts/{id}/compute/ssh-keys` `{"name":"laptop","key_type":"ed25519"}` → includes `private_key` **once** |
 | DELETE | `/api/v1/accounts/{id}/compute/ssh-keys/{key_id}` |
+
+`key_type` is `ed25519` (default) or `rsa`. For RSA, `rsa_bits` may be `2048` (default), `3072`, or `4096`.
 
 Create a machine with `"ssh_key_ids": ["<uuid>"]`. Inline `ssh_keys` public-key strings remain accepted for automation.
 
@@ -112,9 +114,16 @@ If the unit is disabled, heartbeat `{ "enabled": false }` sets `agent_state=OFFL
 Exec and files require Agent **ONLINE**:
 
 - `POST .../machines/{id}/exec` `{"command":"hostname"}`
-- `GET/PUT .../machines/{id}/files`
+- `GET .../machines/{id}/files?path=/` — list (name, size, modified, folder/file)
+- `GET .../machines/{id}/files/content?path=` — read text
+- `PUT .../machines/{id}/files` `{"path","content"}` — create or overwrite text
+- `DELETE .../machines/{id}/files?path=` — delete a file (not a directory)
 
 Otherwise `409 compute.agent_offline`.
+
+The console **Session** tab is a P2P PTY. It stays connected while the browser tab is visible (WebSocket protocol pings every 20s so idle proxies do not drop it). Leaving the tab for **2 minutes** disconnects and shows a black Reconnect screen. Full screen matches Kubernetes pod logs. Copy/paste: right-click menu or Ctrl+C / Ctrl+V / Ctrl+X (Ctrl+C copies when text is selected; otherwise it is SIGINT).
+
+The **Explorer** tab lists folders and files (list or grid, like SO). Create, upload, and delete files; open text files in the editor. Rebuild the VM if the Agent predates explorer metadata / delete jobs.
 
 ## Providers
 
@@ -127,7 +136,7 @@ HomeCloud is the cloud. You choose a **concept** and a **region**. Offerings (He
 | Machines + SSH keys | `/console/compute` |
 | Workspace | `/console/compute/{machine_id}` |
 
-Service tabs: **Machines**, **SSH keys**. Machine tabs: **Overview** (health triad, lifecycle, firewall), **Terminal** (Agent exec), **Files**, **Performance**, **Snapshots**. Terminal and files require `agent_state=ONLINE`. Without `HETZNER_API_TOKEN` a create still returns HTTP 202; the Operation is **FAILED**.
+Service tabs: **Machines**, **SSH keys**. Machine tabs: **Overview** (health triad, lifecycle, firewall), **Session** (Agent PTY, full screen, copy/paste), **Explorer**, **Performance**, **Snapshots**. Session and Explorer require `agent_state=ONLINE`. Without `HETZNER_API_TOKEN` a create still returns HTTP 202; the Operation is **FAILED**.
 
 ## Breaking changes
 
