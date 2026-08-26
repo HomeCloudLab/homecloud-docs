@@ -107,23 +107,33 @@ Disk is **grow-only**: `POST .../volumes/{volume_id}/resize` `{"size_gb":80}`.
 
 ## Agent
 
-The Agent opens **outbound** HTTPS to `/internal/compute/agent/heartbeat` with `X-Homecloud-Agent-Token`. There is no public inbound Agent port. There is **no uninstall API**.
+The Agent opens **outbound** TLS to Compute. Production guests use WebSocket `wss://…/internal/compute/agent/v1/connect` with **header** `X-Homecloud-Agent-Token` and `machine_id`. User JWT is ignored on that endpoint and never enters the guest. HTTP `POST /internal/compute/agent/heartbeat` remains a **fallback** for older images until rebuild. There is no public inbound Agent port. There is **no uninstall API**.
 
-If the unit is disabled, heartbeat `{ "enabled": false }` sets `agent_state=OFFLINE` while the VM can stay `RUNNING` — degraded management, not a dead machine. `POST .../machines/{id}/repair` re-issues node identity; it does not stop the VM.
+If the unit is disabled, heartbeat `{ "enabled": false }` sets `agent_state=OFFLINE` while the VM can stay `RUNNING`. A dropped channel, or no heartbeat for about 45 seconds, also shows `OFFLINE`. `POST .../machines/{id}/repair` re-issues node identity and **closes** any live channel; it does not stop the VM.
 
-Exec and files require Agent **ONLINE**:
+Guest tools are IAM-gated (viewers can list/preview/download; they cannot Session, exec, or write files):
+
+| Action | Permission |
+|--------|------------|
+| List / read / download guest files | `compute.read` |
+| Session PTY and `POST …/exec` | `compute.terminal` (or legacy `compute.update`) |
+| Create / upload / edit / mkdir / delete guest files | `compute.files.write` (or legacy `compute.update`) |
+| Start / stop / rebuild / firewall | `compute.update` |
+
+Exec and files require Agent **ONLINE**. When the channel is up they run as RPC (and Session as `stream.*` PTY) on that socket:
 
 - `POST .../machines/{id}/exec` `{"command":"hostname"}`
 - `GET .../machines/{id}/files?path=/` — list (name, size, modified, folder/file)
 - `GET .../machines/{id}/files/content?path=` — read text
 - `PUT .../machines/{id}/files` `{"path","content"}` — create or overwrite text
-- `DELETE .../machines/{id}/files?path=` — delete a file (not a directory)
+- `GET .../machines/{id}/files/blob?path=` — download (up to 1 MiB)
+- `POST .../machines/{id}/files/mkdir` `{"path"}` — create a folder
 
 Otherwise `409 compute.agent_offline`.
 
 The console **Session** tab is a P2P PTY. It stays connected while the browser tab is visible (WebSocket protocol pings every 20s so idle proxies do not drop it). Leaving the tab for **2 minutes** disconnects and shows a black Reconnect screen. Full screen matches Kubernetes pod logs. Copy/paste: right-click menu or Ctrl+C / Ctrl+V / Ctrl+X (Ctrl+C copies when text is selected; otherwise it is SIGINT).
 
-The **Explorer** tab lists folders and files (list or grid, like SO). Create, upload, and delete files; open text files in the editor. Rebuild the VM if the Agent predates explorer metadata / delete jobs.
+The **Explorer** tab lists folders and files (list or grid). Create, upload, mkdir, download, and delete; open text in the editor and images as a preview. Rebuild the VM to pick up the Agent channel (existing VMs keep HTTP heartbeat until rebuild).
 
 ## Providers
 

@@ -107,23 +107,33 @@ Stop / reboot / delete עוברים בספק גם כש-`agent_state=OFFLINE`.
 
 ## Agent
 
-ה-Agent פותח HTTPS **יוצא** אל `/internal/compute/agent/heartbeat` עם `X-Homecloud-Agent-Token`. אין פורט Agent נכנס ציבורי. **אין API להסרה**.
+ה-Agent פותח TLS **יוצא** אל Compute. אורחים חדשים משתמשים ב-WebSocket `wss://…/internal/compute/agent/v1/connect` עם כותרת `X-Homecloud-Agent-Token` ו-`machine_id`. JWT של המשתמש מנוטרל בנקודה הזו ולא נכנס לאורח. HTTP `POST /internal/compute/agent/heartbeat` נשאר **נסיגה** לדיסקים ישנים עד rebuild. אין פורט Agent נכנס ציבורי. **אין API להסרה**.
 
-אם היחידה כבויה, heartbeat `{ "enabled": false }` קובע `agent_state=OFFLINE` בזמן שה-VM יכול להישאר `RUNNING` — ניהול מוחלש, לא מכונה מתה. `POST .../machines/{id}/repair` מנפיק מחדש זהות צומת ולא עוצר את ה-VM.
+אם היחידה כבויה, heartbeat `{ "enabled": false }` קובע `agent_state=OFFLINE` בזמן שה-VM יכול להישאר `RUNNING`. ניתוק הערוץ, או היעדר heartbeat כ־45 שניות, גם מציגים `OFFLINE`. `POST .../machines/{id}/repair` מנפיק מחדש זהות צומת **וסוגר** ערוץ חי; לא עוצר את ה-VM.
 
-Exec וקבצים דורשים Agent **ONLINE**:
+כלי אורח מנוהלים ב-IAM (צופה יכול לרשום/תצוגה מקדימה/הורדה; לא Session, exec או כתיבת קבצים):
+
+| פעולה | הרשאה |
+|--------|--------|
+| רשימה / קריאה / הורדת קבצים | `compute.read` |
+| סשן PTY ו-`POST …/exec` | `compute.terminal` (או `compute.update` ישן) |
+| יצירה / העלאה / עריכה / mkdir / מחיקה | `compute.files.write` (או `compute.update` ישן) |
+| start / stop / rebuild / firewall | `compute.update` |
+
+Exec וקבצים דורשים Agent **ONLINE**. כשהערוץ למעלה הם רצים כ-RPC (וסשן כ-PTY `stream.*`) על אותו socket:
 
 - `POST .../machines/{id}/exec` `{"command":"hostname"}`
 - `GET .../machines/{id}/files?path=/` — רשימה (שם, גודל, שינוי, תיקייה/קובץ)
 - `GET .../machines/{id}/files/content?path=` — קריאת טקסט
 - `PUT .../machines/{id}/files` `{"path","content"}` — יצירה או דריסה של טקסט
-- `DELETE .../machines/{id}/files?path=` — מחיקת קובץ (לא תיקייה)
+- `GET .../machines/{id}/files/blob?path=` — הורדה (עד 1 MiB)
+- `POST .../machines/{id}/files/mkdir` `{"path"}` — יצירת תיקייה
 
 אחרת `409 compute.agent_offline`.
 
 טאב **סשן** הוא PTY ב-P2P. החיבור נשאר כל עוד כרטיסיית הדפדפן גלויה (פינגים בפרוטוקול כל 20 שניות כדי שפרוקסי IDLE לא ינתק). עזיבת הכרטיסייה ל־**2 דקות** מנתקת ומציגה מסך שחור עם התחבר מחדש. מסך מלא כמו לוגים של Pod בקוברנטיס. העתקה/הדבקה: תפריט ימני או Ctrl+C / Ctrl+V / Ctrl+X (Ctrl+C מעתיק כשיש בחירה; אחרת SIGINT).
 
-טאב **סייר** מציג תיקיות וקבצים (רשימה או רשת, כמו SO). יצירה, העלאה ומחיקה של קבצים; פתיחת קבצי טקסט בעורך. rebuild למכונה אם ה-Agent קדם למטא-דאטה של הסייר / jobs של מחיקה.
+טאב **סייר** מציג תיקיות וקבצים (רשימה או רשת). יצירה, העלאה, mkdir, הורדה ומחיקה; טקסט בעורך ותמונות בתצוגה מקדימה. rebuild כדי לקבל את ערוץ ה-Agent (מכונות קיימות נשארות על HTTP heartbeat עד rebuild).
 
 ## ספקים
 
