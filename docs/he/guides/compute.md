@@ -154,7 +154,7 @@ HomeCloud הוא הענן. בוחרים **קונספט** ו**אזור**. Offerin
 
 ## עדכונים חיים
 
-Compute מפרסם `machine.updated` ו-`operation.updated` ל-Event Bus של ה-API. Realtime Gateway מפיץ אותם ב-**SSE**. הקונסול שולף את המכונה או הרשימה רק כשמגיע אירוע.
+Compute מפרסם `machine.updated` ו-`operation.updated` ל-Event Bus של ה-API. Realtime Gateway מפיץ אותם ב-**SSE**. לטאב בקונסול יש כבר זרם חשבון אחד; Compute נרשם לפילטר עליו ושולף את המכונה או הרשימה רק כשמגיע אירוע. כניסה ל-Compute לא פותחת חיבור SSE שני.
 
 heartbeat של Agent (~כל 2 שניות) **לא** מפרסם `machine.updated` אלא אם נראות ה-Agent באמת השתנתה (`ONLINE` / `OFFLINE` / שגיאה). heartbeat שגרתי לא אמור לפתוח מחדש SSE או לפולל את רשימת המכונות.
 

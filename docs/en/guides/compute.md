@@ -154,7 +154,7 @@ Service tabs: **Machines**, **SSH keys**. Machine tabs: **Overview** (health tri
 
 ## Live updates
 
-Compute publishes `machine.updated` and `operation.updated` to the API Event Bus. The Realtime Gateway fans those out over **SSE**. The console refetches that machine or list only when an event arrives.
+Compute publishes `machine.updated` and `operation.updated` to the API Event Bus. The Realtime Gateway fans those out over **SSE**. The console tab already has one account stream; Compute registers a filter on it and refetches that machine or list only when an event arrives. Opening Compute does not open a second SSE connection.
 
 Agent heartbeats (every ~2s) do **not** publish `machine.updated` unless Agent visibility actually changes (`ONLINE` / `OFFLINE` / error). Routine heartbeats must not reopen SSE or poll the machine list.
 

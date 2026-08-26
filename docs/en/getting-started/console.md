@@ -30,6 +30,8 @@ The UI refetches counts only when the Realtime Gateway signals a relevant change
 
 The gateway is **account-scoped**, not Mail-only. Members connect if they have at least one event-family read permission (`tasks.read`, `iam.read`, `resources.read`, `billing.read`, `compute.read`, …). They only receive events for families they can read. A **403** from the stream is terminal — the console does not retry. Missing `resources.read` does not hide Tasks or the bell.
 
+The console keeps **one SSE connection per browser tab**. Tasks, Compute, Mail, and the notification bell register filters on that stream; opening a service does not open another `/realtime/events` request. REST remains the source of truth. After a deploy, clients reconnect with jitter so they do not all hit the API in the same second.
+
 ## Service catalog
 
 Open **Services** in the sidebar (or `/console/services`) for the full catalog with short descriptions. Enabled services open their console pages; items marked coming soon are not clickable yet.
