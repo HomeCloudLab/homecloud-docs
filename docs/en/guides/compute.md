@@ -135,7 +135,7 @@ Otherwise `409 compute.agent_offline`.
 
 The console **Session** tab does not connect until you choose a method and click Connect. Linux guests offer **Agent shell** (PTY). Windows guests also show **Guest desktop** (not shipped yet). SSH `:22` stays break-glass and is not a Session method.
 
-Full screen covers the **entire browser**: no Session title, no side padding. The live-session toolbar uses console **chrome** tokens and themed `Button` variants (same as the top bar — AWS theme is orange primary, not unthemed white rectangles). Esc or Exit full screen returns. The session stays connected while the browser tab is visible (WebSocket protocol pings every 20s so idle proxies do not drop it). Leaving the tab for **2 minutes** disconnects and shows Reconnect. Copy/paste: right-click menu or Ctrl+C / Ctrl+V / Ctrl+X (Ctrl+C copies when text is selected; otherwise it is SIGINT).
+Full screen covers the **entire browser**: no Session title, no side padding. The live-session toolbar follows the console **page theme** (background, borders, and buttons) so controls stay readable — in AWS that is a light bar with orange primary actions, not the dark top chrome. The terminal canvas stays dark. Esc or Exit full screen returns without dropping the session. The session stays connected while the browser tab is visible (WebSocket protocol pings every 20s so idle proxies do not drop it). Leaving the tab for **2 minutes** disconnects and shows Reconnect. Copy/paste: right-click menu or Ctrl+C / Ctrl+V / Ctrl+X (Ctrl+C copies when text is selected; otherwise it is SIGINT).
 
 The **Explorer** tab lists folders and files (list or grid). Create, upload (drag-and-drop, up to 32 MiB), mkdir, download, and delete files. Folder move/rename is not in this release. Rebuild the VM to pick up `write_b64` chunked upload.
 
@@ -164,7 +164,7 @@ HTTP polling is only a fallback when the SSE stream is down, and only while a ma
 
 The Agent stays stateless: `/proc` → snapshot → heartbeat. Compute owns history (`MetricsRepository` → Postgres). Logs are a different store later (ADR-046). Do not write time series on the guest.
 
-Retention: 15s raw for 24h, 1m for 7d, 5m for 30d, 1h for 90d (min/max/avg). Network is stored as bytes/sec derived at ingest, not cumulative counters. The Performance tab shows four charts (CPU, memory, network, disk) with range buttons.
+Retention: 15s raw for 24h, 1m for 7d, 5m for 30d, 1h for 90d (min/max/avg). Network is stored as bytes/sec derived at ingest, not cumulative counters. The Performance tab shows four charts (CPU, RAM, network, disk) with range buttons. Summary tiles show **used / total (percent)** for CPU (of allocated vCPU), RAM, and disk; network shows live KiB/s or MiB/s plus total bytes transferred. Chart hover uses the same units as the axis.
 
 ## Breaking changes
 
