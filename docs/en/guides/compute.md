@@ -36,7 +36,11 @@ Quota default is **10 machines** on the existing account quota table (`409 compu
 | `debian-12` | `homecloud-agent.deb` |
 | `almalinux-9` | `homecloud-agent.rpm` |
 
-No Windows. Create with `image_id` only — the adapter maps it to a vendor image internally. The client never sends that native id.
+Create with `image_id` only — the adapter maps it to a vendor image internally. The client never sends that native id.
+
+**Windows Server is not available from current capacity.** Current fulfillment is Hetzner Cloud, which has no Windows system image. The catalog still lists `windows-2022`; create is rejected with `compute.concept_unavailable`.
+
+AlmaLinux Agent install uses the `wheel` group (not Ubuntu `sudo`) and `pip` for `websocket-client`. Guests created before that cloud-init stay **Booting guest** until you **rebuild**.
 
 ## Create
 
@@ -135,7 +139,7 @@ Otherwise `409 compute.agent_offline`.
 
 The console **Session** tab does not connect until you choose a method and click Connect. Linux guests offer **Agent shell** (PTY). Windows guests also show **Guest desktop** (not shipped yet). SSH `:22` stays break-glass and is not a Session method.
 
-Full screen covers the **entire browser**: no Session title, no side padding. The live-session toolbar follows the console **page theme** (background, borders, and buttons) so controls stay readable — in AWS that is a light bar with orange primary actions, not the dark top chrome. The terminal canvas stays dark. Esc or Exit full screen returns without dropping the session. The session stays connected while the browser tab is visible (WebSocket protocol pings every 20s so idle proxies do not drop it). Leaving the tab for **2 minutes** disconnects and shows Reconnect. Copy/paste: right-click menu or Ctrl+C / Ctrl+V / Ctrl+X (Ctrl+C copies when text is selected; otherwise it is SIGINT).
+Full screen covers the **entire browser**: no Session title, no side padding. The live-session toolbar follows the console **page theme** (background, borders, and buttons) so controls stay readable — in AWS that is a light bar with orange primary actions, not the dark top chrome. The terminal canvas stays dark. Esc or Exit full screen returns without dropping the session. Find is a compact widget (match case / whole word / regex, result count, previous / next). Ctrl+F focuses it. The session stays connected while the browser tab is visible (WebSocket protocol pings every 20s so idle proxies do not drop it). Leaving the tab for **4 minutes** disconnects and shows Reconnect. End session, leaving Session, a dropped WebSocket, or Agent OFFLINE also close it. Idle typing does not. Copy/paste: right-click menu or Ctrl+C / Ctrl+V / Ctrl+X (Ctrl+C copies when text is selected; otherwise it is SIGINT).
 
 The **Explorer** tab lists folders and files (list or grid). Create, upload (drag-and-drop, up to 32 MiB), mkdir, download, and delete files. Folder move/rename is not in this release. Rebuild the VM to pick up `write_b64` chunked upload.
 
