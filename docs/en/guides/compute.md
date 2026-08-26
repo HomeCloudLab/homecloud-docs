@@ -131,7 +131,9 @@ Exec and files require Agent **ONLINE**. When the channel is up they run as RPC 
 
 Otherwise `409 compute.agent_offline`.
 
-The console **Session** tab is a P2P PTY. It stays connected while the browser tab is visible (WebSocket protocol pings every 20s so idle proxies do not drop it). Leaving the tab for **2 minutes** disconnects and shows a black Reconnect screen. Full screen matches Kubernetes pod logs. Copy/paste: right-click menu or Ctrl+C / Ctrl+V / Ctrl+X (Ctrl+C copies when text is selected; otherwise it is SIGINT).
+The console **Session** tab does not connect until you choose a method and click Connect. Linux guests offer **Agent shell** (PTY). Windows guests also show **Guest desktop** (not shipped yet). SSH `:22` stays break-glass and is not a Session method.
+
+Full screen covers the **entire browser**: no Session title, no side padding. Esc or Exit full screen returns. The session stays connected while the browser tab is visible (WebSocket protocol pings every 20s so idle proxies do not drop it). Leaving the tab for **2 minutes** disconnects and shows Reconnect. Copy/paste: right-click menu or Ctrl+C / Ctrl+V / Ctrl+X (Ctrl+C copies when text is selected; otherwise it is SIGINT).
 
 The **Explorer** tab lists folders and files (list or grid). Create, upload, mkdir, download, and delete; open text in the editor and images as a preview. Rebuild the VM to pick up the Agent channel (existing VMs keep HTTP heartbeat until rebuild).
 
@@ -146,7 +148,15 @@ HomeCloud is the cloud. You choose a **concept** and a **region**. Offerings (He
 | Machines + SSH keys | `/console/compute` |
 | Workspace | `/console/compute/{machine_id}` |
 
-Service tabs: **Machines**, **SSH keys**. Machine tabs: **Overview** (health triad, lifecycle, firewall), **Session** (Agent PTY, full screen, copy/paste), **Explorer**, **Performance**, **Snapshots**. Session and Explorer require `agent_state=ONLINE`. Without `HETZNER_API_TOKEN` a create still returns HTTP 202; the Operation is **FAILED**.
+Service tabs: **Machines**, **SSH keys**. Machine tabs: **Overview** (health triad, lifecycle, firewall), **Session** (choose Agent shell then Connect; full screen edge-to-edge), **Explorer**, **Performance**, **Snapshots**. Session and Explorer require `agent_state=ONLINE`. Without `HETZNER_API_TOKEN` a create still returns HTTP 202; the Operation is **FAILED**.
+
+## Live updates
+
+Compute publishes `machine.updated` and `operation.updated` to the API Event Bus. The Realtime Gateway fans those out over **SSE**. The console refetches that machine or list only when an event arrives.
+
+Agent heartbeats (every ~2s) do **not** publish `machine.updated` unless Agent visibility actually changes (`ONLINE` / `OFFLINE` / error). Routine heartbeats must not reopen SSE or poll the machine list.
+
+HTTP polling is only a fallback when the SSE stream is down, and only while a machine is busy (provisioning, deleting, or booting until Agent is ONLINE).
 
 ## Breaking changes
 
