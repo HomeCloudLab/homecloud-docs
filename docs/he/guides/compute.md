@@ -40,7 +40,7 @@ Workspace בקונסול: **`/console/compute`** — טאבים **מכונות**
 
 **Windows Server אינו זמין מהקיבולת הנוכחית.** המימוש הנוכחי הוא Hetzner Cloud, ואין לו image מערכת של Windows. הקטלוג עדיין מציג `windows-2022`; יצירה נדחית עם `compute.concept_unavailable`.
 
-התקנת Agent ב-AlmaLinux משתמשת בקבוצת `wheel` (לא `sudo` של Ubuntu) וב-`pip` ל-`websocket-client`. אורחים שנוצרו לפני ה-cloud-init הזה נשארים ב**אורח בעלייה** עד **rebuild**.
+התקנת Agent ב-AlmaLinux משתמשת בקבוצת `wheel` (לא `sudo` של Ubuntu) וב-`pip` ל-`websocket-client`. סקריפט ה-Agent תואם **Python 3.9** (AlmaLinux 9; `datetime.UTC` רק מ-3.11). אורחים שנוצרו לפני ה-cloud-init הזה נשארים ב**אורח בעלייה** עד **rebuild**.
 
 ## יצירה
 

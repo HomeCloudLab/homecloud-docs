@@ -40,7 +40,7 @@ Create with `image_id` only — the adapter maps it to a vendor image internally
 
 **Windows Server is not available from current capacity.** Current fulfillment is Hetzner Cloud, which has no Windows system image. The catalog still lists `windows-2022`; create is rejected with `compute.concept_unavailable`.
 
-AlmaLinux Agent install uses the `wheel` group (not Ubuntu `sudo`) and `pip` for `websocket-client`. Guests created before that cloud-init stay **Booting guest** until you **rebuild**.
+AlmaLinux Agent install uses the `wheel` group (not Ubuntu `sudo`) and `pip` for `websocket-client`. The Agent script is **Python 3.9 compatible** (AlmaLinux 9 ships 3.9; `datetime.UTC` is 3.11+). Guests created before that cloud-init stay **Booting guest** until you **rebuild**.
 
 ## Create
 
