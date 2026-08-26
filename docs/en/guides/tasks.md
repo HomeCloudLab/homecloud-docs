@@ -8,7 +8,7 @@ Tasks is a lightweight operational tracker for the account (Hebrew UI name: **מ
 | Keys | `TASK-{n}` per account |
 | Storage | Control-plane Postgres (not an Orchestrator resource) |
 | Notify | Email via platform **noreply** to people with a role on the item (assignees on create/assign; creator **and** assignees on done/cancelled). The console bell lists **one row per unseen discussion** for creator / assignees / watchers (not a copy of each comment). Quoting someone's message also rings their bell even if they are not on the item, as long as they can open Tasks. |
-| Live UI | Realtime Gateway SSE hint; REST is source of truth. Opening a task sets `last_seen_at` for you (WhatsApp-style). |
+| Live UI | Realtime Gateway SSE hint; REST is source of truth. Opening a task sets `last_seen_at` for you (WhatsApp-style). Members with `tasks.read` (and no `resources.read`) still get the live stream and the bell for Tasks — the gateway is not a Mail-only channel. |
 
 ## Console walkthrough
 

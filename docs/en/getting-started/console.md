@@ -28,6 +28,8 @@ The footer bell is an aggregator, not a second inbox:
 
 The UI refetches counts only when the Realtime Gateway signals a relevant change (debounced). Comments and mail messages are not copied into a notifications table.
 
+The gateway is **account-scoped**, not Mail-only. Members connect if they have at least one event-family read permission (`tasks.read`, `iam.read`, `resources.read`, `billing.read`, `compute.read`, …). They only receive events for families they can read. A **403** from the stream is terminal — the console does not retry. Missing `resources.read` does not hide Tasks or the bell.
+
 ## Service catalog
 
 Open **Services** in the sidebar (or `/console/services`) for the full catalog with short descriptions. Enabled services open their console pages; items marked coming soon are not clickable yet.
