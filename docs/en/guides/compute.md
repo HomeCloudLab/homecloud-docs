@@ -4,7 +4,7 @@ Compute is HomeCloud **IaaS**: you ask for a **machine concept** in a HomeCloud 
 
 You buy `hc.general.small` in `eu-central`, not “CX22 in Falkenstein”. The control plane picks a **Provider Offering** internally. Customer list price is on the concept. Wholesale cost is on the offering and is never returned to you.
 
-The console workspace is **`/console/compute`**: **Machines**, **SSH keys**, **Security groups**, **Floating IPs**, and **Load balancers** tabs, plus a machine detail workspace (Overview, Terminal, Files, Performance, Snapshots). CLI/SDK commands will follow when this contract is soaked.
+The console workspace is **`/console/compute`**: **Machines**, **SSH keys**, **Security groups**, **Floating IPs**, **Load balancers**, and **VPC** tabs (VPC is capability-gated), plus a machine detail workspace (Overview, Terminal, Files, Performance, Snapshots). CLI/SDK commands will follow when this contract is soaked.
 
 | Item | Value |
 |------|--------|
@@ -25,8 +25,11 @@ The console workspace is **`/console/compute`**: **Machines**, **SSH keys**, **S
 | **Health triad** | `desired_state`, `provider_state`, `agent_state` — three fields, never one status string |
 | **rebuild** | User action, same `machine_id` |
 | **recover** | Control plane replaces a dead VM, keeps volumes |
+| **VPC** | Account private IPv4 fabric in a HomeCloud region (CIDR). Not a vendor “network” name. |
+| **Subnet** | CIDR carve-out **inside** the parent VPC CIDR. Machines attach to a subnet. |
+| **NIC** | Machine network interface. Stage 6.1: at most **one** private NIC (subnet attach) per machine; inventory shows `nic.private_ip` when attached. |
 
-Quota default is **10 machines** on the existing account quota table (`409 compute.quota_exceeded`). Exhausted region capacity is `409 compute.capacity_exhausted`.
+Quota default is **10 machines** on the existing account quota table (`409 compute.quota_exceeded`). Exhausted region capacity is `409 compute.capacity_exhausted`. VPC quotas: **5 VPCs** and **20 subnets** per account.
 
 ## Images
 
@@ -118,13 +121,15 @@ CPU/RAM resize is **Standard only** and requires the machine **stopped**:
 
 Disk is **grow-only**: `POST .../volumes/{volume_id}/resize` `{"size_gb":80}`.
 
-## Firewall, volumes, snapshots, Floating IP
+## Firewall, volumes, snapshots
 
-- **Security groups** are the source of truth for ingress (account-scoped; attach to machines). Each rule is TCP/UDP + port + **source CIDR** (e.g. `0.0.0.0/0` or `203.0.113.10/32`). Domains are not supported.
+- **Security groups** are the source of truth for ingress (account-scoped). Attach to a **machine** and/or to a private **NIC** (`target_type` `machine` | `nic`). Each rule is TCP/UDP + port + **source CIDR** (e.g. `0.0.0.0/0`, a public host, or a VPC/subnet CIDR). Domains are not supported.
+- Effective rules for a machine = **union** of groups attached to the machine **and** to its NICs (deduplicated). On current Hetzner capacity the driver still applies that union to the **server** firewall — NIC targeting is HomeCloud SoT for future per-interface vendors.
 - The account **default** group includes **TCP 22**. Extra groups do **not** force SSH — create HTTPS-only groups if you want.
 - Console: Compute → **Security groups** (quick create dialog; full-page edit). Detach removes the vendor firewall from the VM; delete removes the firewall object. `PUT .../machines/{id}/firewall` is a compatibility shim that writes the account **default** group.
+- Attach API: `POST .../security-groups/{group_id}/attachments` `{"target_type":"machine"|"nic","target_id":"…"}`. Machine shorthand `POST .../machines/{id}/security-groups/{group_id}` always uses `target_type=machine`.
 - Drivers without a vendor firewall (Scaleway today) store the policy in HomeCloud and do not pretend the vendor applied it.
-- IPv4 is allocated; IPv6 is stored as null and not required.
+- Public IPv4 is allocated on the machine NIC; private IPv4 appears after [VPC subnet attach](#vpc-subnets-private-nic). IPv6 is stored as null and not required.
 - Snapshot a **volume** (`POST .../volumes/{id}/snapshots`), list with `GET .../volumes/{id}/snapshots`, restore to a **new volume** (`POST .../snapshots/{id}/restore`). Not a machine snapshot.
 
 ## Floating IP
@@ -177,7 +182,7 @@ Console: Compute → **Floating IPs**, and the machine Overview card when the pl
 
 ## Load balancers
 
-A public Load Balancer is a **VIP** in front of Compute machines. Targets are reached on **public IPv4** — Stage 5 does not require VPC/private networking. Targets must share the **same capacity placement** as the LB (same rule as Floating IP). Protocols in this release: **TCP** and **HTTP** (HTTPS termination later). Quota is **5** per account (`409 compute.load_balancer_quota`).
+A public Load Balancer is a **VIP** in front of Compute machines. Targets are reached on **public IPv4** — this release does not require a VPC. (Private / east-west LB targets come later; VPC + private NIC are the foundation.) Targets must share the **same capacity placement** as the LB (same rule as Floating IP). Protocols in this release: **TCP** and **HTTP** (HTTPS termination later). Quota is **5** per account (`409 compute.load_balancer_quota`).
 
 PowerShell:
 
@@ -218,6 +223,94 @@ Mutating calls return **202** `{ load_balancer_id, operation_id }`.
 | `compute.invalid_listener` | Bad protocol/port |
 
 Console: Compute → **Load balancers**.
+
+## VPC / subnets / private NIC
+
+A **VPC** is an account-scoped private IPv4 fabric in a HomeCloud **region**. You choose a CIDR (typically RFC1918), carve **subnets** that must sit **inside** that VPC CIDR, then **attach** a machine to a subnet (one private NIC per machine in this release). Inventory shows the observed private address on `nic.private_ip`. Public IPv4 / Floating IP behavior is unchanged.
+
+Capability gate: placements with `private_network` support VPC (Hetzner today). Scaleway and other drivers without private networks return `compute.vpc_unsupported` and the console **hides** the VPC tab when no capable region is selected — same honesty pattern as Floating IP.
+
+Quotas: **5 VPCs** and **20 subnets** per account (`409 compute.vpc_quota` / `compute.subnet_quota`). One private subnet attachment per machine.
+
+### Create VPC
+
+PowerShell:
+
+```powershell
+Invoke-RestMethod -Method Post `
+  -Uri "$env:HOMECLOUD_API/api/v1/accounts/$accountId/compute/vpcs" `
+  -Headers @{ Authorization = "Bearer $token" } `
+  -ContentType "application/json" `
+  -Body '{"name":"app-net","region_code":"eu-central","cidr":"10.0.0.0/16"}'
+```
+
+bash:
+
+```bash
+curl -sS -X POST "$HOMECLOUD_API/api/v1/accounts/$ACCOUNT_ID/compute/vpcs" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"name":"app-net","region_code":"eu-central","cidr":"10.0.0.0/16"}'
+```
+
+### Create subnet
+
+Subnet CIDR must be a subnet of the parent VPC CIDR and must not overlap sibling subnets.
+
+PowerShell:
+
+```powershell
+Invoke-RestMethod -Method Post `
+  -Uri "$env:HOMECLOUD_API/api/v1/accounts/$accountId/compute/vpcs/$vpcId/subnets" `
+  -Headers @{ Authorization = "Bearer $token" } `
+  -ContentType "application/json" `
+  -Body '{"name":"web","cidr":"10.0.1.0/24"}'
+```
+
+bash:
+
+```bash
+curl -sS -X POST "$HOMECLOUD_API/api/v1/accounts/$ACCOUNT_ID/compute/vpcs/$VPC_ID/subnets" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"name":"web","cidr":"10.0.1.0/24"}'
+```
+
+### Attach / detach machine
+
+`POST .../machines/{machine_id}/subnets/{subnet_id}` attaches the machine’s private NIC (same region + capacity placement as the VPC). `DELETE` on the same path detaches. Mutating calls return **202** `{ nic_id, machine_id, subnet_id, operation_id }` (detach clears `subnet_id` in the response).
+
+| Action | Request |
+|--------|---------|
+| List VPCs | `GET .../vpcs?region_code=` (sets `can_create` when region is capable) |
+| Get VPC | `GET .../vpcs/{id}` (includes nested `subnets`) |
+| Create VPC | `POST .../vpcs` `{ name, region_code, cidr, description? }` |
+| Delete VPC | `DELETE .../vpcs/{id}` |
+| List subnets | `GET .../vpcs/{id}/subnets` |
+| Create subnet | `POST .../vpcs/{id}/subnets` `{ name, cidr }` |
+| Delete subnet | `DELETE .../vpcs/{id}/subnets/{subnet_id}` or `DELETE .../subnets/{subnet_id}` |
+| Attach | `POST .../machines/{machine_id}/subnets/{subnet_id}` |
+| Detach | `DELETE .../machines/{machine_id}/subnets/{subnet_id}` |
+
+Mutating VPC/subnet/NIC calls return **202** with an `operation_id`. Machine and VPC must share region and capacity placement (same family of checks as Floating IP / LB).
+
+| Code | Meaning |
+|------|---------|
+| `compute.vpc_unsupported` | Region/placement has no private-network capability |
+| `compute.vpc_quota` | Account already has 5 VPCs |
+| `compute.subnet_quota` | Account already has 20 subnets |
+| `compute.invalid_cidr` | Bad CIDR, or subnet not contained in VPC CIDR |
+| `compute.subnet_overlap` | Subnet CIDR overlaps another subnet in the VPC |
+| `compute.vpc_in_use` | Delete blocked while subnets/NICs still in use |
+| `compute.vpc_region` | Machine and VPC in different regions |
+| `compute.vpc_provider` | Machine and VPC are not the same capacity placement |
+| `compute.nic_busy` | Attach/detach still in progress, or machine already has a private subnet |
+| `compute.subnet_busy` | Subnet still provisioning |
+| `compute.vpc_not_found` / `compute.subnet_not_found` | Unknown id |
+
+Console: Compute → **VPC** (when the selected region can create). Machine **Overview** shows private IPv4 and attach/detach when the placement supports private networks.
+
+Security groups may target the NIC after attach: `POST .../security-groups/{group_id}/attachments` with `{"target_type":"nic","target_id":"<nic_id>"}` (`nic_id` from the attach response).
 
 ## Agent
 
@@ -261,14 +354,14 @@ HomeCloud is the cloud. You choose a **concept** and a **region**. Offerings (He
 
 | Page | Path |
 |------|------|
-| Machines + SSH keys + Security groups + Floating IPs + Load balancers | `/console/compute` |
+| Machines + SSH keys + Security groups + Floating IPs + Load balancers + VPC | `/console/compute` |
 | Workspace | `/console/compute/{machine_id}` |
 
-Service tabs: **Machines**, **SSH keys**, **Security groups**, **Floating IPs**, **Load balancers**. Machine tabs: **Overview** (health triad, lifecycle, attached groups, Floating IP), **Session** (choose Agent shell then Connect; full screen edge-to-edge), **Explorer**, **Performance**, **Snapshots**. Session and Explorer require `agent_state=ONLINE`. Without `HETZNER_API_TOKEN` a create still returns HTTP 202; the Operation is **FAILED**.
+Service tabs: **Machines**, **SSH keys**, **Security groups**, **Floating IPs**, **Load balancers**, **VPC** (hidden when the region has no `private_network` capability). Machine tabs: **Overview** (health triad, lifecycle, attached groups, Floating IP, private NIC / IPv4), **Session** (choose Agent shell then Connect; full screen edge-to-edge), **Explorer**, **Performance**, **Snapshots**. Session and Explorer require `agent_state=ONLINE`. Without `HETZNER_API_TOKEN` a create still returns HTTP 202; the Operation is **FAILED**.
 
 ## Live updates
 
-Compute publishes `machine.updated`, `operation.updated`, `floating_ip.updated`, and `load_balancer.updated` to the API Event Bus. The Realtime Gateway fans those out over **SSE**. The console tab already has one account stream; Compute registers a filter on it and refetches that machine or list only when an event arrives. Opening Compute does not open a second SSE connection.
+Compute publishes `machine.updated`, `operation.updated`, `floating_ip.updated`, `load_balancer.updated`, `vpc.updated`, `subnet.updated`, and `nic.updated` to the API Event Bus. The Realtime Gateway fans those out over **SSE**. The console tab already has one account stream; Compute registers a filter on it and refetches that machine or list only when an event arrives. Opening Compute does not open a second SSE connection.
 
 Agent heartbeats (every ~2s) do **not** publish `machine.updated` unless Agent visibility actually changes (`ONLINE` / `OFFLINE` / error). Routine heartbeats must not reopen SSE or poll the machine list.
 

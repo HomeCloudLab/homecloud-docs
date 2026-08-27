@@ -4,7 +4,7 @@ Compute הוא שכבת ה-**IaaS** של HomeCloud: קונים **קונספט מ
 
 קונים `hc.general.small` ב-`eu-central`, לא “CX22 ב-Falkenstein”. מישור הבקרה בוחר **Provider Offering** בפנים. מחיר הלקוח חי על הקונספט. עלות הספק חיה על ה-Offering ואינה חוזרת ללקוח.
 
-Workspace בקונסול: **`/console/compute`** — טאבים **מכונות**, **מפתחות SSH**, **Security groups**, **Floating IPs** ו-**Load balancers**, ו-workspace לפרטי מכונה (סקירה, טרמינל, קבצים, ביצועים, Snapshots). פקודות CLI/SDK יגיעו אחרי שהחוזה יתייצב.
+Workspace בקונסול: **`/console/compute`** — טאבים **מכונות**, **מפתחות SSH**, **Security groups**, **Floating IPs**, **Load balancers** ו-**VPC** (VPC מסונן לפי יכולת), ו-workspace לפרטי מכונה (סקירה, טרמינל, קבצים, ביצועים, Snapshots). פקודות CLI/SDK יגיעו אחרי שהחוזה יתייצב.
 
 | פריט | ערך |
 |------|--------|
@@ -25,8 +25,11 @@ Workspace בקונסול: **`/console/compute`** — טאבים **מכונות**
 | **Health triad** | `desired_state`, `provider_state`, `agent_state` — שלושה שדות, לא מחרוזת status אחת |
 | **rebuild** | פעולת משתמש, אותו `machine_id` |
 | **recover** | מישור הבקרה מחליף VM מת, שומר volumes |
+| **VPC** | רשת IPv4 פרטית ברמת חשבון באזור HomeCloud (CIDR). לא שם “network” של ספק. |
+| **Subnet** | חיתוך CIDR **בתוך** ה-CIDR של ה-VPC. מכונות מתחברות ל-subnet. |
+| **NIC** | ממשק רשת של המכונה. Stage 6.1: לכל היותר **NIC פרטי אחד** (חיבור ל-subnet) למכונה; במלאי מופיע `nic.private_ip` אחרי חיבור. |
 
-מכסת ברירת מחדל: **10 מכונות** בטבלת ה-quota הקיימת (`409 compute.quota_exceeded`). קיבולת אזור מלאה: `409 compute.capacity_exhausted`.
+מכסת ברירת מחדל: **10 מכונות** בטבלת ה-quota הקיימת (`409 compute.quota_exceeded`). קיבולת אזור מלאה: `409 compute.capacity_exhausted`. מכסות VPC: **5 VPCs** ו-**20 subnets** לחשבון.
 
 ## Images
 
@@ -118,13 +121,15 @@ Stop / reboot / delete עוברים בספק גם כש-`agent_state=OFFLINE`.
 
 דיסק הוא **גידול בלבד**: `POST .../volumes/{volume_id}/resize` `{"size_gb":80}`.
 
-## Firewall, volumes, snapshots, Floating IP
+## Firewall, volumes, snapshots
 
-- **Security groups** הם מקור האמת ל-ingress (ברמת חשבון; מחברים למכונות). כל כלל הוא TCP/UDP + פורט + **CIDR מקור** (למשל `0.0.0.0/0` או `203.0.113.10/32`). דומיינים לא נתמכים.
+- **Security groups** הם מקור האמת ל-ingress (ברמת חשבון). מחברים ל**מכונה** ו/או ל-**NIC** פרטי (`target_type` `machine` | `nic`). כל כלל הוא TCP/UDP + פורט + **CIDR מקור** (למשל `0.0.0.0/0`, מארח ציבורי, או CIDR של VPC/subnet). דומיינים לא נתמכים.
+- כללי האפקטיביים למכונה = **איחוד** הקבוצות המחוברות למכונה **ול-NICs** שלה (בלי כפילויות). בקיבולת Hetzner הנוכחית הדרייבר עדיין מחיל את האיחוד על firewall של ה**שרת** — מיקוד ל-NIC הוא SoT של HomeCloud לספקים עתידיים לפי ממשק.
 - קבוצת **default** כוללת **TCP 22**. קבוצות נוספות **לא** כופות SSH — אפשר ליצור קבוצה ל-HTTPS בלבד.
 - בקונסול: Compute → **Security groups** (יצירה מהירה בפופאפ; עריכה בעמוד מלא). ניתוק מסיר את ה-firewall מה-VM אצל הספק; מחיקה מוחקת את אובייקט ה-firewall. `PUT .../machines/{id}/firewall` הוא shim תאימות שכותב לקבוצת **default**.
+- API חיבור: `POST .../security-groups/{group_id}/attachments` `{"target_type":"machine"|"nic","target_id":"…"}`. קיצור מכונה `POST .../machines/{id}/security-groups/{group_id}` תמיד משתמש ב-`target_type=machine`.
 - דרייברים בלי firewall אצל הספק (Scaleway כרגע) שומרים את המדיניות ב-HomeCloud ולא מתיימרים שהספק החיל אותה.
-- מוקצה IPv4; IPv6 נשמר כ-null ולא נדרש.
+- IPv4 ציבורי מוקצה על NIC של המכונה; IPv4 פרטי מופיע אחרי [חיבור ל-subnet ב-VPC](#vpc-subnets-private-nic). IPv6 נשמר כ-null ולא נדרש.
 - Snapshot ל-**volume** (`POST .../volumes/{id}/snapshots`), רשימה ב-`GET .../volumes/{id}/snapshots`, שחזור ל-**volume חדש** (`POST .../snapshots/{id}/restore`). לא snapshot של מכונה.
 
 ## Floating IP
@@ -177,7 +182,7 @@ curl -sS -X POST "$HOMECLOUD_API/api/v1/accounts/$ACCOUNT_ID/compute/floating-ip
 
 ## Load balancers
 
-Load Balancer ציבורי הוא **VIP** מול מכונות Compute. היעדים נגישים ב-**IPv4 ציבורי** — Stage 5 לא דורש VPC. היעדים חייבים לשתף את **אותו placement קיבולת** כמו ה-LB (כמו Floating IP). פרוטוקולים בגרסה זו: **TCP** ו-**HTTP** (HTTPS בהמשך). מכסה: **5** לחשבון (`409 compute.load_balancer_quota`).
+Load Balancer ציבורי הוא **VIP** מול מכונות Compute. היעדים נגישים ב-**IPv4 ציבורי** — הגרסה הזו לא דורשת VPC. (LB פרטי / east-west יגיע בהמשך; VPC + NIC פרטי הם הבסיס.) היעדים חייבים לשתף את **אותו placement קיבולת** כמו ה-LB (כמו Floating IP). פרוטוקולים בגרסה זו: **TCP** ו-**HTTP** (HTTPS בהמשך). מכסה: **5** לחשבון (`409 compute.load_balancer_quota`).
 
 PowerShell:
 
@@ -218,6 +223,94 @@ curl -sS -X POST "$HOMECLOUD_API/api/v1/accounts/$ACCOUNT_ID/compute/load-balanc
 | `compute.invalid_listener` | פרוטוקול/פורט לא תקין |
 
 בקונסול: Compute → **Load balancers**.
+
+## VPC / subnets / private NIC
+
+**VPC** הוא רשת IPv4 פרטית ברמת חשבון באזור HomeCloud. בוחרים CIDR (בדרך כלל RFC1918), חותכים **subnets** שחייבים לשבת **בתוך** ה-CIDR של ה-VPC, ואז **מחברים** מכונה ל-subnet (NIC פרטי אחד למכונה בגרסה זו). במלאי מופיעה הכתובת הפרטית ב-`nic.private_ip`. IPv4 ציבורי / Floating IP לא משתנים.
+
+שער יכולת: placements עם `private_network` תומכים ב-VPC (Hetzner היום). Scaleway ודרייברים בלי רשת פרטית מחזירים `compute.vpc_unsupported`, והקונסול **מסתיר** את טאב VPC כשאין אזור תומך — אותה כנות כמו Floating IP.
+
+מכסות: **5 VPCs** ו-**20 subnets** לחשבון (`409 compute.vpc_quota` / `compute.subnet_quota`). חיבור subnet פרטי אחד למכונה.
+
+### יצירת VPC
+
+PowerShell:
+
+```powershell
+Invoke-RestMethod -Method Post `
+  -Uri "$env:HOMECLOUD_API/api/v1/accounts/$accountId/compute/vpcs" `
+  -Headers @{ Authorization = "Bearer $token" } `
+  -ContentType "application/json" `
+  -Body '{"name":"app-net","region_code":"eu-central","cidr":"10.0.0.0/16"}'
+```
+
+bash:
+
+```bash
+curl -sS -X POST "$HOMECLOUD_API/api/v1/accounts/$ACCOUNT_ID/compute/vpcs" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"name":"app-net","region_code":"eu-central","cidr":"10.0.0.0/16"}'
+```
+
+### יצירת subnet
+
+CIDR של subnet חייב להיות subnet של ה-CIDR של ה-VPC ולא לחפוף subnets אחים.
+
+PowerShell:
+
+```powershell
+Invoke-RestMethod -Method Post `
+  -Uri "$env:HOMECLOUD_API/api/v1/accounts/$accountId/compute/vpcs/$vpcId/subnets" `
+  -Headers @{ Authorization = "Bearer $token" } `
+  -ContentType "application/json" `
+  -Body '{"name":"web","cidr":"10.0.1.0/24"}'
+```
+
+bash:
+
+```bash
+curl -sS -X POST "$HOMECLOUD_API/api/v1/accounts/$ACCOUNT_ID/compute/vpcs/$VPC_ID/subnets" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"name":"web","cidr":"10.0.1.0/24"}'
+```
+
+### חיבור / ניתוק מכונה
+
+`POST .../machines/{machine_id}/subnets/{subnet_id}` מחבר את ה-NIC הפרטי של המכונה (אותו אזור + placement כמו ה-VPC). `DELETE` באותו נתיב מנתק. קריאות שינוי מחזירות **202** `{ nic_id, machine_id, subnet_id, operation_id }` (בניתוק `subnet_id` מתאפס בתשובה).
+
+| פעולה | בקשה |
+|--------|---------|
+| רשימת VPCs | `GET .../vpcs?region_code=` (מגדיר `can_create` כשהאזור תומך) |
+| קריאת VPC | `GET .../vpcs/{id}` (כולל `subnets` מקוננים) |
+| יצירת VPC | `POST .../vpcs` `{ name, region_code, cidr, description? }` |
+| מחיקת VPC | `DELETE .../vpcs/{id}` |
+| רשימת subnets | `GET .../vpcs/{id}/subnets` |
+| יצירת subnet | `POST .../vpcs/{id}/subnets` `{ name, cidr }` |
+| מחיקת subnet | `DELETE .../vpcs/{id}/subnets/{subnet_id}` או `DELETE .../subnets/{subnet_id}` |
+| חיבור | `POST .../machines/{machine_id}/subnets/{subnet_id}` |
+| ניתוק | `DELETE .../machines/{machine_id}/subnets/{subnet_id}` |
+
+קריאות שינוי ל-VPC/subnet/NIC מחזירות **202** עם `operation_id`. מכונה ו-VPC חייבים לשתף אזור ו-placement קיבולת (אותה משפחת בדיקות כמו Floating IP / LB).
+
+| קוד | משמעות |
+|------|---------|
+| `compute.vpc_unsupported` | אין יכולת רשת פרטית באזור/placement |
+| `compute.vpc_quota` | בחשבון כבר יש 5 VPCs |
+| `compute.subnet_quota` | בחשבון כבר יש 20 subnets |
+| `compute.invalid_cidr` | CIDR לא תקין, או subnet לא בתוך CIDR של ה-VPC |
+| `compute.subnet_overlap` | CIDR של subnet חופף subnet אחר ב-VPC |
+| `compute.vpc_in_use` | מחיקה חסומה כל עוד יש subnets/NICs בשימוש |
+| `compute.vpc_region` | מכונה ו-VPC באזורים שונים |
+| `compute.vpc_provider` | מכונה ו-VPC אינם באותו placement קיבולת |
+| `compute.nic_busy` | חיבור/ניתוק עדיין בתהליך, או למכונה כבר יש subnet פרטי |
+| `compute.subnet_busy` | ה-subnet עדיין ב-provisioning |
+| `compute.vpc_not_found` / `compute.subnet_not_found` | מזהה לא מוכר |
+
+בקונסול: Compute → **VPC** (כשהאזור שנבחר יכול ליצור). ב**סקירה** של המכונה — IPv4 פרטי וחיבור/ניתוק כשה-placement תומך ברשת פרטית.
+
+אחרי חיבור אפשר לחבר Security group ל-NIC: `POST .../security-groups/{group_id}/attachments` עם `{"target_type":"nic","target_id":"<nic_id>"}` (`nic_id` מתשובת החיבור).
 
 ## Agent
 
@@ -261,14 +354,14 @@ HomeCloud הוא הענן. בוחרים **קונספט** ו**אזור**. Offerin
 
 | דף | נתיב |
 |------|------|
-| מכונות + מפתחות SSH + Security groups + Floating IPs + Load balancers | `/console/compute` |
+| מכונות + מפתחות SSH + Security groups + Floating IPs + Load balancers + VPC | `/console/compute` |
 | Workspace | `/console/compute/{machine_id}` |
 
-טאבי שירות: **מכונות**, **מפתחות SSH**, **Security groups**, **Floating IPs**, **Load balancers**. טאבי מכונה: **סקירה** (משולש בריאות, מחזור חיים, קבוצות מחוברות, Floating IP), **סשן** (בחירת מעטפת Agent ואז התחבר; מסך מלא קצה-לקצה), **סייר**, **ביצועים**, **Snapshots**. סשן וסייר דורשים `agent_state=ONLINE`. בלי `HETZNER_API_TOKEN` יצירה עדיין מחזירה HTTP 202; ה-Operation הוא **FAILED**.
+טאבי שירות: **מכונות**, **מפתחות SSH**, **Security groups**, **Floating IPs**, **Load balancers**, **VPC** (מוסתר כשאין יכולת `private_network` באזור). טאבי מכונה: **סקירה** (משולש בריאות, מחזור חיים, קבוצות מחוברות, Floating IP, NIC / IPv4 פרטי), **סשן** (בחירת מעטפת Agent ואז התחבר; מסך מלא קצה-לקצה), **סייר**, **ביצועים**, **Snapshots**. סשן וסייר דורשים `agent_state=ONLINE`. בלי `HETZNER_API_TOKEN` יצירה עדיין מחזירה HTTP 202; ה-Operation הוא **FAILED**.
 
 ## עדכונים חיים
 
-Compute מפרסם `machine.updated`, `operation.updated`, `floating_ip.updated` ו-`load_balancer.updated` ל-Event Bus של ה-API. Realtime Gateway מפיץ אותם ב-**SSE**. לטאב בקונסול יש כבר זרם חשבון אחד; Compute נרשם לפילטר עליו ושולף את המכונה או הרשימה רק כשמגיע אירוע. כניסה ל-Compute לא פותחת חיבור SSE שני.
+Compute מפרסם `machine.updated`, `operation.updated`, `floating_ip.updated`, `load_balancer.updated`, `vpc.updated`, `subnet.updated` ו-`nic.updated` ל-Event Bus של ה-API. Realtime Gateway מפיץ אותם ב-**SSE**. לטאב בקונסול יש כבר זרם חשבון אחד; Compute נרשם לפילטר עליו ושולף את המכונה או הרשימה רק כשמגיע אירוע. כניסה ל-Compute לא פותחת חיבור SSE שני.
 
 heartbeat של Agent (~כל 2 שניות) **לא** מפרסם `machine.updated` אלא אם נראות ה-Agent באמת השתנתה (`ONLINE` / `OFFLINE` / שגיאה). heartbeat שגרתי לא אמור לפתוח מחדש SSE או לפולל את רשימת המכונות.
 

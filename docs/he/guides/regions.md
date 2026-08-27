@@ -22,4 +22,4 @@
 
 ## שמות Compute
 
-המוצר הוא **Compute**. Images הם מזהי HomeCloud: `ubuntu-24.04`, `debian-12`, `almalinux-9`. אחסון אובייקטים הוא **SO** (`so://`). מסדים מנוהלים הם **MDB**.
+המוצר הוא **Compute**. Images הם מזהי HomeCloud: `ubuntu-24.04`, `debian-12`, `almalinux-9`. אחסון אובייקטים הוא **SO** (`so://`). מסדים מנוהלים הם **MDB**. רשת Compute פרטית משתמשת ב-**VPC** / **subnet** / IPv4 פרטי על NIC (לא שמות “network” של ספק).

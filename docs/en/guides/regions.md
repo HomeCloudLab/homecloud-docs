@@ -22,4 +22,4 @@ Logical databases (`hc_control`, `hc_compute`, …) are the isolation unit for s
 
 ## Compute naming
 
-The product is **Compute**. Images are HomeCloud ids: `ubuntu-24.04`, `debian-12`, `almalinux-9`. Object storage is **SO** (`so://`). Managed databases are **MDB**.
+The product is **Compute**. Images are HomeCloud ids: `ubuntu-24.04`, `debian-12`, `almalinux-9`. Object storage is **SO** (`so://`). Managed databases are **MDB**. Private Compute networking uses **VPC** / **subnet** / NIC private IPv4 (not vendor “network” names).

@@ -14,7 +14,7 @@
 | [Object Storage (SO)](object-storage.md) | SO | לאחסן קבצים, לסנכרן תיקיות, לארח אתר סטטי |
 | [Message Queues (MQ)](queues.md) | MQ | לנתק workers, להשתמש ב-DLQ |
 | [Managed Databases (MDB)](databases.md) | MDB | להריץ PostgreSQL, MySQL או MongoDB |
-| [Compute](compute.md) | Compute | מכונות וירטואליות, Agent, volumes, operations |
+| [Compute](compute.md) | Compute | מכונות וירטואליות, VPC / subnets, Agent, volumes, operations |
 | [אזורים](regions.md) | פלטפורמה | מקומות HomeCloud (`homelab`, `eu-central`), לא שמות ספק |
 | [Redis](redis.md) | Redis | מטמון מנוהל |
 | [Functions](functions.md) | FN | handlers ב-serverless עם triggers |

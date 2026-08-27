@@ -14,7 +14,7 @@ Step-by-step guides for every major HomeCloud service. Each page covers:
 | [Object Storage (SO)](object-storage.md) | SO | Store files, sync folders, host a static website |
 | [Message Queues (MQ)](queues.md) | MQ | Decouple workers, use a DLQ |
 | [Managed Databases (MDB)](databases.md) | MDB | Run PostgreSQL, MySQL, or MongoDB |
-| [Compute](compute.md) | Compute | Virtual machines, Agent, volumes, operations |
+| [Compute](compute.md) | Compute | Virtual machines, VPC / subnets, Agent, volumes, operations |
 | [Regions](regions.md) | Platform | HomeCloud places (`homelab`, `eu-central`), not vendor names |
 | [Redis](redis.md) | Redis | Managed cache |
 | [Functions](functions.md) | FN | Serverless handlers with triggers |
