@@ -4,7 +4,7 @@ Compute is HomeCloud **IaaS**: you ask for a **machine concept** in a HomeCloud 
 
 You buy `hc.general.small` in `eu-central`, not “CX22 in Falkenstein”. The control plane picks a **Provider Offering** internally. Customer list price is on the concept. Wholesale cost is on the offering and is never returned to you.
 
-The console workspace is **`/console/compute`**: **Machines** and **SSH keys** tabs, plus a machine detail workspace (Overview, Terminal, Files, Performance, Snapshots). CLI/SDK commands will follow when this contract is soaked.
+The console workspace is **`/console/compute`**: **Machines**, **SSH keys**, **Security groups**, and **Floating IPs** tabs, plus a machine detail workspace (Overview, Terminal, Files, Performance, Snapshots). CLI/SDK commands will follow when this contract is soaked.
 
 | Item | Value |
 |------|--------|
@@ -64,6 +64,18 @@ curl -sS -X POST "$HOMECLOUD_API/api/v1/accounts/$ACCOUNT_ID/compute/machines" \
   -d '{"name":"web-1","concept_id":"hc.general.small","image_id":"ubuntu-24.04","region_code":"eu-central","ssh_key_ids":["KEY_ID"]}'
 ```
 
+Optional create fields:
+
+| Field | Meaning |
+|-------|---------|
+| `placement_scope` | `region` (default) or `flex` (EU cheapest eligible). Not available in `homelab`. |
+| `boot_disk_gb` | Boot volume size in GB steps. Minimum is the concept included disk. |
+| `data_disk_gb` | Optional attached data volume. Rejected with `compute.data_volume_unsupported` when the placement has no `volume_attach`. |
+| `security_group_ids` | Extra groups (default always attaches). Rejected with `compute.firewall_unsupported` when the placement has no firewall. |
+| `ssh_key_ids` | Account SSH keys injected at first boot. |
+
+No eligible offering is `400 compute.placement_unavailable` (not a generic concept error). List/get machines include `operation_id`, `operation_status`, `operation_action`, and `operation_progress` for the latest Compute Operation. Create progress is ~10 (running), ~35 (before vendor create), ~80 (after), 100 (succeeded).
+
 `region_code` is geography, not a vendor. `eu-central` can be fulfilled by more than one offering. A live create needs the matching vendor token on the API (`HETZNER_API_TOKEN` and/or `SCALEWAY_API_TOKEN` + `SCALEWAY_PROJECT_ID`). Without capacity configured the operation completes as **FAILED** (still HTTP 202) with a HomeCloud error — never a vendor name. `class` remains accepted as an alias (`basic` → `hc.shared.small`, `standard` → `hc.general.small`).
 
 List concepts: `GET /api/v1/accounts/{id}/compute/concepts` (customer prices only).
@@ -103,11 +115,61 @@ CPU/RAM resize is **Standard only** and requires the machine **stopped**:
 
 Disk is **grow-only**: `POST .../volumes/{volume_id}/resize` `{"size_gb":80}`.
 
-## Firewall, volumes, snapshots
+## Firewall, volumes, snapshots, Floating IP
 
-- Default inbound **TCP 22**. Extra rules: TCP/UDP only (`PUT .../machines/{id}/firewall`).
+- **Security groups** are the source of truth for ingress (account-scoped; attach to machines). Default group allows **TCP 22**. Extra rules are TCP/UDP only.
+- Console: Compute → **Security groups**. `PUT .../machines/{id}/firewall` is a compatibility shim that writes the account **default** group.
+- Drivers without a vendor firewall (Scaleway today) store the policy in HomeCloud and do not pretend the vendor applied it.
 - IPv4 is allocated; IPv6 is stored as null and not required.
 - Snapshot a **volume** (`POST .../volumes/{id}/snapshots`), list with `GET .../volumes/{id}/snapshots`, restore to a **new volume** (`POST .../snapshots/{id}/restore`). Not a machine snapshot.
+
+## Floating IP
+
+A Floating IP is a **network identity** that outlives a machine. Allocate in a region, then associate to **one** machine in that region. Deleting the machine **unassigns** the address; **release** returns it to capacity. Quota is **10** per account (`409 compute.floating_ip_quota`).
+
+PowerShell:
+
+```powershell
+Invoke-RestMethod -Method Post `
+  -Uri "$env:HOMECLOUD_API/api/v1/accounts/$accountId/compute/floating-ips" `
+  -Headers @{ Authorization = "Bearer $token" } `
+  -ContentType "application/json" `
+  -Body '{"name":"web-public","region_code":"eu-central"}'
+```
+
+bash:
+
+```bash
+curl -sS -X POST "$HOMECLOUD_API/api/v1/accounts/$ACCOUNT_ID/compute/floating-ips" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"name":"web-public","region_code":"eu-central"}'
+```
+
+| Action | Request |
+|--------|---------|
+| List | `GET .../floating-ips?region_code=` (sets `can_allocate`) |
+| Get | `GET .../floating-ips/{id}` |
+| Associate | `POST .../floating-ips/{id}/associate` `{"machine_id":"..."}` |
+| Disassociate | `POST .../floating-ips/{id}/disassociate` |
+| Release | `DELETE .../floating-ips/{id}` |
+| On a machine | `GET .../machines/{id}/floating-ips` |
+
+Mutating calls return **202** `{ floating_ip_id, operation_id }`. Recover re-assigns Floating IPs whose `desired_machine_id` is still that machine.
+
+| Code | Meaning |
+|------|---------|
+| `compute.floating_ip_unsupported` | Placement has no Floating IP capability |
+| `compute.floating_ip_quota` | Account already has 10 Floating IPs |
+| `compute.floating_ip_exists` | Name already used in the account |
+| `compute.floating_ip_region` | IP and machine are in different regions |
+| `compute.floating_ip_provider` | IP and machine are not the same capacity placement |
+| `compute.floating_ip_attached` | Machine already has a Floating IP |
+| `compute.floating_ip_busy` | Allocate/release still in progress |
+| `compute.invalid_floating_ip_name` | Name does not match the allowed pattern |
+| `compute.floating_ip_not_found` | Unknown id |
+
+Console: Compute → **Floating IPs**, and the machine Overview card when the placement supports it.
 
 ## Agent
 
@@ -151,14 +213,14 @@ HomeCloud is the cloud. You choose a **concept** and a **region**. Offerings (He
 
 | Page | Path |
 |------|------|
-| Machines + SSH keys | `/console/compute` |
+| Machines + SSH keys + Security groups + Floating IPs | `/console/compute` |
 | Workspace | `/console/compute/{machine_id}` |
 
-Service tabs: **Machines**, **SSH keys**. Machine tabs: **Overview** (health triad, lifecycle, firewall), **Session** (choose Agent shell then Connect; full screen edge-to-edge), **Explorer**, **Performance**, **Snapshots**. Session and Explorer require `agent_state=ONLINE`. Without `HETZNER_API_TOKEN` a create still returns HTTP 202; the Operation is **FAILED**.
+Service tabs: **Machines**, **SSH keys**, **Security groups**, **Floating IPs**. Machine tabs: **Overview** (health triad, lifecycle, attached groups, Floating IP), **Session** (choose Agent shell then Connect; full screen edge-to-edge), **Explorer**, **Performance**, **Snapshots**. Session and Explorer require `agent_state=ONLINE`. Without `HETZNER_API_TOKEN` a create still returns HTTP 202; the Operation is **FAILED**.
 
 ## Live updates
 
-Compute publishes `machine.updated` and `operation.updated` to the API Event Bus. The Realtime Gateway fans those out over **SSE**. The console tab already has one account stream; Compute registers a filter on it and refetches that machine or list only when an event arrives. Opening Compute does not open a second SSE connection.
+Compute publishes `machine.updated`, `operation.updated`, and `floating_ip.updated` to the API Event Bus. The Realtime Gateway fans those out over **SSE**. The console tab already has one account stream; Compute registers a filter on it and refetches that machine or list only when an event arrives. Opening Compute does not open a second SSE connection.
 
 Agent heartbeats (every ~2s) do **not** publish `machine.updated` unless Agent visibility actually changes (`ONLINE` / `OFFLINE` / error). Routine heartbeats must not reopen SSE or poll the machine list.
 

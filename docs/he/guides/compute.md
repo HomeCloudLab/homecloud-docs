@@ -4,7 +4,7 @@ Compute הוא שכבת ה-**IaaS** של HomeCloud: קונים **קונספט מ
 
 קונים `hc.general.small` ב-`eu-central`, לא “CX22 ב-Falkenstein”. מישור הבקרה בוחר **Provider Offering** בפנים. מחיר הלקוח חי על הקונספט. עלות הספק חיה על ה-Offering ואינה חוזרת ללקוח.
 
-Workspace בקונסול: **`/console/compute`** — טאבים **מכונות** ו-**מפתחות SSH**, ו-workspace לפרטי מכונה (סקירה, טרמינל, קבצים, ביצועים, Snapshots). פקודות CLI/SDK יגיעו אחרי שהחוזה יתייצב.
+Workspace בקונסול: **`/console/compute`** — טאבים **מכונות**, **מפתחות SSH**, **Security groups** ו-**Floating IPs**, ו-workspace לפרטי מכונה (סקירה, טרמינל, קבצים, ביצועים, Snapshots). פקודות CLI/SDK יגיעו אחרי שהחוזה יתייצב.
 
 | פריט | ערך |
 |------|--------|
@@ -64,6 +64,18 @@ curl -sS -X POST "$HOMECLOUD_API/api/v1/accounts/$ACCOUNT_ID/compute/machines" \
   -d '{"name":"web-1","concept_id":"hc.general.small","image_id":"ubuntu-24.04","region_code":"eu-central","ssh_key_ids":["KEY_ID"]}'
 ```
 
+שדות יצירה אופציונליים:
+
+| שדה | משמעות |
+|-----|--------|
+| `placement_scope` | `region` (ברירת מחדל) או `flex` (הזול ביותר באירופה). לא זמין ב-`homelab`. |
+| `boot_disk_gb` | גודל דיסק אתחול בצעדי GB. המינימום הוא הדיסק הכלול בקונספט. |
+| `data_disk_gb` | Volume נתונים מצורף אופציונלי. נדחה עם `compute.data_volume_unsupported` כשאין `volume_attach`. |
+| `security_group_ids` | קבוצות נוספות (default תמיד מחוברת). נדחה עם `compute.firewall_unsupported` כשאין firewall. |
+| `ssh_key_ids` | מפתחות SSH של החשבון בהפעלה ראשונה. |
+
+אין Offering מתאים: `400 compute.placement_unavailable` (לא שגיאת concept כללית). רשימה/GET של מכונות כוללים `operation_id`, `operation_status`, `operation_action` ו-`operation_progress` עבור ה-Operation האחרון. התקדמות ביצירה: ~10 (running), ~35 (לפני create אצל הספק), ~80 (אחרי), 100 (succeeded).
+
 `region_code` הוא מיקום, לא ספק. `eu-central` יכול להתמלא על ידי יותר מ-Offering אחד. יצירה חיה דורשת טוקן מתאים ב-API. בלי קיבולת מוגדרת ה-Operation מסתיים ב-**FAILED** (עדיין HTTP 202) עם שגיאת HomeCloud — בלי שם ספק. `class` נשאר כינוי (`basic` → `hc.shared.small`, `standard` → `hc.general.small`).
 
 רשימת קונספטים: `GET /api/v1/accounts/{id}/compute/concepts` (מחירי לקוח בלבד).
@@ -103,11 +115,61 @@ Stop / reboot / delete עוברים בספק גם כש-`agent_state=OFFLINE`.
 
 דיסק הוא **גידול בלבד**: `POST .../volumes/{volume_id}/resize` `{"size_gb":80}`.
 
-## Firewall, volumes, snapshots
+## Firewall, volumes, snapshots, Floating IP
 
-- ברירת מחדל לכניסה **TCP 22**. כללים נוספים: TCP/UDP בלבד (`PUT .../machines/{id}/firewall`).
+- **Security groups** הם מקור האמת ל-ingress (ברמת חשבון; מחברים למכונות). קבוצת ברירת המחדל מאפשרת **TCP 22**. כללים נוספים: TCP/UDP בלבד.
+- בקונסול: Compute → **Security groups**. `PUT .../machines/{id}/firewall` הוא shim תאימות שכותב לקבוצת **default** של החשבון.
+- דרייברים בלי firewall אצל הספק (Scaleway כרגע) שומרים את המדיניות ב-HomeCloud ולא מתיימרים שהספק החיל אותה.
 - מוקצה IPv4; IPv6 נשמר כ-null ולא נדרש.
 - Snapshot ל-**volume** (`POST .../volumes/{id}/snapshots`), רשימה ב-`GET .../volumes/{id}/snapshots`, שחזור ל-**volume חדש** (`POST .../snapshots/{id}/restore`). לא snapshot של מכונה.
+
+## Floating IP
+
+Floating IP הוא **זהות רשת** שנשארת אחרי מכונה. מקצים באזור, ואז מחברים ל**מכונה אחת** באותו אזור. מחיקת המכונה **מנתקת** את הכתובת; **שחרור** מחזיר אותה לקיבולת. מכסה: **10** לחשבון (`409 compute.floating_ip_quota`).
+
+PowerShell:
+
+```powershell
+Invoke-RestMethod -Method Post `
+  -Uri "$env:HOMECLOUD_API/api/v1/accounts/$accountId/compute/floating-ips" `
+  -Headers @{ Authorization = "Bearer $token" } `
+  -ContentType "application/json" `
+  -Body '{"name":"web-public","region_code":"eu-central"}'
+```
+
+bash:
+
+```bash
+curl -sS -X POST "$HOMECLOUD_API/api/v1/accounts/$ACCOUNT_ID/compute/floating-ips" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"name":"web-public","region_code":"eu-central"}'
+```
+
+| פעולה | בקשה |
+|--------|---------|
+| רשימה | `GET .../floating-ips?region_code=` (מציב `can_allocate`) |
+| קריאה | `GET .../floating-ips/{id}` |
+| חיבור | `POST .../floating-ips/{id}/associate` `{"machine_id":"..."}` |
+| ניתוק | `POST .../floating-ips/{id}/disassociate` |
+| שחרור | `DELETE .../floating-ips/{id}` |
+| על מכונה | `GET .../machines/{id}/floating-ips` |
+
+קריאות שינוי מחזירות **202** `{ floating_ip_id, operation_id }`. Recover מחבר מחדש Floating IPs ש-`desired_machine_id` שלהם עדיין המכונה הזו.
+
+| קוד | משמעות |
+|------|---------|
+| `compute.floating_ip_unsupported` | אין יכולת Floating IP ב-placement |
+| `compute.floating_ip_quota` | בחשבון כבר יש 10 Floating IPs |
+| `compute.floating_ip_exists` | השם כבר בשימוש בחשבון |
+| `compute.floating_ip_region` | ה-IP והמכונה באזורים שונים |
+| `compute.floating_ip_provider` | ה-IP והמכונה אינם באותו placement קיבולת |
+| `compute.floating_ip_attached` | למכונה כבר יש Floating IP |
+| `compute.floating_ip_busy` | הקצאה/שחרור עדיין בתהליך |
+| `compute.invalid_floating_ip_name` | השם אינו תואם את התבנית |
+| `compute.floating_ip_not_found` | מזהה לא מוכר |
+
+בקונסול: Compute → **Floating IPs**, וכרטיס בסקירת המכונה כשה-placement תומך.
 
 ## Agent
 
@@ -151,14 +213,14 @@ HomeCloud הוא הענן. בוחרים **קונספט** ו**אזור**. Offerin
 
 | דף | נתיב |
 |------|------|
-| מכונות + מפתחות SSH | `/console/compute` |
+| מכונות + מפתחות SSH + Security groups + Floating IPs | `/console/compute` |
 | Workspace | `/console/compute/{machine_id}` |
 
-טאבי שירות: **מכונות**, **מפתחות SSH**. טאבי מכונה: **סקירה** (משולש בריאות, מחזור חיים, firewall), **סשן** (בחירת מעטפת Agent ואז התחבר; מסך מלא קצה-לקצה), **סייר**, **ביצועים**, **Snapshots**. סשן וסייר דורשים `agent_state=ONLINE`. בלי `HETZNER_API_TOKEN` יצירה עדיין מחזירה HTTP 202; ה-Operation הוא **FAILED**.
+טאבי שירות: **מכונות**, **מפתחות SSH**, **Security groups**, **Floating IPs**. טאבי מכונה: **סקירה** (משולש בריאות, מחזור חיים, קבוצות מחוברות, Floating IP), **סשן** (בחירת מעטפת Agent ואז התחבר; מסך מלא קצה-לקצה), **סייר**, **ביצועים**, **Snapshots**. סשן וסייר דורשים `agent_state=ONLINE`. בלי `HETZNER_API_TOKEN` יצירה עדיין מחזירה HTTP 202; ה-Operation הוא **FAILED**.
 
 ## עדכונים חיים
 
-Compute מפרסם `machine.updated` ו-`operation.updated` ל-Event Bus של ה-API. Realtime Gateway מפיץ אותם ב-**SSE**. לטאב בקונסול יש כבר זרם חשבון אחד; Compute נרשם לפילטר עליו ושולף את המכונה או הרשימה רק כשמגיע אירוע. כניסה ל-Compute לא פותחת חיבור SSE שני.
+Compute מפרסם `machine.updated`, `operation.updated` ו-`floating_ip.updated` ל-Event Bus של ה-API. Realtime Gateway מפיץ אותם ב-**SSE**. לטאב בקונסול יש כבר זרם חשבון אחד; Compute נרשם לפילטר עליו ושולף את המכונה או הרשימה רק כשמגיע אירוע. כניסה ל-Compute לא פותחת חיבור SSE שני.
 
 heartbeat של Agent (~כל 2 שניות) **לא** מפרסם `machine.updated` אלא אם נראות ה-Agent באמת השתנתה (`ONLINE` / `OFFLINE` / שגיאה). heartbeat שגרתי לא אמור לפתוח מחדש SSE או לפולל את רשימת המכונות.
 
