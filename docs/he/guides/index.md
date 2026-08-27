@@ -24,7 +24,7 @@
 | [Mail](mail.md) | Mail | תיבות דואר, תבניות, אוטומציות |
 | [Secrets](secrets.md) | Secrets | לאחסן אישורים לאפליקציות ופונקציות |
 | [IAM](iam.md) | IAM | תפקידים, מדיניות, Access Keys, תפקידי קונסול |
-| [Domains & DNS](domains.md) | Domains | להביא דומיין משלכם |
+| [Domains & DNS](domains.md) | Domains | להביא דומיין משלכם, או לחפש שם (רישום עדיין לא למכירה) |
 | [SSL certificates](ssl.md) | SSL | לראות תעודות שהונפקו |
 | [Billing](billing.md) | Billing | שימוש, אומדנים, חשבוניות, התראות הוצאה |
 | [Monitoring](monitoring.md) | Monitoring | מדדים, לוגים, התראות |

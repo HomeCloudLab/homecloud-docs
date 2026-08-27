@@ -189,7 +189,7 @@ resource "homecloud_redis_instance" "cache" {
 
 ## P4 Functions / IR / Domains
 
-Spec-only function (no IDE files). Function URL is a sibling. Domain create does **not** wait for DNS verification. Image tags stay out of Terraform.
+Spec-only function (no IDE files). Function URL is a sibling. Set `wait_for_verified` on `homecloud_domain` to poll TXT or nameserver verification. Image tags stay out of Terraform.
 
 ```hcl
 resource "homecloud_function" "hello" {
@@ -206,7 +206,23 @@ resource "homecloud_ir_repository" "app" {
 }
 
 resource "homecloud_domain" "site" {
-  hostname = "app.example.com"
+  hostname           = "example.com"
+  dns_mode           = "homecloud"
+  wait_for_verified  = true
+}
+
+resource "homecloud_dns_record" "www" {
+  domain_id = homecloud_domain.site.id
+  type      = "A"
+  host      = "www"
+  record    = "1.2.3.4"
+}
+
+resource "homecloud_domain_attachment" "fn" {
+  domain_id   = homecloud_domain.site.id
+  target_id   = homecloud_function.hello.id
+  target_type = "function"
+  host        = "www"
 }
 ```
 
@@ -252,6 +268,8 @@ resource "homecloud_compute_machine" "web" {
 | `homecloud_function_url` | `.../functions/{name}/url` |
 | `homecloud_ir_repository` | `/api/v1/accounts/{id}/registry/repositories` |
 | `homecloud_domain` | `/api/v1/accounts/{id}/domains` |
+| `homecloud_dns_record` | `/domains/{id}/dns-records` |
+| `homecloud_domain_attachment` | `/api/v1/accounts/{id}/domain-attachments` |
 | `homecloud_compute_machine` | `/api/v1/accounts/{id}/compute/machines` |
 | `homecloud_ssh_key` | `/api/v1/accounts/{id}/compute/ssh-keys` |
 | `homecloud_application` | `/api/v1/accounts/{id}/applications` |

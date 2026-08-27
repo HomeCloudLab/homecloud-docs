@@ -24,7 +24,7 @@ Step-by-step guides for every major HomeCloud service. Each page covers:
 | [Mail](mail.md) | Mail | Mailboxes, templates, automations |
 | [Secrets](secrets.md) | Secrets | Store credentials for apps and functions |
 | [IAM](iam.md) | IAM | Roles, policies, Access Keys, console roles |
-| [Domains & DNS](domains.md) | Domains | Bring your own domain |
+| [Domains & DNS](domains.md) | Domains | Bring your own domain, or search for a name (registration is not for sale yet) |
 | [SSL certificates](ssl.md) | SSL | See issued certificates |
 | [Billing](billing.md) | Billing | Usage, estimates, invoices, spend alerts |
 | [Monitoring](monitoring.md) | Monitoring | Metrics, logs, alerts |
