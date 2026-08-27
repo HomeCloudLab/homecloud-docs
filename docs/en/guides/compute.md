@@ -120,8 +120,9 @@ Disk is **grow-only**: `POST .../volumes/{volume_id}/resize` `{"size_gb":80}`.
 
 ## Firewall, volumes, snapshots, Floating IP
 
-- **Security groups** are the source of truth for ingress (account-scoped; attach to machines). Default group allows **TCP 22**. Extra rules are TCP/UDP only.
-- Console: Compute → **Security groups**. `PUT .../machines/{id}/firewall` is a compatibility shim that writes the account **default** group.
+- **Security groups** are the source of truth for ingress (account-scoped; attach to machines). Each rule is TCP/UDP + port + **source CIDR** (e.g. `0.0.0.0/0` or `203.0.113.10/32`). Domains are not supported.
+- The account **default** group includes **TCP 22**. Extra groups do **not** force SSH — create HTTPS-only groups if you want.
+- Console: Compute → **Security groups** (quick create dialog; full-page edit). Detach removes the vendor firewall from the VM; delete removes the firewall object. `PUT .../machines/{id}/firewall` is a compatibility shim that writes the account **default** group.
 - Drivers without a vendor firewall (Scaleway today) store the policy in HomeCloud and do not pretend the vendor applied it.
 - IPv4 is allocated; IPv6 is stored as null and not required.
 - Snapshot a **volume** (`POST .../volumes/{id}/snapshots`), list with `GET .../volumes/{id}/snapshots`, restore to a **new volume** (`POST .../snapshots/{id}/restore`). Not a machine snapshot.
@@ -248,7 +249,7 @@ Otherwise `409 compute.agent_offline`.
 
 The console **Session** tab does not connect until you choose a method and click Connect. Linux guests offer **Agent shell** (PTY). Windows guests also show **Guest desktop** (not shipped yet). SSH `:22` stays break-glass and is not a Session method.
 
-Full screen covers the **entire browser**: no Session title, no side padding. The live-session toolbar follows the console **page theme** (background, borders, and buttons) so controls stay readable — in AWS that is a light bar with orange primary actions, not the dark top chrome. The terminal canvas stays dark. Esc or Exit full screen returns without dropping the session. Find sits on its own row under status and session actions (match case / whole word / regex, result count, previous / next). Type to search. Ctrl+F focuses it. The session stays connected while the browser tab is visible (WebSocket protocol pings every 20s so idle proxies do not drop it). Leaving the tab for **4 minutes** disconnects and shows Reconnect. End session, leaving Session, a dropped WebSocket, or Agent OFFLINE also close it. Idle typing does not. Copy/paste: right-click menu or Ctrl+C / Ctrl+V / Ctrl+X (Ctrl+C copies when text is selected; otherwise it is SIGINT).
+Full screen covers the **entire browser**: no Session title, no side padding. The live-session toolbar follows the console **page theme** (background, borders, and buttons) so controls stay readable — in AWS that is a light bar with orange primary actions, not the dark top chrome. The terminal canvas stays dark. Esc or Exit full screen returns without dropping the session. Find sits on its own row under status and session actions (match case / whole word / regex, result count, previous / next). Type to search. Ctrl+F focuses it. The session stays connected while the browser tab is visible (WebSocket protocol pings every 20s so idle proxies do not drop it). Leaving the tab for **4 minutes** disconnects and shows Reconnect. End session, leaving Session, a dropped WebSocket, or Agent OFFLINE also close it. Idle typing does not. Copy/paste: right-click menu or **Ctrl+Shift+C** / Ctrl+V / **Ctrl+Shift+X**. Plain **Ctrl+C** is always SIGINT to the shell (same as SSH).
 
 The **Explorer** tab lists folders and files (list or grid). Create, upload (drag-and-drop, up to 32 MiB), mkdir, download, and delete files. Folder move/rename is not in this release. Rebuild the VM to pick up `write_b64` chunked upload.
 
