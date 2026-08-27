@@ -4,7 +4,7 @@ Compute is HomeCloud **IaaS**: you ask for a **machine concept** in a HomeCloud 
 
 You buy `hc.general.small` in `eu-central`, not “CX22 in Falkenstein”. The control plane picks a **Provider Offering** internally. Customer list price is on the concept. Wholesale cost is on the offering and is never returned to you.
 
-The console workspace is **`/console/compute`**: **Machines**, **SSH keys**, **Security groups**, and **Floating IPs** tabs, plus a machine detail workspace (Overview, Terminal, Files, Performance, Snapshots). CLI/SDK commands will follow when this contract is soaked.
+The console workspace is **`/console/compute`**: **Machines**, **SSH keys**, **Security groups**, **Floating IPs**, and **Load balancers** tabs, plus a machine detail workspace (Overview, Terminal, Files, Performance, Snapshots). CLI/SDK commands will follow when this contract is soaked.
 
 | Item | Value |
 |------|--------|
@@ -171,6 +171,50 @@ Mutating calls return **202** `{ floating_ip_id, operation_id }`. Recover re-ass
 
 Console: Compute → **Floating IPs**, and the machine Overview card when the placement supports it.
 
+## Load balancers
+
+A public Load Balancer is a **VIP** in front of Compute machines. Targets are reached on **public IPv4** — Stage 5 does not require VPC/private networking. Targets must share the **same capacity placement** as the LB (same rule as Floating IP). Protocols in this release: **TCP** and **HTTP** (HTTPS termination later). Quota is **5** per account (`409 compute.load_balancer_quota`).
+
+PowerShell:
+
+```powershell
+Invoke-RestMethod -Method Post `
+  -Uri "$env:HOMECLOUD_API/api/v1/accounts/$accountId/compute/load-balancers" `
+  -Headers @{ Authorization = "Bearer $token" } `
+  -ContentType "application/json" `
+  -Body '{"name":"web-front","region_code":"eu-central","listeners":[{"protocol":"http","port":80,"target_port":8080}],"machine_ids":["MACHINE_ID"]}'
+```
+
+bash:
+
+```bash
+curl -sS -X POST "$HOMECLOUD_API/api/v1/accounts/$ACCOUNT_ID/compute/load-balancers" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"name":"web-front","region_code":"eu-central","listeners":[{"protocol":"http","port":80,"target_port":8080}],"machine_ids":["MACHINE_ID"]}'
+```
+
+| Action | Request |
+|--------|---------|
+| List | `GET .../load-balancers?region_code=` (sets `can_create`) |
+| Get | `GET .../load-balancers/{id}` |
+| Update | `PUT .../load-balancers/{id}` `{ listeners, machine_ids }` |
+| Delete | `DELETE .../load-balancers/{id}` |
+
+Mutating calls return **202** `{ load_balancer_id, operation_id }`.
+
+| Code | Meaning |
+|------|---------|
+| `compute.load_balancer_unsupported` | Placement has no LB capability |
+| `compute.load_balancer_quota` | Account already has 5 LBs |
+| `compute.load_balancer_exists` | Name already used |
+| `compute.load_balancer_region` | LB and targets in different regions |
+| `compute.load_balancer_provider` | Targets are not the same capacity placement |
+| `compute.load_balancer_target_ip` | Target machine has no public IPv4 |
+| `compute.invalid_listener` | Bad protocol/port |
+
+Console: Compute → **Load balancers**.
+
 ## Agent
 
 The Agent opens **outbound** TLS to Compute. Production guests use WebSocket `wss://…/internal/compute/agent/v1/connect` with **header** `X-Homecloud-Agent-Token` and `machine_id`. User JWT is ignored on that endpoint and never enters the guest. HTTP `POST /internal/compute/agent/heartbeat` remains a **fallback** for older images until rebuild. There is no public inbound Agent port. There is **no uninstall API**.
@@ -213,14 +257,14 @@ HomeCloud is the cloud. You choose a **concept** and a **region**. Offerings (He
 
 | Page | Path |
 |------|------|
-| Machines + SSH keys + Security groups + Floating IPs | `/console/compute` |
+| Machines + SSH keys + Security groups + Floating IPs + Load balancers | `/console/compute` |
 | Workspace | `/console/compute/{machine_id}` |
 
-Service tabs: **Machines**, **SSH keys**, **Security groups**, **Floating IPs**. Machine tabs: **Overview** (health triad, lifecycle, attached groups, Floating IP), **Session** (choose Agent shell then Connect; full screen edge-to-edge), **Explorer**, **Performance**, **Snapshots**. Session and Explorer require `agent_state=ONLINE`. Without `HETZNER_API_TOKEN` a create still returns HTTP 202; the Operation is **FAILED**.
+Service tabs: **Machines**, **SSH keys**, **Security groups**, **Floating IPs**, **Load balancers**. Machine tabs: **Overview** (health triad, lifecycle, attached groups, Floating IP), **Session** (choose Agent shell then Connect; full screen edge-to-edge), **Explorer**, **Performance**, **Snapshots**. Session and Explorer require `agent_state=ONLINE`. Without `HETZNER_API_TOKEN` a create still returns HTTP 202; the Operation is **FAILED**.
 
 ## Live updates
 
-Compute publishes `machine.updated`, `operation.updated`, and `floating_ip.updated` to the API Event Bus. The Realtime Gateway fans those out over **SSE**. The console tab already has one account stream; Compute registers a filter on it and refetches that machine or list only when an event arrives. Opening Compute does not open a second SSE connection.
+Compute publishes `machine.updated`, `operation.updated`, `floating_ip.updated`, and `load_balancer.updated` to the API Event Bus. The Realtime Gateway fans those out over **SSE**. The console tab already has one account stream; Compute registers a filter on it and refetches that machine or list only when an event arrives. Opening Compute does not open a second SSE connection.
 
 Agent heartbeats (every ~2s) do **not** publish `machine.updated` unless Agent visibility actually changes (`ONLINE` / `OFFLINE` / error). Routine heartbeats must not reopen SSE or poll the machine list.
 

@@ -4,7 +4,7 @@ Compute הוא שכבת ה-**IaaS** של HomeCloud: קונים **קונספט מ
 
 קונים `hc.general.small` ב-`eu-central`, לא “CX22 ב-Falkenstein”. מישור הבקרה בוחר **Provider Offering** בפנים. מחיר הלקוח חי על הקונספט. עלות הספק חיה על ה-Offering ואינה חוזרת ללקוח.
 
-Workspace בקונסול: **`/console/compute`** — טאבים **מכונות**, **מפתחות SSH**, **Security groups** ו-**Floating IPs**, ו-workspace לפרטי מכונה (סקירה, טרמינל, קבצים, ביצועים, Snapshots). פקודות CLI/SDK יגיעו אחרי שהחוזה יתייצב.
+Workspace בקונסול: **`/console/compute`** — טאבים **מכונות**, **מפתחות SSH**, **Security groups**, **Floating IPs** ו-**Load balancers**, ו-workspace לפרטי מכונה (סקירה, טרמינל, קבצים, ביצועים, Snapshots). פקודות CLI/SDK יגיעו אחרי שהחוזה יתייצב.
 
 | פריט | ערך |
 |------|--------|
@@ -171,6 +171,50 @@ curl -sS -X POST "$HOMECLOUD_API/api/v1/accounts/$ACCOUNT_ID/compute/floating-ip
 
 בקונסול: Compute → **Floating IPs**, וכרטיס בסקירת המכונה כשה-placement תומך.
 
+## Load balancers
+
+Load Balancer ציבורי הוא **VIP** מול מכונות Compute. היעדים נגישים ב-**IPv4 ציבורי** — Stage 5 לא דורש VPC. היעדים חייבים לשתף את **אותו placement קיבולת** כמו ה-LB (כמו Floating IP). פרוטוקולים בגרסה זו: **TCP** ו-**HTTP** (HTTPS בהמשך). מכסה: **5** לחשבון (`409 compute.load_balancer_quota`).
+
+PowerShell:
+
+```powershell
+Invoke-RestMethod -Method Post `
+  -Uri "$env:HOMECLOUD_API/api/v1/accounts/$accountId/compute/load-balancers" `
+  -Headers @{ Authorization = "Bearer $token" } `
+  -ContentType "application/json" `
+  -Body '{"name":"web-front","region_code":"eu-central","listeners":[{"protocol":"http","port":80,"target_port":8080}],"machine_ids":["MACHINE_ID"]}'
+```
+
+bash:
+
+```bash
+curl -sS -X POST "$HOMECLOUD_API/api/v1/accounts/$ACCOUNT_ID/compute/load-balancers" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"name":"web-front","region_code":"eu-central","listeners":[{"protocol":"http","port":80,"target_port":8080}],"machine_ids":["MACHINE_ID"]}'
+```
+
+| פעולה | בקשה |
+|--------|---------|
+| רשימה | `GET .../load-balancers?region_code=` (מציב `can_create`) |
+| קריאה | `GET .../load-balancers/{id}` |
+| עדכון | `PUT .../load-balancers/{id}` `{ listeners, machine_ids }` |
+| מחיקה | `DELETE .../load-balancers/{id}` |
+
+קריאות שינוי מחזירות **202** `{ load_balancer_id, operation_id }`.
+
+| קוד | משמעות |
+|------|---------|
+| `compute.load_balancer_unsupported` | אין יכולת LB ב-placement |
+| `compute.load_balancer_quota` | בחשבון כבר יש 5 LBs |
+| `compute.load_balancer_exists` | השם כבר בשימוש |
+| `compute.load_balancer_region` | LB ויעדים באזורים שונים |
+| `compute.load_balancer_provider` | יעדים אינם באותו placement |
+| `compute.load_balancer_target_ip` | למכונת יעד אין IPv4 ציבורי |
+| `compute.invalid_listener` | פרוטוקול/פורט לא תקין |
+
+בקונסול: Compute → **Load balancers**.
+
 ## Agent
 
 ה-Agent פותח TLS **יוצא** אל Compute. אורחים חדשים משתמשים ב-WebSocket `wss://…/internal/compute/agent/v1/connect` עם כותרת `X-Homecloud-Agent-Token` ו-`machine_id`. JWT של המשתמש מנוטרל בנקודה הזו ולא נכנס לאורח. HTTP `POST /internal/compute/agent/heartbeat` נשאר **נסיגה** לדיסקים ישנים עד rebuild. אין פורט Agent נכנס ציבורי. **אין API להסרה**.
@@ -213,14 +257,14 @@ HomeCloud הוא הענן. בוחרים **קונספט** ו**אזור**. Offerin
 
 | דף | נתיב |
 |------|------|
-| מכונות + מפתחות SSH + Security groups + Floating IPs | `/console/compute` |
+| מכונות + מפתחות SSH + Security groups + Floating IPs + Load balancers | `/console/compute` |
 | Workspace | `/console/compute/{machine_id}` |
 
-טאבי שירות: **מכונות**, **מפתחות SSH**, **Security groups**, **Floating IPs**. טאבי מכונה: **סקירה** (משולש בריאות, מחזור חיים, קבוצות מחוברות, Floating IP), **סשן** (בחירת מעטפת Agent ואז התחבר; מסך מלא קצה-לקצה), **סייר**, **ביצועים**, **Snapshots**. סשן וסייר דורשים `agent_state=ONLINE`. בלי `HETZNER_API_TOKEN` יצירה עדיין מחזירה HTTP 202; ה-Operation הוא **FAILED**.
+טאבי שירות: **מכונות**, **מפתחות SSH**, **Security groups**, **Floating IPs**, **Load balancers**. טאבי מכונה: **סקירה** (משולש בריאות, מחזור חיים, קבוצות מחוברות, Floating IP), **סשן** (בחירת מעטפת Agent ואז התחבר; מסך מלא קצה-לקצה), **סייר**, **ביצועים**, **Snapshots**. סשן וסייר דורשים `agent_state=ONLINE`. בלי `HETZNER_API_TOKEN` יצירה עדיין מחזירה HTTP 202; ה-Operation הוא **FAILED**.
 
 ## עדכונים חיים
 
-Compute מפרסם `machine.updated`, `operation.updated` ו-`floating_ip.updated` ל-Event Bus של ה-API. Realtime Gateway מפיץ אותם ב-**SSE**. לטאב בקונסול יש כבר זרם חשבון אחד; Compute נרשם לפילטר עליו ושולף את המכונה או הרשימה רק כשמגיע אירוע. כניסה ל-Compute לא פותחת חיבור SSE שני.
+Compute מפרסם `machine.updated`, `operation.updated`, `floating_ip.updated` ו-`load_balancer.updated` ל-Event Bus של ה-API. Realtime Gateway מפיץ אותם ב-**SSE**. לטאב בקונסול יש כבר זרם חשבון אחד; Compute נרשם לפילטר עליו ושולף את המכונה או הרשימה רק כשמגיע אירוע. כניסה ל-Compute לא פותחת חיבור SSE שני.
 
 heartbeat של Agent (~כל 2 שניות) **לא** מפרסם `machine.updated` אלא אם נראות ה-Agent באמת השתנתה (`ONLINE` / `OFFLINE` / שגיאה). heartbeat שגרתי לא אמור לפתוח מחדש SSE או לפולל את רשימת המכונות.
 
