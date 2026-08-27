@@ -69,8 +69,11 @@ Optional create fields:
 | Field | Meaning |
 |-------|---------|
 | `placement_scope` | `region` (default) or `flex` (EU cheapest eligible). Not available in `homelab`. |
-| `boot_disk_gb` | Boot volume size in GB steps. Minimum is the concept included disk. |
-| `data_disk_gb` | Optional attached data volume. Rejected with `compute.data_volume_unsupported` when the placement has no `volume_attach`. |
+| `boot_disk_gb` | Boot volume size in GB (free choice). Platform minimum **10** GB; maximum from the concept policy. Billed **per GB for the full size**. |
+| `data_disk_gb` | Optional single attached data volume (compat). Prefer `data_disk_sizes`. |
+| `data_disk_sizes` | Optional list of data volume sizes (GB each, free choice, min 10). Max 5. Rejected with `compute.data_volume_unsupported` when the placement has no `volume_attach`. |
+
+After create, `POST .../machines/{id}/volumes` with `{ "size_gb": N }` attaches another data volume.
 | `security_group_ids` | Extra groups (default always attaches). Rejected with `compute.firewall_unsupported` when the placement has no firewall. |
 | `ssh_key_ids` | Account SSH keys injected at first boot. |
 

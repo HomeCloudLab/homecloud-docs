@@ -69,8 +69,11 @@ curl -sS -X POST "$HOMECLOUD_API/api/v1/accounts/$ACCOUNT_ID/compute/machines" \
 | שדה | משמעות |
 |-----|--------|
 | `placement_scope` | `region` (ברירת מחדל) או `flex` (הזול ביותר באירופה). לא זמין ב-`homelab`. |
-| `boot_disk_gb` | גודל דיסק אתחול בצעדי GB. המינימום הוא הדיסק הכלול בקונספט. |
-| `data_disk_gb` | Volume נתונים מצורף אופציונלי. נדחה עם `compute.data_volume_unsupported` כשאין `volume_attach`. |
+| `boot_disk_gb` | גודל דיסק אתחול ב-GB (בחירה חופשית). מינימום פלטפורמה **10** GB; מקסימום ממדיניות הקונספט. **חיוב לפי GB על כל הגודל**. |
+| `data_disk_gb` | Volume נתונים בודד אופציונלי (תאימות). עדיף `data_disk_sizes`. |
+| `data_disk_sizes` | רשימה אופציונלית של גדלי Volumes נתונים (GB כל אחד, בחירה חופשית, מינ׳ 10). עד 5. נדחה עם `compute.data_volume_unsupported` כשאין `volume_attach`. |
+
+אחרי יצירה, `POST .../machines/{id}/volumes` עם `{ "size_gb": N }` מצרף volume נתונים נוסף.
 | `security_group_ids` | קבוצות נוספות (default תמיד מחוברת). נדחה עם `compute.firewall_unsupported` כשאין firewall. |
 | `ssh_key_ids` | מפתחות SSH של החשבון בהפעלה ראשונה. |
 
