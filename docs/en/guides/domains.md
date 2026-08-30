@@ -35,9 +35,9 @@ Keep DNS at your registrar. After TXT verify, open **Services** and connect an A
 | What you connect | Record to add |
 |------------------|---------------|
 | A subdomain (`www`, `app`, `api`, …) | **CNAME** from that name to the platform hostname shown in the console |
-| The root name (`example.com`) | **A** and **AAAA** with the addresses shown, **or** ALIAS / ANAME / CNAME flattening on `@` if your DNS host supports it |
+| The root name (`example.com`) | **ALIAS** or **ANAME** for `@` to that hostname, if your DNS host supports it. Otherwise connect a subdomain. |
 
-A CNAME cannot sit on the root name (it would conflict with SOA, NS, and mail). Prefer ALIAS when the DNS host has it, so addresses stay current. Then click **Check DNS**. SSL is issued automatically after DNS points here. The **SSL** tab shows Active / Pending / Failed / Expiring / Expired and **Refresh**.
+Then click **Check DNS**. SSL is issued automatically after DNS points here. The **SSL** tab shows Active / Pending / Failed / Expiring / Expired and **Refresh**.
 
 ## HomeCloud DNS
 
@@ -68,7 +68,7 @@ Terraform resources: `homecloud_domain` (optional `wait_for_verified`), `homeclo
 ## Tips
 
 - Nameserver changes can take minutes to hours.
-- External DNS: CNAME on a subdomain; A/AAAA or ALIAS on the root. HomeCloud DNS writes both for you.
+- External DNS: CNAME on a subdomain; ALIAS or ANAME on the root if the DNS host supports it. HomeCloud DNS writes both for you.
 - Detach every hostname before deleting the domain.
 - Search is availability only. Buying a name is not offered yet.
 
