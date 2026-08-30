@@ -34,22 +34,22 @@
 
 | מה מחברים | איזו רשומה להוסיף |
 |-----------|-------------------|
-| תת-שם (`www`, `app`, `api`, …) | **CNAME** מהשם הזה לשם הפלטפורמה שמוצג בקונסול |
-| השם הראשי (`example.com`) | **ALIAS** או **ANAME** עבור `@` לשם הזה, אם מארח ה-DNS תומך. אחרת חברו תת-שם. |
+| תת-שם (`www`, `app`, `api`, `test`, …) | בשדה **תת-שם** הזינו רק את התווית, חברו, ואז הוסיפו **CNAME** ששם הרשומה הוא אותה תווית (לא השם המלא) ליעד שמוצג |
+| השם הראשי (`example.com`) | השאירו תת-שם ריק. **ALIAS** או **ANAME** עבור `@` לשם הזה, אם מארח ה-DNS תומך. אחרת שנו את השם לתת-שם, שמרו, והשתמשו ב-CNAME. |
 
-אחר כך **בדיקת DNS**. SSL מונפק אוטומטית אחרי שה-DNS מצביע לכאן. טאב **SSL** מציג פעיל / ממתין / נכשל / עומד לפוג / פג ו-**Refresh**.
+בצירוף ממתין אפשר **לשנות את השם** ו**לנתק**. בדיקת DNS בודקת רק את השם השמור. SSL מונפק אוטומטית אחרי שה-DNS מצביע לכאן. טאב **SSL** מציג פעיל / ממתין / נכשל / עומד לפוג / פג ו-**Refresh**.
 
 ## DNS של HomeCloud
 
 כשהמצב זמין, העבירו nameservers ל-`ns1.{apex}` ו-`ns2.{apex}`, ואז Verify. זה יוצר **אזור מארח**: SOA ו-NS לקריאה בלבד. נהלו A, AAAA, CNAME, TXT, MX, CAA ו-SRV בטאב **DNS**. Apex לשירות הוא **צירוף**, לא סוג רשומה בשם ALIAS.
 
-אחרי שה-NS תואמים, **צירוף** כותב את הרשומה ומפעיל ניתוב — בלי Verify שני. חברו את השם הראשי (host ריק), `www`, `api` או כל תווית אחרת. בצירוף apex אפשר גם ליצור alias ל-**www** לאותו שירות (תיבת סימון בצירוף; בקונסול ברירת המחדל דלוקה). הפעילו **DNSSEC** בטאב DNS והעתיקו את רשומות ה-DS אצל הרשם.
+אחרי שה-NS תואמים, **צירוף** כותב את הרשומה ומפעיל ניתוב — בלי Verify שני. חברו את השם הראשי (host ריק), `www`, `api` או כל תווית אחרת. בצירוף apex אפשר גם ליצור alias ל-**www** לאותו שירות (תיבת סימון בצירוף; כבויה כברירת מחדל). הפעילו **DNSSEC** בטאב DNS והעתיקו את רשומות ה-DS אצל הרשם.
 
 ## דף הדומיין
 
 לכל דומיין יש **סקירה**, **DNS**, **SSL**, **שירותים**, **דואר** ו-**הגדרות**.
 
-- **שירותים** — צירוף או ניתוק של אפליקציה, Function URL או אתר SO. כל יעד מקבל HTTPS על ה-hostname. אין custom domain ל-Compute. שלבי ה-DNS המלאים לחיבור שממתין נשארים בטאב הזה.
+- **שירותים** — צירוף או ניתוק של אפליקציה, Function URL או אתר SO. בשדה תת-שם אפשר להגדיר או לשנות שם ממתין (`test`, `www`, או ריק לשם הראשי). כל יעד מקבל HTTPS על ה-hostname. אין custom domain ל-Compute. שלבי ה-DNS המלאים לחיבור שממתין נשארים בטאב הזה.
 - **דואר** — פותח את [Deliverability](mail.md) (מקור אחד ל-MX / SPF / DKIM / DMARC).
 - **הגדרות** — מחיקת הדומיין אחרי ניתוק שירותים.
 
@@ -60,8 +60,10 @@
 ```bash
 homecloud domains create example.com --dns-mode homecloud
 homecloud domains record-create DOMAIN_ID --type A --record 1.2.3.4 --host www
-homecloud domains attach DOMAIN_ID --target-id FUNCTION_ID --target-type function --host www
+homecloud domains attach DOMAIN_ID --target-id FUNCTION_ID --target-type function --host test
 ```
+
+`--host` הוא התווית היחסית (`test`, `www`). ריק = השם הראשי. שינוי שם ממתין או ניתוק הם בקונסול (שירותים). ב-Terraform `homecloud_domain_attachment.host` גם יחסי; שינוי שלו מחליף את המשאב.
 
 משאבי Terraform: `homecloud_domain` (`wait_for_verified` אופציונלי), `homecloud_dns_record`, `homecloud_domain_attachment`. חיפוש וקניית דומיין הם רק בקונסול/API.
 

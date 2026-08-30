@@ -67,6 +67,21 @@
 
 פרטים: [fn](fn.md).
 
+## דומיינים
+
+| פקודה | Auth | תיאור |
+|-------|------|-------|
+| `homecloud domains list` | JWT | רשימת דומיינים |
+| `homecloud domains create` | JWT | הוספת דומיין (`--dns-mode external` או `homecloud`) |
+| `homecloud domains get` | JWT | פרטי דומיין |
+| `homecloud domains verify` | JWT | אימות TXT או nameservers |
+| `homecloud domains attach` | JWT | חיבור hostname (`--host test` יחסי; ריק = שורש) |
+| `homecloud domains records` | JWT | רשימת רשומות DNS של HomeCloud |
+| `homecloud domains record-create` | JWT | יצירת רשומת DNS מארח |
+| `homecloud domains delete` | JWT | מחיקת דומיין (קודם נתקו שירותים) |
+
+פרטים: [domains](domains.md). מדריך: [דומיינים](../../guides/domains.md).
+
 ## Image registry (`ir`)
 
 | פקודה | Auth | תיאור |

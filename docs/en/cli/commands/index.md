@@ -67,6 +67,21 @@ Details: [so](so.md).
 
 Details: [fn](fn.md).
 
+## Domains
+
+| Command | Auth | Description |
+|---------|------|-------------|
+| `homecloud domains list` | JWT | List domains |
+| `homecloud domains create` | JWT | Add a domain (`--dns-mode external` or `homecloud`) |
+| `homecloud domains get` | JWT | Domain detail |
+| `homecloud domains verify` | JWT | Verify TXT or nameservers |
+| `homecloud domains attach` | JWT | Connect a hostname (`--host test` relative; empty = root) |
+| `homecloud domains records` | JWT | List HomeCloud DNS records |
+| `homecloud domains record-create` | JWT | Create a hosted DNS record |
+| `homecloud domains delete` | JWT | Delete a domain (detach services first) |
+
+Details: [domains](domains.md). Guide: [Domains](../../guides/domains.md).
+
 ## Image registry (`ir`)
 
 | Command | Auth | Description |

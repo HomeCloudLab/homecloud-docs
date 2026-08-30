@@ -34,22 +34,22 @@ Keep DNS at your registrar. After TXT verify, open **Services** and connect an A
 
 | What you connect | Record to add |
 |------------------|---------------|
-| A subdomain (`www`, `app`, `api`, …) | **CNAME** from that name to the platform hostname shown in the console |
-| The root name (`example.com`) | **ALIAS** or **ANAME** for `@` to that hostname, if your DNS host supports it. Otherwise connect a subdomain. |
+| A subdomain (`www`, `app`, `api`, `test`, …) | Set **Host** to that label, connect, then add a **CNAME** whose Name is only that label (not the full hostname) to the platform hostname shown |
+| The root name (`example.com`) | Leave Host empty. **ALIAS** or **ANAME** for `@` to that hostname, if your DNS host supports it. Otherwise change Host to a subdomain, save, and use a CNAME. |
 
-Then click **Check DNS**. SSL is issued automatically after DNS points here. The **SSL** tab shows Active / Pending / Failed / Expiring / Expired and **Refresh**.
+On a pending connection you can **change the host** and **Disconnect**. Check DNS looks up the saved host only. SSL is issued automatically after DNS points here. The **SSL** tab shows Active / Pending / Failed / Expiring / Expired and **Refresh**.
 
 ## HomeCloud DNS
 
 When enabled, point nameservers at `ns1.{apex}` and `ns2.{apex}`, then Verify. That creates a **hosted zone**: SOA and NS are read-only. Manage A, AAAA, CNAME, TXT, MX, CAA, and SRV on the **DNS** tab. Apex → a service is an **attachment**, not a record type named ALIAS.
 
-After nameservers match, **Attach** writes the record and activates routing — no second Verify. Attach the root (empty host), `www`, `api`, or any other label. Connecting the apex can also create a **www** alias to the same service (checkbox on Attach; default on in the console). Enable **DNSSEC** on the DNS tab and copy the DS records at the registrar.
+After nameservers match, **Attach** writes the record and activates routing — no second Verify. Attach the root (empty host), `www`, `api`, or any other label. Connecting the apex can also create a **www** alias to the same service (checkbox on Attach; off by default). Enable **DNSSEC** on the DNS tab and copy the DS records at the registrar.
 
 ## Domain page
 
 Each domain has **Overview**, **DNS**, **SSL**, **Services**, **Mail**, and **Settings**.
 
-- **Services** — connect or detach Application, Function URL, or SO website. Each target gets HTTPS on that hostname. Compute cannot use a custom domain. Full DNS steps for a pending connection stay on this tab.
+- **Services** — connect or detach Application, Function URL, or SO website. Set or change Host on a pending connection (`test`, `www`, or empty for the root). Each target gets HTTPS on that hostname. Compute cannot use a custom domain. Full DNS steps for a pending connection stay on this tab.
 - **Mail** — opens [Mail Deliverability](mail.md) (one place for MX / SPF / DKIM / DMARC).
 - **Settings** — delete the domain after you detach services.
 
@@ -60,8 +60,10 @@ Applications, Function URLs, and SO websites show attached hostnames as **Manage
 ```bash
 homecloud domains create example.com --dns-mode homecloud
 homecloud domains record-create DOMAIN_ID --type A --record 1.2.3.4 --host www
-homecloud domains attach DOMAIN_ID --target-id FUNCTION_ID --target-type function --host www
+homecloud domains attach DOMAIN_ID --target-id FUNCTION_ID --target-type function --host test
 ```
+
+`--host` is the relative label (`test`, `www`). Empty is the root name. Changing a pending host or Disconnect is in the Console (Services). Terraform `homecloud_domain_attachment.host` is also relative; changing it replaces the resource.
 
 Terraform resources: `homecloud_domain` (optional `wait_for_verified`), `homecloud_dns_record`, `homecloud_domain_attachment`. Domain search and purchase are console/API only.
 
