@@ -13,6 +13,6 @@ homecloud domains record-create DOMAIN_ID --type A --record 1.2.3.4 --host www
 homecloud domains delete DOMAIN_ID
 ```
 
-`--host` on attach is relative to the domain (`test`, `www`). Empty is the root name. Check DNS, changing a pending host, and Disconnect are in the Console.
+`--host` on attach is relative to the domain (`test`, `www`). Empty is the root name. Check DNS, changing a pending host, Disconnect, switching External DNS ↔ HomeCloud DNS, and zone-file import/export are in the Console.
 
 Guide: [Domains](../../guides/domains.md).

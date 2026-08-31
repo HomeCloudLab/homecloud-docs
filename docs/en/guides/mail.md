@@ -18,10 +18,13 @@ HomeCloud Mail gives your account **mailboxes**, a full webmail client, **templa
 
 ## Create and use a mailbox
 
-1. Open **Mail** → **Create mailbox** (local part on the platform mail domain, unless your platform already supports custom domains).  
-2. Open the mailbox.  
-3. Send a test message to yourself; use **Sync inbox** if a new message is slow to appear.  
-4. Open **Settings** inside the mailbox for display name, signature, forwarding, and automation rules.
+1. Add and **verify** your domain under **Domains** (External DNS is enough — no nameserver change).
+2. Open the domain → **Mail** → **Enable Mail**.
+3. Create a mailbox (`hello@your-domain`). On External DNS, copy the MX / SPF / DKIM / DMARC rows at your registrar, then use **Deliverability** to check them.
+4. Open the mailbox. Send a test message; use **Sync inbox** if a new message is slow to appear.
+5. Open **Settings** inside the mailbox for display name, signature, forwarding, and automation rules.
+
+Platform-domain addresses (`@` the platform mail zone) stay limited to the Platform Mail Account. Your own hostname does not.
 
 ### Compose
 
@@ -93,6 +96,11 @@ data = client.mail.download_attachment(msgs[0]["id"], "0")
 ## API examples (console JWT)
 
 ```bash
+# Enable Mail on a verified custom domain
+curl -sS -X POST -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
+  -d '{"hostname":"example.com"}' \
+  "$API/api/v1/accounts/$ACCOUNT_ID/mail/domains"
+
 # List mailboxes
 curl -sS -H "Authorization: Bearer $TOKEN" \
   "$API/api/v1/accounts/$ACCOUNT_ID/mail/mailboxes"

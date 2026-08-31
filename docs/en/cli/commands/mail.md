@@ -40,7 +40,7 @@ homecloud mail attachment <message-id> <part-id> --dest ./invoice.pdf
 
 ## Tips
 
-- Prefer the console for compose, templates, and automations.  
+- Prefer the console for compose, templates, automations, and **Enable Mail** on a custom domain.  
 - Use CLI/SDK for scripting exports and debugging message IDs.  
 - If lists look stale, sync from the console (**Sync inbox**) and retry.
 

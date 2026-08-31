@@ -13,6 +13,6 @@ homecloud domains record-create DOMAIN_ID --type A --record 1.2.3.4 --host www
 homecloud domains delete DOMAIN_ID
 ```
 
-`--host` בצירוף יחסי לדומיין (`test`, `www`). ריק = השם הראשי. בדיקת DNS, שינוי שם ממתין וניתוק הם בקונסול.
+`--host` בצירוף יחסי לדומיין (`test`, `www`). ריק = השם הראשי. בדיקת DNS, שינוי שם ממתין, ניתוק, מעבר בין DNS חיצוני ל-DNS של HomeCloud וייבוא/ייצוא קובץ אזור הם בקונסול.
 
 מדריך: [דומיינים](../../guides/domains.md).

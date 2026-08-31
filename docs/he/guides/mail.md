@@ -18,10 +18,13 @@ HomeCloud Mail נותן לחשבון **תיבות דואר**, לקוח webmail �
 
 ## יצירה ושימוש בתיבה
 
-1. פתחו **Mail** → **Create mailbox** (חלק מקומי בדומיין הדואר של הפלטפורמה, אלא אם הפלטפורמה כבר תומכת בדומיינים מותאמים).  
-2. פתחו את התיבה.  
-3. שלחו הודעת בדיקה לעצמכם; השתמשו ב-**Sync inbox** אם הודעה חדשה מתעכבת.  
-4. פתחו **Settings** בתוך התיבה לשם תצוגה, חתימה, העברה וכללי אוטומציה.
+1. הוסיפו ואמתו דומיין תחת **דומיינים** (DNS חיצוני מספיק — בלי להחליף nameservers).
+2. בדף הדומיין → **דואר** → **הפעלת דואר**.
+3. צרו תיבה (`hello@הדומיין-שלכם`). ב-DNS חיצוני העתיקו את שורות MX / SPF / DKIM / DMARC אצל הרשם, ואז בדקו ב-**Deliverability**.
+4. פתחו את התיבה. שלחו הודעת בדיקה; השתמשו ב-**Sync inbox** אם הודעה חדשה מתעכבת.
+5. פתחו **Settings** בתוך התיבה לשם תצוגה, חתימה, העברה וכללי אוטומציה.
+
+כתובות על דומיין הדואר של הפלטפורמה נשארות מוגבלות לחשבון Platform Mail. hostname שלכם לא.
 
 ### כתיבה
 
@@ -93,6 +96,11 @@ data = client.mail.download_attachment(msgs[0]["id"], "0")
 ## דוגמאות API (JWT קונסול)
 
 ```bash
+# הפעלת דואר על דומיין מאומת
+curl -sS -X POST -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
+  -d '{"hostname":"example.com"}' \
+  "$API/api/v1/accounts/$ACCOUNT_ID/mail/domains"
+
 # List mailboxes
 curl -sS -H "Authorization: Bearer $TOKEN" \
   "$API/api/v1/accounts/$ACCOUNT_ID/mail/mailboxes"
