@@ -369,7 +369,7 @@ HomeCloud הוא הענן. בוחרים **קונספט** ו**אזור**. Offerin
 | מכונות + מפתחות SSH + Security groups + Floating IPs + Load balancers + VPC | `/console/compute` |
 | Workspace | `/console/compute/{machine_id}` |
 
-טאבי שירות: **מכונות**, **מפתחות SSH**, **Security groups**, **Floating IPs**, **Load balancers**, **VPC** (מוסתר כשאין יכולת `private_network` באזור). טאבי מכונה: **סקירה** (משולש בריאות, מחזור חיים, קבוצות מחוברות, Floating IP, NIC / IPv4 פרטי), **סשן** (בחירת מעטפת Agent ואז התחבר; מסך מלא קצה-לקצה), **סייר**, **ביצועים**, **Snapshots**. סשן וסייר דורשים `agent_state=ONLINE`. בלי `HETZNER_API_TOKEN` יצירה עדיין מחזירה HTTP 202; ה-Operation הוא **FAILED**.
+טאבי שירות: **מכונות**, **מפתחות SSH**, **Security groups**, **Floating IPs**, **Load balancers**, **VPC** (מוסתר כשאין יכולת `private_network` באזור). רשימת המכונות **ברירת המחדל היא כל האזורים** כדי שמכונת Windows ב-`eu-west` לא תוסתר כשהכותרת על `eu-central` — הן ממשיכות לחייב. יצירה / VPC / LB נשארים לפי האזור שנבחר. טאבי מכונה: **סקירה** (משולש בריאות, מחזור חיים, קבוצות מחוברות, Floating IP, NIC / IPv4 פרטי), **סשן** (בחירת מעטפת Agent ואז התחבר; מסך מלא קצה-לקצה), **סייר**, **ביצועים**, **Snapshots**. סשן וסייר דורשים `agent_state=ONLINE`. בלי `HETZNER_API_TOKEN` יצירה עדיין מחזירה HTTP 202; ה-Operation הוא **FAILED**.
 
 ## עדכונים חיים
 

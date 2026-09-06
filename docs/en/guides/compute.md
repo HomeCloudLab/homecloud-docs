@@ -369,7 +369,7 @@ HomeCloud is the cloud. You choose a **concept** and a **region**. Offerings (He
 | Machines + SSH keys + Security groups + Floating IPs + Load balancers + VPC | `/console/compute` |
 | Workspace | `/console/compute/{machine_id}` |
 
-Service tabs: **Machines**, **SSH keys**, **Security groups**, **Floating IPs**, **Load balancers**, **VPC** (hidden when the region has no `private_network` capability). Machine tabs: **Overview** (health triad, lifecycle, attached groups, Floating IP, private NIC / IPv4), **Session** (choose Agent shell then Connect; full screen edge-to-edge), **Explorer**, **Performance**, **Snapshots**. Session and Explorer require `agent_state=ONLINE`. Without `HETZNER_API_TOKEN` a create still returns HTTP 202; the Operation is **FAILED**.
+Service tabs: **Machines**, **SSH keys**, **Security groups**, **Floating IPs**, **Load balancers**, **VPC** (hidden when the region has no `private_network` capability). The Machines list **defaults to every region** so a Windows VM in `eu-west` is not hidden while the header is on `eu-central` — those machines still bill. Create / VPC / LB stay scoped to the selected region. Machine tabs: **Overview** (health triad, lifecycle, attached groups, Floating IP, private NIC / IPv4), **Session** (choose Agent shell then Connect; full screen edge-to-edge), **Explorer**, **Performance**, **Snapshots**. Session and Explorer require `agent_state=ONLINE`. Without `HETZNER_API_TOKEN` a create still returns HTTP 202; the Operation is **FAILED**.
 
 ## Live updates
 
