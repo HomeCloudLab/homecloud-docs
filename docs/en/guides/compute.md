@@ -38,10 +38,11 @@ Quota default is **10 machines** on the existing account quota table (`409 compu
 | `ubuntu-24.04` | `homecloud-agent.deb` |
 | `debian-12` | `homecloud-agent.deb` |
 | `almalinux-9` | `homecloud-agent.rpm` |
+| `windows-2022` | HomeCloud Agent (PowerShell `#ps1`) when a bootstrap image is ready |
 
 Create with `image_id` only — the adapter maps it to a vendor image internally. The client never sends that native id.
 
-**Windows Server is not available from current capacity.** Current fulfillment is Hetzner Cloud, which has no Windows system image. The catalog still lists `windows-2022`; create is rejected with `compute.concept_unavailable`.
+**Windows is `image ∩ offering`, not a lane.** `GET /concepts?image_id=windows-2022` marks a concept `available` only when an offering in that placement can boot it and the shape has at least **4 GiB** RAM. The console does not apply a local Windows filter. Create of a too-small shape or a placement with no capable offering returns `compute.invalid_image` / `compute.placement_unavailable`.
 
 AlmaLinux Agent install uses the `wheel` group (not Ubuntu `sudo`) and `pip` for `websocket-client`. The Agent script is **Python 3.9 compatible** (AlmaLinux 9 ships 3.9; `datetime.UTC` is 3.11+). Guests created before that cloud-init stay **Booting guest** until you **rebuild**.
 
@@ -84,7 +85,7 @@ No eligible offering is `400 compute.placement_unavailable` (not a generic conce
 
 `region_code` is geography, not a vendor. `eu-central` can be fulfilled by more than one offering. A live create needs the matching vendor token on the API (`HETZNER_API_TOKEN` and/or `SCALEWAY_API_TOKEN` + `SCALEWAY_PROJECT_ID`). Without capacity configured the operation completes as **FAILED** (still HTTP 202) with a HomeCloud error — never a vendor name. `class` remains accepted as an alias (`basic` → `hc.shared.small`, `standard` → `hc.general.small`).
 
-List concepts: `GET /api/v1/accounts/{id}/compute/concepts` (customer prices only).
+List concepts: `GET /api/v1/accounts/{id}/compute/concepts` (customer prices only). Pass `image_id` so `available` is the image∩offering intersection for that guest (required for Windows honesty).
 
 Same `Idempotency-Key` + same body returns the original `machine_id` / `operation_id`.
 
@@ -182,7 +183,7 @@ Console: Compute → **Floating IPs**, and the machine Overview card when the pl
 
 ## Load balancers
 
-A public Load Balancer is a **VIP** in front of Compute machines. Targets are reached on **public IPv4** — this release does not require a VPC. (Private / east-west LB targets come later; VPC + private NIC are the foundation.) Targets must share the **same capacity placement** as the LB (same rule as Floating IP). Protocols in this release: **TCP** and **HTTP** (HTTPS termination later). Quota is **5** per account (`409 compute.load_balancer_quota`).
+A public Load Balancer is a **VIP** in front of Compute machines. Desired targets are HomeCloud objects — `machine`, `nic`, or `address` — not a vendor server id. `machine_ids` is a shorthand for `{ "type": "machine", "id": "…" }`. Current adapters implement **machine** and **address** in regions whose offerings advertise `load_balancer` (`eu-central` and `eu-west` today). **nic** returns `compute.unsupported_target` until a later adapter. Targets must share the HomeCloud **region**. Same create/update body works in both regions. Protocols in this release: **TCP** and **HTTP** (HTTPS later). Quota is **5** per account (`409 compute.load_balancer_quota`).
 
 PowerShell:
 
@@ -203,11 +204,20 @@ curl -sS -X POST "$HOMECLOUD_API/api/v1/accounts/$ACCOUNT_ID/compute/load-balanc
   -d '{"name":"web-front","region_code":"eu-central","listeners":[{"protocol":"http","port":80,"target_port":8080}],"machine_ids":["MACHINE_ID"]}'
 ```
 
+Equivalent `targets` body (same machine shorthand, plus an address target):
+
+```bash
+curl -sS -X POST "$HOMECLOUD_API/api/v1/accounts/$ACCOUNT_ID/compute/load-balancers" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"name":"web-front","region_code":"eu-central","listeners":[{"protocol":"http","port":80,"target_port":8080}],"targets":[{"type":"machine","id":"MACHINE_ID"},{"type":"address","address":"203.0.113.10"}]}'
+```
+
 | Action | Request |
 |--------|---------|
 | List | `GET .../load-balancers?region_code=` (sets `can_create`) |
 | Get | `GET .../load-balancers/{id}` |
-| Update | `PUT .../load-balancers/{id}` `{ listeners, machine_ids }` |
+| Update | `PUT .../load-balancers/{id}` `{ listeners, machine_ids }` or `{ targets }` |
 | Delete | `DELETE .../load-balancers/{id}` |
 
 Mutating calls return **202** `{ load_balancer_id, operation_id }`.
@@ -217,9 +227,9 @@ Mutating calls return **202** `{ load_balancer_id, operation_id }`.
 | `compute.load_balancer_unsupported` | Placement has no LB capability |
 | `compute.load_balancer_quota` | Account already has 5 LBs |
 | `compute.load_balancer_exists` | Name already used |
-| `compute.load_balancer_region` | LB and targets in different regions |
-| `compute.load_balancer_provider` | Targets are not the same capacity placement |
-| `compute.load_balancer_target_ip` | Target machine has no public IPv4 |
+| `compute.load_balancer_region` | LB and targets in different HomeCloud regions |
+| `compute.unsupported_target` | This adapter cannot implement that target type (or the target is not reachable yet) |
+| `compute.invalid_targets` | Bad target list |
 | `compute.invalid_listener` | Bad protocol/port |
 
 Console: Compute → **Load balancers**.
@@ -228,7 +238,7 @@ Console: Compute → **Load balancers**.
 
 A **VPC** is an account-scoped private IPv4 fabric in a HomeCloud **region**. You choose a CIDR (typically RFC1918), carve **subnets** that must sit **inside** that VPC CIDR, then **attach** a machine to a subnet (one private NIC per machine in this release). Inventory shows the observed private address on `nic.private_ip`. Public IPv4 / Floating IP behavior is unchanged.
 
-Capability gate: placements with `private_network` support VPC (Hetzner today). Scaleway and other drivers without private networks return `compute.vpc_unsupported` and the console **hides** the VPC tab when no capable region is selected — same honesty pattern as Floating IP.
+Capability gate: placements with `private_network` support VPC (`eu-central` and `eu-west` today). Other placements return `compute.vpc_unsupported` and the console **hides** the VPC tab when no capable region is selected — same honesty pattern as Floating IP. Same create/attach body works in both regions (`machine_id` + `subnet_id`; never a vendor network id).
 
 Quotas: **5 VPCs** and **20 subnets** per account (`409 compute.vpc_quota` / `compute.subnet_quota`). One private subnet attachment per machine.
 
@@ -292,7 +302,7 @@ curl -sS -X POST "$HOMECLOUD_API/api/v1/accounts/$ACCOUNT_ID/compute/vpcs/$VPC_I
 | Attach | `POST .../machines/{machine_id}/subnets/{subnet_id}` |
 | Detach | `DELETE .../machines/{machine_id}/subnets/{subnet_id}` |
 
-Mutating VPC/subnet/NIC calls return **202** with an `operation_id`. Machine and VPC must share region and capacity placement (same family of checks as Floating IP / LB).
+Mutating VPC/subnet/NIC calls return **202** with an `operation_id`. Machine and VPC must share a HomeCloud **region**. Same-vendor fabric is an adapter detail: if that adapter cannot attach the machine it returns `compute.unsupported_target`.
 
 | Code | Meaning |
 |------|---------|
@@ -302,8 +312,8 @@ Mutating VPC/subnet/NIC calls return **202** with an `operation_id`. Machine and
 | `compute.invalid_cidr` | Bad CIDR, or subnet not contained in VPC CIDR |
 | `compute.subnet_overlap` | Subnet CIDR overlaps another subnet in the VPC |
 | `compute.vpc_in_use` | Delete blocked while subnets/NICs still in use |
-| `compute.vpc_region` | Machine and VPC in different regions |
-| `compute.vpc_provider` | Machine and VPC are not the same capacity placement |
+| `compute.vpc_region` | Machine and VPC in different HomeCloud regions |
+| `compute.unsupported_target` | This adapter cannot attach that machine to the fabric |
 | `compute.nic_busy` | Attach/detach still in progress, or machine already has a private subnet |
 | `compute.subnet_busy` | Subnet still provisioning |
 | `compute.vpc_not_found` / `compute.subnet_not_found` | Unknown id |

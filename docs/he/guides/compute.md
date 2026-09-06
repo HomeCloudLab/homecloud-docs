@@ -38,10 +38,11 @@ Workspace בקונסול: **`/console/compute`** — טאבים **מכונות**
 | `ubuntu-24.04` | `homecloud-agent.deb` |
 | `debian-12` | `homecloud-agent.deb` |
 | `almalinux-9` | `homecloud-agent.rpm` |
+| `windows-2022` | HomeCloud Agent (PowerShell `#ps1`) כשתמונת bootstrap מוכנה |
 
 יוצרים עם `image_id` בלבד — המתאם ממפה בפנים. הלקוח לא שולח את ה-id של הספק.
 
-**Windows Server אינו זמין מהקיבולת הנוכחית.** המימוש הנוכחי הוא Hetzner Cloud, ואין לו image מערכת של Windows. הקטלוג עדיין מציג `windows-2022`; יצירה נדחית עם `compute.concept_unavailable`.
+**Windows הוא `image ∩ offering`, לא נתיב מוצר.** `GET /concepts?image_id=windows-2022` מסמן קונספט כ-`available` רק כשיש offering ב-placement שיודע לבוט אותו והצורה היא לפחות **4 GiB** RAM. הקונסול לא מחיל סינון Windows מקומי. יצירה של צורה קטנה מדי או placement בלי offering מתאים מחזירה `compute.invalid_image` / `compute.placement_unavailable`.
 
 התקנת Agent ב-AlmaLinux משתמשת בקבוצת `wheel` (לא `sudo` של Ubuntu) וב-`pip` ל-`websocket-client`. סקריפט ה-Agent תואם **Python 3.9** (AlmaLinux 9; `datetime.UTC` רק מ-3.11). אורחים שנוצרו לפני ה-cloud-init הזה נשארים ב**אורח בעלייה** עד **rebuild**.
 
@@ -84,7 +85,7 @@ curl -sS -X POST "$HOMECLOUD_API/api/v1/accounts/$ACCOUNT_ID/compute/machines" \
 
 `region_code` הוא מיקום, לא ספק. `eu-central` יכול להתמלא על ידי יותר מ-Offering אחד. יצירה חיה דורשת טוקן מתאים ב-API. בלי קיבולת מוגדרת ה-Operation מסתיים ב-**FAILED** (עדיין HTTP 202) עם שגיאת HomeCloud — בלי שם ספק. `class` נשאר כינוי (`basic` → `hc.shared.small`, `standard` → `hc.general.small`).
 
-רשימת קונספטים: `GET /api/v1/accounts/{id}/compute/concepts` (מחירי לקוח בלבד).
+רשימת קונספטים: `GET /api/v1/accounts/{id}/compute/concepts` (מחירי לקוח בלבד). מעבירים `image_id` כדי ש-`available` יהיה חיתוך image∩offering לאורח הזה (נדרש ליושר Windows).
 
 אותו `Idempotency-Key` + אותו גוף מחזירים את אותו `machine_id` / `operation_id`.
 
@@ -182,7 +183,7 @@ curl -sS -X POST "$HOMECLOUD_API/api/v1/accounts/$ACCOUNT_ID/compute/floating-ip
 
 ## Load balancers
 
-Load Balancer ציבורי הוא **VIP** מול מכונות Compute. היעדים נגישים ב-**IPv4 ציבורי** — הגרסה הזו לא דורשת VPC. (LB פרטי / east-west יגיע בהמשך; VPC + NIC פרטי הם הבסיס.) היעדים חייבים לשתף את **אותו placement קיבולת** כמו ה-LB (כמו Floating IP). פרוטוקולים בגרסה זו: **TCP** ו-**HTTP** (HTTPS בהמשך). מכסה: **5** לחשבון (`409 compute.load_balancer_quota`).
+Load Balancer ציבורי הוא **VIP** מול מכונות Compute. יעדים רצויים הם אובייקטי HomeCloud — `machine`, `nic` או `address` — לא מזהה שרת של ספק. `machine_ids` הוא קיצור ל-`{ "type": "machine", "id": "…" }`. המתאמים הנוכחיים מממשים **machine** ו-**address** באזורים שה-offerings שלהם מפרסמים `load_balancer` (`eu-central` ו-`eu-west` היום). **nic** מחזיר `compute.unsupported_target` עד מתאם מאוחר יותר. היעדים חייבים לשתף **אזור** HomeCloud. אותו גוף create/update עובד בשני האזורים. פרוטוקולים בגרסה זו: **TCP** ו-**HTTP** (HTTPS בהמשך). מכסה: **5** לחשבון (`409 compute.load_balancer_quota`).
 
 PowerShell:
 
@@ -203,11 +204,20 @@ curl -sS -X POST "$HOMECLOUD_API/api/v1/accounts/$ACCOUNT_ID/compute/load-balanc
   -d '{"name":"web-front","region_code":"eu-central","listeners":[{"protocol":"http","port":80,"target_port":8080}],"machine_ids":["MACHINE_ID"]}'
 ```
 
+גוף `targets` שקול (אותו קיצור מכונה, וגם יעד address):
+
+```bash
+curl -sS -X POST "$HOMECLOUD_API/api/v1/accounts/$ACCOUNT_ID/compute/load-balancers" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"name":"web-front","region_code":"eu-central","listeners":[{"protocol":"http","port":80,"target_port":8080}],"targets":[{"type":"machine","id":"MACHINE_ID"},{"type":"address","address":"203.0.113.10"}]}'
+```
+
 | פעולה | בקשה |
 |--------|---------|
 | רשימה | `GET .../load-balancers?region_code=` (מציב `can_create`) |
 | קריאה | `GET .../load-balancers/{id}` |
-| עדכון | `PUT .../load-balancers/{id}` `{ listeners, machine_ids }` |
+| עדכון | `PUT .../load-balancers/{id}` `{ listeners, machine_ids }` או `{ targets }` |
 | מחיקה | `DELETE .../load-balancers/{id}` |
 
 קריאות שינוי מחזירות **202** `{ load_balancer_id, operation_id }`.
@@ -217,9 +227,9 @@ curl -sS -X POST "$HOMECLOUD_API/api/v1/accounts/$ACCOUNT_ID/compute/load-balanc
 | `compute.load_balancer_unsupported` | אין יכולת LB ב-placement |
 | `compute.load_balancer_quota` | בחשבון כבר יש 5 LBs |
 | `compute.load_balancer_exists` | השם כבר בשימוש |
-| `compute.load_balancer_region` | LB ויעדים באזורים שונים |
-| `compute.load_balancer_provider` | יעדים אינם באותו placement |
-| `compute.load_balancer_target_ip` | למכונת יעד אין IPv4 ציבורי |
+| `compute.load_balancer_region` | LB ויעדים באזורי HomeCloud שונים |
+| `compute.unsupported_target` | המתאם לא מממש את סוג היעד (או שהיעד עדיין לא נגיש) |
+| `compute.invalid_targets` | רשימת יעדים לא תקינה |
 | `compute.invalid_listener` | פרוטוקול/פורט לא תקין |
 
 בקונסול: Compute → **Load balancers**.
@@ -228,7 +238,7 @@ curl -sS -X POST "$HOMECLOUD_API/api/v1/accounts/$ACCOUNT_ID/compute/load-balanc
 
 **VPC** הוא רשת IPv4 פרטית ברמת חשבון באזור HomeCloud. בוחרים CIDR (בדרך כלל RFC1918), חותכים **subnets** שחייבים לשבת **בתוך** ה-CIDR של ה-VPC, ואז **מחברים** מכונה ל-subnet (NIC פרטי אחד למכונה בגרסה זו). במלאי מופיעה הכתובת הפרטית ב-`nic.private_ip`. IPv4 ציבורי / Floating IP לא משתנים.
 
-שער יכולת: placements עם `private_network` תומכים ב-VPC (Hetzner היום). Scaleway ודרייברים בלי רשת פרטית מחזירים `compute.vpc_unsupported`, והקונסול **מסתיר** את טאב VPC כשאין אזור תומך — אותה כנות כמו Floating IP.
+שער יכולת: placements עם `private_network` תומכים ב-VPC (`eu-central` ו-`eu-west` היום). placements אחרים מחזירים `compute.vpc_unsupported`, והקונסול **מסתיר** את טאב VPC כשאין אזור תומך — אותה כנות כמו Floating IP. אותו גוף create/attach עובד בשני האזורים (`machine_id` + `subnet_id`; לא מזהה רשת של ספק).
 
 מכסות: **5 VPCs** ו-**20 subnets** לחשבון (`409 compute.vpc_quota` / `compute.subnet_quota`). חיבור subnet פרטי אחד למכונה.
 
@@ -292,7 +302,7 @@ curl -sS -X POST "$HOMECLOUD_API/api/v1/accounts/$ACCOUNT_ID/compute/vpcs/$VPC_I
 | חיבור | `POST .../machines/{machine_id}/subnets/{subnet_id}` |
 | ניתוק | `DELETE .../machines/{machine_id}/subnets/{subnet_id}` |
 
-קריאות שינוי ל-VPC/subnet/NIC מחזירות **202** עם `operation_id`. מכונה ו-VPC חייבים לשתף אזור ו-placement קיבולת (אותה משפחת בדיקות כמו Floating IP / LB).
+קריאות שינוי ל-VPC/subnet/NIC מחזירות **202** עם `operation_id`. מכונה ו-VPC חייבים לשתף **אזור** HomeCloud. אותו ספק הוא פרט מתאם: אם המתאם לא יכול לחבר את המכונה הוא מחזיר `compute.unsupported_target`.
 
 | קוד | משמעות |
 |------|---------|
@@ -302,8 +312,8 @@ curl -sS -X POST "$HOMECLOUD_API/api/v1/accounts/$ACCOUNT_ID/compute/vpcs/$VPC_I
 | `compute.invalid_cidr` | CIDR לא תקין, או subnet לא בתוך CIDR של ה-VPC |
 | `compute.subnet_overlap` | CIDR של subnet חופף subnet אחר ב-VPC |
 | `compute.vpc_in_use` | מחיקה חסומה כל עוד יש subnets/NICs בשימוש |
-| `compute.vpc_region` | מכונה ו-VPC באזורים שונים |
-| `compute.vpc_provider` | מכונה ו-VPC אינם באותו placement קיבולת |
+| `compute.vpc_region` | מכונה ו-VPC באזורי HomeCloud שונים |
+| `compute.unsupported_target` | המתאם לא יכול לחבר את המכונה ל-fabric |
 | `compute.nic_busy` | חיבור/ניתוק עדיין בתהליך, או למכונה כבר יש subnet פרטי |
 | `compute.subnet_busy` | ה-subnet עדיין ב-provisioning |
 | `compute.vpc_not_found` / `compute.subnet_not_found` | מזהה לא מוכר |
