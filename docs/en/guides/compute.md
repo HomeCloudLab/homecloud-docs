@@ -44,7 +44,7 @@ Create with `image_id` only — the adapter maps it to a vendor image internally
 
 **Windows is `image ∩ offering`, not a lane.** `GET /concepts?image_id=windows-2022` marks a concept `available` only when an offering in that placement can boot it and the shape has at least **4 GiB** RAM. The console does not apply a local Windows filter. Create of a too-small shape or a placement with no capable offering returns `compute.invalid_image` / `compute.placement_unavailable`.
 
-`windows-2022` stays `available=false` when the private bootstrap image is unset **or the configured UUID is gone** on Scaleway. A stale env var must not sell a create that 404s.
+`windows-2022` stays `available=false` when the private bootstrap image is unset **or the configured UUID is gone** on Scaleway. A stale env var must not sell a create that 404s. Catalog `available=true` means a live image UUID exists — not that guest bootstrap or Agent ONLINE is proven. Session still requires `agent_state=ONLINE`.
 
 AlmaLinux Agent install uses the `wheel` group (not Ubuntu `sudo`) and `pip` for `websocket-client`. The Agent script is **Python 3.9 compatible** (AlmaLinux 9 ships 3.9; `datetime.UTC` is 3.11+). Guests created before that cloud-init stay **Booting guest** until you **rebuild**.
 
@@ -129,7 +129,7 @@ Disk is **grow-only**: `POST .../volumes/{volume_id}/resize` `{"size_gb":80}`.
 - **Security groups** are the source of truth for ingress (account-scoped). Attach to a **machine** and/or to a private **NIC** (`target_type` `machine` | `nic`). Each rule is TCP/UDP + port + **source CIDR** (e.g. `0.0.0.0/0`, a public host, or a VPC/subnet CIDR). Domains are not supported.
 - Effective rules for a machine = **union** of groups attached to the machine **and** to its NICs (deduplicated). On current Hetzner capacity the driver still applies that union to the **server** firewall — NIC targeting is HomeCloud SoT for future per-interface vendors.
 - The account **default** group includes **TCP 22**. Extra groups do **not** force SSH — create HTTPS-only groups if you want.
-- Console: Compute → **Security groups** (quick create dialog; full-page edit). Detach removes the vendor firewall from the VM; delete removes the firewall object. `PUT .../machines/{id}/firewall` is a compatibility shim that writes the account **default** group.
+- Console: Compute → **Security groups** (quick create dialog; full-page edit). The list shows attached machines. Detach removes the vendor firewall from the VM; delete removes the firewall object. Delete is blocked while a group is attached to a **live** machine or NIC. Deleting a machine detaches its groups. Attachments to a machine that is already gone are cleaned up and do not block delete. `PUT .../machines/{id}/firewall` is a compatibility shim that writes the account **default** group.
 - Attach API: `POST .../security-groups/{group_id}/attachments` `{"target_type":"machine"|"nic","target_id":"…"}`. Machine shorthand `POST .../machines/{id}/security-groups/{group_id}` always uses `target_type=machine`.
 - Drivers without a vendor firewall (Scaleway today) store the policy in HomeCloud and do not pretend the vendor applied it.
 - Public IPv4 is allocated on the machine NIC; private IPv4 appears after [VPC subnet attach](#vpc-subnets-private-nic). IPv6 is stored as null and not required.

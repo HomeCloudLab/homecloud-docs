@@ -44,7 +44,7 @@ Workspace בקונסול: **`/console/compute`** — טאבים **מכונות**
 
 **Windows הוא `image ∩ offering`, לא נתיב מוצר.** `GET /concepts?image_id=windows-2022` מסמן קונספט כ-`available` רק כשיש offering ב-placement שיודע לבוט אותו והצורה היא לפחות **4 GiB** RAM. הקונסול לא מחיל סינון Windows מקומי. יצירה של צורה קטנה מדי או placement בלי offering מתאים מחזירה `compute.invalid_image` / `compute.placement_unavailable`.
 
-`windows-2022` נשאר `available=false` כשתמונת ה-bootstrap הפרטית לא מוגדרת **או כשה-UUID שמוגדר כבר לא קיים** ב-Scaleway. משתנה סביבה מת לא אמור למכור יצירה שנכשלת ב-404.
+`windows-2022` נשאר `available=false` כשתמונת ה-bootstrap הפרטית לא מוגדרת **או כשה-UUID שמוגדר כבר לא קיים** ב-Scaleway. משתנה סביבה מת לא אמור למכור יצירה שנכשלת ב-404. `available=true` בקטלוג אומר ש־UUID חי קיים — לא ש־bootstrap של האורח או Agent ONLINE הוכחו. סשן עדיין דורש `agent_state=ONLINE`.
 
 התקנת Agent ב-AlmaLinux משתמשת בקבוצת `wheel` (לא `sudo` של Ubuntu) וב-`pip` ל-`websocket-client`. סקריפט ה-Agent תואם **Python 3.9** (AlmaLinux 9; `datetime.UTC` רק מ-3.11). אורחים שנוצרו לפני ה-cloud-init הזה נשארים ב**אורח בעלייה** עד **rebuild**.
 
@@ -129,7 +129,7 @@ Stop / reboot / delete עוברים בספק גם כש-`agent_state=OFFLINE`.
 - **Security groups** הם מקור האמת ל-ingress (ברמת חשבון). מחברים ל**מכונה** ו/או ל-**NIC** פרטי (`target_type` `machine` | `nic`). כל כלל הוא TCP/UDP + פורט + **CIDR מקור** (למשל `0.0.0.0/0`, מארח ציבורי, או CIDR של VPC/subnet). דומיינים לא נתמכים.
 - כללי האפקטיביים למכונה = **איחוד** הקבוצות המחוברות למכונה **ול-NICs** שלה (בלי כפילויות). בקיבולת Hetzner הנוכחית הדרייבר עדיין מחיל את האיחוד על firewall של ה**שרת** — מיקוד ל-NIC הוא SoT של HomeCloud לספקים עתידיים לפי ממשק.
 - קבוצת **default** כוללת **TCP 22**. קבוצות נוספות **לא** כופות SSH — אפשר ליצור קבוצה ל-HTTPS בלבד.
-- בקונסול: Compute → **Security groups** (יצירה מהירה בפופאפ; עריכה בעמוד מלא). ניתוק מסיר את ה-firewall מה-VM אצל הספק; מחיקה מוחקת את אובייקט ה-firewall. `PUT .../machines/{id}/firewall` הוא shim תאימות שכותב לקבוצת **default**.
+- בקונסול: Compute → **Security groups** (יצירה מהירה בפופאפ; עריכה בעמוד מלא). הרשימה מציגה מכונות מחוברות. ניתוק מסיר את ה-firewall מה-VM אצל הספק; מחיקה מוחקת את אובייקט ה-firewall. מחיקה חסומה כל עוד הקבוצה מחוברת למכונה או NIC **חיים**. מחיקת מכונה מנתקת את הקבוצות שלה. חיבור למכונה שכבר נמחקה מנוקה ואינו חוסם מחיקה. `PUT .../machines/{id}/firewall` הוא shim תאימות שכותב לקבוצת **default**.
 - API חיבור: `POST .../security-groups/{group_id}/attachments` `{"target_type":"machine"|"nic","target_id":"…"}`. קיצור מכונה `POST .../machines/{id}/security-groups/{group_id}` תמיד משתמש ב-`target_type=machine`.
 - דרייברים בלי firewall אצל הספק (Scaleway כרגע) שומרים את המדיניות ב-HomeCloud ולא מתיימרים שהספק החיל אותה.
 - IPv4 ציבורי מוקצה על NIC של המכונה; IPv4 פרטי מופיע אחרי [חיבור ל-subnet ב-VPC](#vpc-subnets-private-nic). IPv6 נשמר כ-null ולא נדרש.
