@@ -44,6 +44,8 @@ Create with `image_id` only — the adapter maps it to a vendor image internally
 
 **Windows is `image ∩ offering`, not a lane.** `GET /concepts?image_id=windows-2022` marks a concept `available` only when an offering in that placement can boot it and the shape has at least **4 GiB** RAM. The console does not apply a local Windows filter. Create of a too-small shape or a placement with no capable offering returns `compute.invalid_image` / `compute.placement_unavailable`.
 
+`windows-2022` stays `available=false` when the private bootstrap image is unset **or the configured UUID is gone** on Scaleway. A stale env var must not sell a create that 404s.
+
 AlmaLinux Agent install uses the `wheel` group (not Ubuntu `sudo`) and `pip` for `websocket-client`. The Agent script is **Python 3.9 compatible** (AlmaLinux 9 ships 3.9; `datetime.UTC` is 3.11+). Guests created before that cloud-init stay **Booting guest** until you **rebuild**.
 
 ## Create

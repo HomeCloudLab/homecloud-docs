@@ -44,6 +44,8 @@ Workspace בקונסול: **`/console/compute`** — טאבים **מכונות**
 
 **Windows הוא `image ∩ offering`, לא נתיב מוצר.** `GET /concepts?image_id=windows-2022` מסמן קונספט כ-`available` רק כשיש offering ב-placement שיודע לבוט אותו והצורה היא לפחות **4 GiB** RAM. הקונסול לא מחיל סינון Windows מקומי. יצירה של צורה קטנה מדי או placement בלי offering מתאים מחזירה `compute.invalid_image` / `compute.placement_unavailable`.
 
+`windows-2022` נשאר `available=false` כשתמונת ה-bootstrap הפרטית לא מוגדרת **או כשה-UUID שמוגדר כבר לא קיים** ב-Scaleway. משתנה סביבה מת לא אמור למכור יצירה שנכשלת ב-404.
+
 התקנת Agent ב-AlmaLinux משתמשת בקבוצת `wheel` (לא `sudo` של Ubuntu) וב-`pip` ל-`websocket-client`. סקריפט ה-Agent תואם **Python 3.9** (AlmaLinux 9; `datetime.UTC` רק מ-3.11). אורחים שנוצרו לפני ה-cloud-init הזה נשארים ב**אורח בעלייה** עד **rebuild**.
 
 ## יצירה
