@@ -116,7 +116,7 @@ curl -sS -X POST "$HOMECLOUD_API/api/v1/accounts/$ACCOUNT_ID/compute/machines" \
 | POST | `.../machines/{id}/recover` | `recover` |
 | DELETE | `.../machines/{id}` | `delete` |
 
-Stop / reboot / delete עוברים בספק גם כש-`agent_state=OFFLINE`.
+Stop / reboot / delete עוברים בספק גם כש-`agent_state=OFFLINE`. מחיקה מסירה את המופע **וגם** את דיסק ה-boot ב-placement (כולל דיסקי block ברשת). מחיקת Load balancer ו-VPC ממתינה שהאובייקט אצל הספק ייעלם לפני ש-HomeCloud מוחק את השורה.
 
 שינוי CPU/RAM הוא **Standard בלבד** ודורש מכונה **עצורה**:
 
@@ -185,7 +185,7 @@ curl -sS -X POST "$HOMECLOUD_API/api/v1/accounts/$ACCOUNT_ID/compute/floating-ip
 
 ## Load balancers
 
-Load Balancer ציבורי הוא **VIP** מול מכונות Compute. יעדים רצויים הם אובייקטי HomeCloud — `machine`, `nic` או `address` — לא מזהה שרת של ספק. `machine_ids` הוא קיצור ל-`{ "type": "machine", "id": "…" }`. המתאמים הנוכחיים מממשים **machine**, **nic** ו-**address** באזורים שה-offerings שלהם מפרסמים `load_balancer` (`eu-central` ו-`eu-west` היום). יעד **nic** משתמש ב-IPv4 הפרטי אחרי חיבור VPC; המתאם מחבר את **אותו** מוצר LB ציבורי ל-VPC (לא SKU נפרד). NIC בלי `private_ip` עדיין מדולג עד שהחיבור מסתיים. NIC ממספק אחר מחזיר `compute.unsupported_target`. היעדים חייבים לשתף **אזור** HomeCloud. אותו גוף create/update עובד בשני האזורים. פרוטוקולים: **TCP**, **HTTP** ו-**HTTPS**. HTTPS מסיים TLS ב-LB: מעבירים `hostname` DNS (לא מזהה תעודה של ספק) ומפנים רשומת **A** ל-VIP כדי שהתעודה המנוהלת תונפק. ה-backends נשארים HTTP. Listeners של HTTP/HTTPS מקבלים `sticky: true` (affinity בעוגייה; שם העוגיה נשאר במתאם). בדיקות HTTP מקבלות `path` (ברירת מחדל `/`). משקל ליעד אינו זמין ב-SKU הציבורי הנוכחי. מכסה: **5** לחשבון (`409 compute.load_balancer_quota`).
+Load Balancer ציבורי הוא **VIP** מול מכונות Compute. יעדים רצויים הם אובייקטי HomeCloud — `machine`, `nic` או `address` — לא מזהה שרת של ספק. `machine_ids` הוא קיצור ל-`{ "type": "machine", "id": "…" }`. המתאמים הנוכחיים מממשים **machine**, **nic** ו-**address** באזורים שה-offerings שלהם מפרסמים `load_balancer` (`eu-central` ו-`eu-west` היום). יעד **nic** משתמש ב-IPv4 הפרטי אחרי חיבור VPC; המתאם מחבר את **אותו** מוצר LB ציבורי ל-VPC (לא SKU נפרד). NIC בלי `private_ip` עדיין מדולג עד שהחיבור מסתיים. NIC ממספק אחר מחזיר `compute.unsupported_target`. היעדים חייבים לשתף **אזור** HomeCloud. ב-`eu-west` ה-LB יושב באותו אזור קיבולת כמו המכונה כדי שתעודות HTTPS ו-backends פרטיים יוכלו לעלות. אותו גוף create/update עובד בשני האזורים. פרוטוקולים: **TCP**, **HTTP** ו-**HTTPS**. HTTPS מסיים TLS ב-LB: מעבירים `hostname` DNS (לא מזהה תעודה של ספק) ומפנים רשומת **A** ל-VIP כדי שהתעודה המנוהלת תונפק. ה-backends נשארים HTTP. Listeners של HTTP/HTTPS מקבלים `sticky: true` (affinity בעוגייה; שם העוגיה נשאר במתאם). בדיקות HTTP מקבלות `path` (ברירת מחדל `/`). משקל ליעד אינו זמין ב-SKU הציבורי הנוכחי. מכסה: **5** לחשבון (`409 compute.load_balancer_quota`).
 
 PowerShell:
 
@@ -236,7 +236,7 @@ curl -sS -X POST "$HOMECLOUD_API/api/v1/accounts/$ACCOUNT_ID/compute/load-balanc
   -d '{"name":"web-priv","region_code":"eu-central","listeners":[{"protocol":"http","port":80,"target_port":8080}],"targets":[{"type":"nic","id":"NIC_ID"}]}'
 ```
 
-סיום HTTPS (תעודה מנוהלת לשם DNS; ה-backends נשארים HTTP). אחרי היצירה מפנים רשומת A ל-VIP:
+סיום HTTPS (תעודה מנוהלת לשם DNS; ה-backends נשארים HTTP). היצירה מחזירה VIP **פעיל** גם אם התעודה עדיין ממתינה ל-DNS. מפנים רשומת A ל-VIP, ואז **מעדכנים** את ה-LB (אותו גוף) כדי שהמתאם יחבר את התעודה:
 
 PowerShell:
 
@@ -297,13 +297,15 @@ curl -sS -X POST "$HOMECLOUD_API/api/v1/accounts/$ACCOUNT_ID/compute/load-balanc
 | `compute.invalid_targets` | רשימת יעדים לא תקינה |
 | `compute.invalid_listener` | פרוטוקול/פורט/hostname לא תקין, TCP+sticky, או HTTPS/sticky לא זמין |
 
-בקונסול: Compute → **Load balancers**.
+בקונסול: Compute → **Load balancers**. **מחק** בשורה משחרר את ה-VIP (`DELETE .../load-balancers/{id}`).
 
 ## VPC / subnets / private NIC
 
 **VPC** הוא רשת IPv4 פרטית ברמת חשבון באזור HomeCloud. בוחרים CIDR (בדרך כלל RFC1918), חותכים **subnets** שחייבים לשבת **בתוך** ה-CIDR של ה-VPC, ואז **מחברים** מכונה ל-subnet (NIC פרטי אחד למכונה בגרסה זו). במלאי מופיעה הכתובת הפרטית ב-`nic.private_ip`. IPv4 ציבורי / Floating IP לא משתנים.
 
 שער יכולת: placements עם `private_network` תומכים ב-VPC (`eu-central` ו-`eu-west` היום). placements אחרים מחזירים `compute.vpc_unsupported`, והקונסול **מסתיר** את טאב VPC כשאין אזור תומך — אותה כנות כמו Floating IP. אותו גוף create/attach עובד בשני האזורים (`machine_id` + `subnet_id`; לא מזהה רשת של ספק).
+
+ב-`eu-west` מכונות, VPC ו-LB ציבורי שצריכים להתחבר (NIC פרטי או תעודות HTTPS) יושבים ב**אותו אזור קיבולת**. CIDR של VPC ב-placement הזה חייב להיות **`/29`–`/20`** (`compute.invalid_cidr` לקידומת רחבה כמו `/16`). `eu-central` עדיין מקבל fabrics של `/16`. subnet שנמצא בתוך ה-CIDR של ה-VPC נרשם גם כשה-placement לא יכול להוסיף קידומת ספק שנייה אחרי היצירה.
 
 מכסות: **5 VPCs** ו-**20 subnets** לחשבון (`409 compute.vpc_quota` / `compute.subnet_quota`). חיבור subnet פרטי אחד למכונה.
 
@@ -362,7 +364,7 @@ curl -sS -X POST "$HOMECLOUD_API/api/v1/accounts/$ACCOUNT_ID/compute/vpcs/$VPC_I
 | רשימת VPCs | `GET .../vpcs?region_code=` (מגדיר `can_create` כשהאזור תומך) |
 | קריאת VPC | `GET .../vpcs/{id}` (כולל `subnets` מקוננים) |
 | יצירת VPC | `POST .../vpcs` `{ name, region_code, cidr, description? }` |
-| מחיקת VPC | `DELETE .../vpcs/{id}` |
+| מחיקת VPC | `DELETE .../vpcs/{id}` — subnets ריקים נמחקים יחד עם ה-VPC |
 | רשימת subnets | `GET .../vpcs/{id}/subnets` |
 | יצירת subnet | `POST .../vpcs/{id}/subnets` `{ name, cidr }` |
 | מחיקת subnet | `DELETE .../vpcs/{id}/subnets/{subnet_id}` או `DELETE .../subnets/{subnet_id}` |
@@ -379,14 +381,14 @@ curl -sS -X POST "$HOMECLOUD_API/api/v1/accounts/$ACCOUNT_ID/compute/vpcs/$VPC_I
 | `compute.subnet_quota` | בחשבון כבר יש 20 subnets |
 | `compute.invalid_cidr` | CIDR לא תקין, או subnet לא בתוך CIDR של ה-VPC |
 | `compute.subnet_overlap` | CIDR של subnet חופף subnet אחר ב-VPC |
-| `compute.vpc_in_use` | מחיקה חסומה כל עוד יש subnets/NICs בשימוש |
+| `compute.vpc_in_use` | מחיקה חסומה כל עוד למכונה יש NIC פרטי על ה-VPC |
 | `compute.vpc_region` | מכונה ו-VPC באזורי HomeCloud שונים |
 | `compute.unsupported_target` | המתאם לא יכול לחבר את המכונה ל-fabric |
 | `compute.nic_busy` | חיבור/ניתוק עדיין בתהליך, או למכונה כבר יש subnet פרטי |
 | `compute.subnet_busy` | ה-subnet עדיין ב-provisioning |
 | `compute.vpc_not_found` / `compute.subnet_not_found` | מזהה לא מוכר |
 
-בקונסול: Compute → **VPC** (כשהאזור שנבחר יכול ליצור). ב**יצירת מכונה** אפשר לבחור subnet אופציונלי כשיש `private_network` וה-placement הוא האזור הזה. ב**סקירה** של המכונה — IPv4 פרטי וחיבור/ניתוק כשה-placement תומך ברשת פרטית.
+בקונסול: Compute → **VPC** (כשהאזור שנבחר יכול ליצור). **מחק** זמין גם כשיש subnets ריקים — הם נמחקים עם ה-VPC. נתקו או מחקו מכונות מחוברות קודם אם המחיקה מחזירה `compute.vpc_in_use`. ב**יצירת מכונה** אפשר לבחור subnet אופציונלי כשיש `private_network` וה-placement הוא האזור הזה. ב**סקירה** של המכונה — IPv4 פרטי וחיבור/ניתוק כשה-placement תומך ברשת פרטית.
 
 אחרי חיבור אפשר לחבר Security group ל-NIC: `POST .../security-groups/{group_id}/attachments` עם `{"target_type":"nic","target_id":"<nic_id>"}` (`nic_id` מתשובת החיבור).
 

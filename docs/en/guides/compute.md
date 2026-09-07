@@ -116,7 +116,7 @@ Create a machine with `"ssh_key_ids": ["<uuid>"]`. Inline `ssh_keys` public-key 
 | POST | `.../machines/{id}/recover` | `recover` |
 | DELETE | `.../machines/{id}` | `delete` |
 
-Stop / reboot / delete go through the provider even when `agent_state=OFFLINE`.
+Stop / reboot / delete go through the provider even when `agent_state=OFFLINE`. Delete removes the instance **and** its boot disk at the placement (including network block disks). Load balancer and VPC delete wait until the placement object is gone before HomeCloud drops the row.
 
 CPU/RAM resize is **Standard only** and requires the machine **stopped**:
 
@@ -185,7 +185,7 @@ Console: Compute → **Floating IPs**, and the machine Overview card when the pl
 
 ## Load balancers
 
-A public Load Balancer is a **VIP** in front of Compute machines. Desired targets are HomeCloud objects — `machine`, `nic`, or `address` — not a vendor server id. `machine_ids` is a shorthand for `{ "type": "machine", "id": "…" }`. Current adapters implement **machine**, **nic**, and **address** in regions whose offerings advertise `load_balancer` (`eu-central` and `eu-west` today). A **nic** target uses the machine's private IPv4 after VPC attach; the adapter attaches the **same** public LB product to that VPC (not a separate vendor SKU). NIC without a private IP yet is skipped until attach finishes (same pending skip as a machine without a reachable address). Cross-adapter NIC (Hetzner LB + Scaleway VPC) returns `compute.unsupported_target`. Targets must share the HomeCloud **region**. Same create/update body works in both regions. Protocols: **TCP**, **HTTP**, and **HTTPS**. HTTPS terminates TLS at the load balancer: pass a DNS `hostname` (never a vendor certificate id), then point an **A** record at the VIP so the managed certificate can issue. Backends stay HTTP. HTTP/HTTPS listeners accept `sticky: true` (cookie affinity; cookie name is adapter-private). HTTP health checks accept `path` (default `/`). Per-target weight is not available on the current public LB SKUs. Quota is **5** per account (`409 compute.load_balancer_quota`).
+A public Load Balancer is a **VIP** in front of Compute machines. Desired targets are HomeCloud objects — `machine`, `nic`, or `address` — not a vendor server id. `machine_ids` is a shorthand for `{ "type": "machine", "id": "…" }`. Current adapters implement **machine**, **nic**, and **address** in regions whose offerings advertise `load_balancer` (`eu-central` and `eu-west` today). A **nic** target uses the machine's private IPv4 after VPC attach; the adapter attaches the **same** public LB product to that VPC (not a separate vendor SKU). NIC without a private IP yet is skipped until attach finishes (same pending skip as a machine without a reachable address). Cross-adapter NIC (Hetzner LB + Scaleway VPC) returns `compute.unsupported_target`. Targets must share the HomeCloud **region**. In `eu-west`, the load balancer is colocated with the target machine's capacity zone so HTTPS certificates and private NIC backends can provision. Same create/update body works in both regions. Protocols: **TCP**, **HTTP**, and **HTTPS**. HTTPS terminates TLS at the load balancer: pass a DNS `hostname` (never a vendor certificate id), then point an **A** record at the VIP so the managed certificate can issue. Backends stay HTTP. HTTP/HTTPS listeners accept `sticky: true` (cookie affinity; cookie name is adapter-private). HTTP health checks accept `path` (default `/`). Per-target weight is not available on the current public LB SKUs. Quota is **5** per account (`409 compute.load_balancer_quota`).
 
 PowerShell:
 
@@ -236,7 +236,7 @@ curl -sS -X POST "$HOMECLOUD_API/api/v1/accounts/$ACCOUNT_ID/compute/load-balanc
   -d '{"name":"web-priv","region_code":"eu-central","listeners":[{"protocol":"http","port":80,"target_port":8080}],"targets":[{"type":"nic","id":"NIC_ID"}]}'
 ```
 
-HTTPS termination (managed certificate for a DNS hostname; backends stay HTTP). After create, point an A record at the VIP:
+HTTPS termination (managed certificate for a DNS hostname; backends stay HTTP). Create returns an **active** VIP even if the certificate is still waiting for DNS. Point an A record at that VIP, then **update** the load balancer (same body) so the adapter can attach the certificate:
 
 PowerShell:
 
@@ -297,13 +297,15 @@ Mutating calls return **202** `{ load_balancer_id, operation_id }`.
 | `compute.invalid_targets` | Bad target list |
 | `compute.invalid_listener` | Bad protocol/port/hostname, TCP+sticky, or HTTPS/sticky not available |
 
-Console: Compute → **Load balancers**.
+Console: Compute → **Load balancers**. **Delete** on the row releases the VIP (`DELETE .../load-balancers/{id}`).
 
 ## VPC / subnets / private NIC
 
 A **VPC** is an account-scoped private IPv4 fabric in a HomeCloud **region**. You choose a CIDR (typically RFC1918), carve **subnets** that must sit **inside** that VPC CIDR, then **attach** a machine to a subnet (one private NIC per machine in this release). Inventory shows the observed private address on `nic.private_ip`. Public IPv4 / Floating IP behavior is unchanged.
 
 Capability gate: placements with `private_network` support VPC (`eu-central` and `eu-west` today). Other placements return `compute.vpc_unsupported` and the console **hides** the VPC tab when no capable region is selected — same honesty pattern as Floating IP. Same create/attach body works in both regions (`machine_id` + `subnet_id`; never a vendor network id).
+
+In `eu-west`, machines, VPC, and public LB that need to attach (private NIC or HTTPS certificates) are placed in the **same capacity zone**. A VPC CIDR on that placement must be **`/29`–`/20`** (`compute.invalid_cidr` for a wider prefix such as `/16`). `eu-central` still accepts typical `/16` fabrics. A subnet that sits inside the VPC CIDR is recorded even when the placement cannot add a second vendor prefix after create.
 
 Quotas: **5 VPCs** and **20 subnets** per account (`409 compute.vpc_quota` / `compute.subnet_quota`). One private subnet attachment per machine.
 
@@ -362,7 +364,7 @@ curl -sS -X POST "$HOMECLOUD_API/api/v1/accounts/$ACCOUNT_ID/compute/vpcs/$VPC_I
 | List VPCs | `GET .../vpcs?region_code=` (sets `can_create` when region is capable) |
 | Get VPC | `GET .../vpcs/{id}` (includes nested `subnets`) |
 | Create VPC | `POST .../vpcs` `{ name, region_code, cidr, description? }` |
-| Delete VPC | `DELETE .../vpcs/{id}` |
+| Delete VPC | `DELETE .../vpcs/{id}` — unused subnets are removed with the VPC |
 | List subnets | `GET .../vpcs/{id}/subnets` |
 | Create subnet | `POST .../vpcs/{id}/subnets` `{ name, cidr }` |
 | Delete subnet | `DELETE .../vpcs/{id}/subnets/{subnet_id}` or `DELETE .../subnets/{subnet_id}` |
@@ -379,14 +381,14 @@ Mutating VPC/subnet/NIC calls return **202** with an `operation_id`. Machine and
 | `compute.subnet_quota` | Account already has 20 subnets |
 | `compute.invalid_cidr` | Bad CIDR, or subnet not contained in VPC CIDR |
 | `compute.subnet_overlap` | Subnet CIDR overlaps another subnet in the VPC |
-| `compute.vpc_in_use` | Delete blocked while subnets/NICs still in use |
+| `compute.vpc_in_use` | Delete blocked while a machine still has a private NIC on this VPC |
 | `compute.vpc_region` | Machine and VPC in different HomeCloud regions |
 | `compute.unsupported_target` | This adapter cannot attach that machine to the fabric |
 | `compute.nic_busy` | Attach/detach still in progress, or machine already has a private subnet |
 | `compute.subnet_busy` | Subnet still provisioning |
 | `compute.vpc_not_found` / `compute.subnet_not_found` | Unknown id |
 
-Console: Compute → **VPC** (when the selected region can create). **Create machine** can pick an optional subnet when the type has `private_network` and placement is this region. Machine **Overview** shows private IPv4 and attach/detach when the placement supports private networks.
+Console: Compute → **VPC** (when the selected region can create). **Delete** is available even when the VPC still has empty subnets; those subnets are removed with the VPC. Detach or delete attached machines first if delete returns `compute.vpc_in_use`. **Create machine** can pick an optional subnet when the type has `private_network` and placement is this region. Machine **Overview** shows private IPv4 and attach/detach when the placement supports private networks.
 
 Security groups may target the NIC after attach: `POST .../security-groups/{group_id}/attachments` with `{"target_type":"nic","target_id":"<nic_id>"}` (`nic_id` from the attach response).
 
