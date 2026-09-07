@@ -193,9 +193,9 @@ Omit `scheme` (or send `public`) for today’s public VIP. `scheme` and `vpc_id`
 
 An internal load balancer is the **same** HomeCloud LB product with a private VIP in a **HomeCloud VPC**. The domain is `vpc_id` + HomeCloud targets — not “a Scaleway network” or “a Hetzner network.” The adapter underlay is an implementation detail of the current placement.
 
-**This slice:** packets stay on the fabric that currently implements that VPC (one adapter, same as NIC-target LB). A NIC in the same HomeCloud VPC that this underlay cannot reach returns `compute.unsupported_target`. Cross-provider overlay / mesh is a **later** networking change. It will not add a new ALB type or a new target type.
+**This slice:** same-underlay packets stay on the native fabric. When VPC overlay is `ready`, an internal LB may target a `nic` / `machine` on another underlay of the same `vpc_id`. Until overlay is ready, a NIC this underlay cannot reach returns `compute.unsupported_target` (or `compute.overlay_unavailable` if overlay is in `error`). Overlay does not add a new ALB type or a new target type.
 
-**Not in this slice:** public internet reachability, HomeCloud internal DNS, HTTPS / managed certificates (Let's Encrypt cannot issue for RFC1918), overlay between providers.
+**Not in this slice:** public internet reachability, HomeCloud internal DNS, HTTPS / managed certificates (Let's Encrypt cannot issue for RFC1918), a second load-balancer product, customer VPN, or VPC peering.
 
 PowerShell:
 
@@ -335,9 +335,10 @@ Mutating calls return **202** `{ load_balancer_id, operation_id }`.
 | `compute.lb_internal_unsupported` | Placement cannot omit the public interface (`lb_internal=false`) |
 | `compute.load_balancer_quota` | Account already has 5 LBs |
 | `compute.load_balancer_exists` | Name already used |
-| `compute.load_balancer_region` | LB and targets in different HomeCloud regions |
+| `compute.load_balancer_region` | LB and targets in different HomeCloud regions (internal + overlay `ready` may span bound regions) |
 | `compute.vpc_not_found` / `compute.vpc_busy` / `compute.vpc_region` | Internal LB VPC missing, still provisioning, or in another region |
-| `compute.unsupported_target` | This adapter cannot implement that target type, the target is not on this VPC, or the current underlay cannot reach it |
+| `compute.unsupported_target` | This adapter cannot implement that target type, the target is not on this VPC, or the current underlay cannot reach it (overlay not ready) |
+| `compute.overlay_unavailable` | Overlay is in `error`; do not treat the remote NIC as a healthy backend |
 | `compute.invalid_targets` | Bad target list, or address outside the VPC CIDR |
 | `compute.invalid_listener` | Bad protocol/port/hostname, TCP+sticky, HTTPS on internal, or HTTPS/sticky not available |
 
@@ -405,9 +406,10 @@ curl -sS -X POST "$HOMECLOUD_API/api/v1/accounts/$ACCOUNT_ID/compute/vpcs/$VPC_I
 
 | Action | Request |
 |--------|---------|
-| List VPCs | `GET .../vpcs?region_code=` (sets `can_create` when region is capable) |
-| Get VPC | `GET .../vpcs/{id}` (includes nested `subnets`) |
+| List VPCs | `GET .../vpcs?region_code=` (sets `can_create` and `can_bind_overlay` when the region is capable) |
+| Get VPC | `GET .../vpcs/{id}` (includes nested `subnets`, `overlay_status`, `underlay_regions`) |
 | Create VPC | `POST .../vpcs` `{ name, region_code, cidr, description? }` |
+| Bind overlay | `POST .../vpcs/{id}/underlays` `{ region_code }` — HomeCloud region only; no vendor ids |
 | Delete VPC | `DELETE .../vpcs/{id}` — unused subnets are removed with the VPC |
 | List subnets | `GET .../vpcs/{id}/subnets` |
 | Create subnet | `POST .../vpcs/{id}/subnets` `{ name, cidr }` |
@@ -416,7 +418,34 @@ curl -sS -X POST "$HOMECLOUD_API/api/v1/accounts/$ACCOUNT_ID/compute/vpcs/$VPC_I
 | Attach | `POST .../machines/{machine_id}/subnets/{subnet_id}` |
 | Detach | `DELETE .../machines/{machine_id}/subnets/{subnet_id}` |
 
-Mutating VPC/subnet/NIC calls return **202** with an `operation_id`. Machine and VPC must share a HomeCloud **region**. Same-vendor fabric is an adapter detail: if that adapter cannot attach the machine it returns `compute.unsupported_target`.
+Mutating VPC/subnet/NIC calls return **202** with an `operation_id`. Machine and VPC must share a HomeCloud **region** until overlay is `ready` for a binding that covers the machine’s region. Same-vendor fabric is an adapter detail: if that adapter cannot attach the machine it returns `compute.unsupported_target`.
+
+### Overlay
+
+A HomeCloud VPC is one `vpc_id` + CIDR. Create still picks a **home** region (first underlay). Overlay binds another HomeCloud region into the same VPC so private packets can cross fabrics. Internal VIP stays the same LB product (`scheme=internal`); overlay does **not** invent a multi-provider ALB.
+
+`GET` shows `overlay_status` (`absent` | `pending` | `ready` | `error`) and `underlay_regions` (HomeCloud region codes only — never vendor network ids).
+
+Capability `vpc_overlay`: if false, `POST .../underlays` returns `compute.overlay_unsupported`. Stub implements two in-process fabrics. Current Hetzner and Scaleway placements stay off until overlay gateways exist on those underlays.
+
+PowerShell:
+
+```powershell
+Invoke-RestMethod -Method Post `
+  -Uri "$env:HOMECLOUD_API/api/v1/accounts/$accountId/compute/vpcs/$vpcId/underlays" `
+  -Headers @{ Authorization = "Bearer $token" } `
+  -ContentType "application/json" `
+  -Body '{"region_code":"eu-central"}'
+```
+
+bash:
+
+```bash
+curl -sS -X POST "$HOMECLOUD_API/api/v1/accounts/$ACCOUNT_ID/compute/vpcs/$VPC_ID/underlays" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"region_code":"eu-central"}'
+```
 
 | Code | Meaning |
 |------|---------|
@@ -426,8 +455,11 @@ Mutating VPC/subnet/NIC calls return **202** with an `operation_id`. Machine and
 | `compute.invalid_cidr` | Bad CIDR, or subnet not contained in VPC CIDR |
 | `compute.subnet_overlap` | Subnet CIDR overlaps another subnet in the VPC |
 | `compute.vpc_in_use` | Delete blocked while a machine still has a private NIC on this VPC |
-| `compute.vpc_region` | Machine and VPC in different HomeCloud regions |
-| `compute.unsupported_target` | This adapter cannot attach that machine to the fabric |
+| `compute.vpc_region` | Machine and VPC in different HomeCloud regions (until overlay is `ready` for that binding) |
+| `compute.overlay_unsupported` | Placement cannot bind a second underlay (`vpc_overlay=false`) |
+| `compute.overlay_unavailable` | Overlay is in `error` or the gateway path is gone |
+| `compute.overlay_bound` | That HomeCloud region is already bound to this VPC |
+| `compute.unsupported_target` | This adapter cannot attach that machine to the fabric, or overlay is not ready for a cross-underlay NIC |
 | `compute.nic_busy` | Attach/detach still in progress, or machine already has a private subnet |
 | `compute.subnet_busy` | Subnet still provisioning |
 | `compute.vpc_not_found` / `compute.subnet_not_found` | Unknown id |

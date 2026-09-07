@@ -193,9 +193,9 @@ Load Balancer ציבורי הוא **VIP** מול מכונות Compute. יעדי�
 
 Load balancer פנימי הוא **אותו** מוצר LB של HomeCloud עם VIP פרטי ב-**VPC של HomeCloud**. ה-domain הוא `vpc_id` + יעדי HomeCloud — לא «רשת Scaleway» ולא «רשת Hetzner». ה-underlay הוא פרט מימוש של ה-placement הנוכחי.
 
-**ב-slice הזה:** החבילות נשארות על הבד שמממש כרגע את ה-VPC (מתאם אחד, כמו LB עם יעד NIC). NIC באותו VPC של HomeCloud שה-underlay לא מגיע אליו מחזיר `compute.unsupported_target`. Overlay / mesh בין ספקים הוא שינוי רשת **מאוחר יותר**. הוא לא יוסיף סוג ALB חדש ולא סוג יעד חדש.
+**ב-slice הזה:** חבילות באותו underlay נשארות על הבד המקורי. כש-overlay של ה-VPC `ready`, LB פנימי יכול לכוון `nic` / `machine` על underlay אחר של אותו `vpc_id`. עד שה-overlay מוכן, NIC שה-underlay לא מגיע אליו מחזיר `compute.unsupported_target` (או `compute.overlay_unavailable` אם overlay ב-`error`). Overlay לא מוסיף סוג ALB חדש ולא סוג יעד חדש.
 
-**לא ב-slice הזה:** נגישות מהאינטרנט הציבורי, DNS פנימי של HomeCloud, HTTPS / תעודות מנוהלות (Let's Encrypt לא מנפיק ל-RFC1918), overlay בין ספקים.
+**לא ב-slice הזה:** נגישות מהאינטרנט הציבורי, DNS פנימי של HomeCloud, HTTPS / תעודות מנוהלות (Let's Encrypt לא מנפיק ל-RFC1918), מוצר load balancer שני, VPN ללקוח, או peering בין VPCs.
 
 PowerShell:
 
@@ -335,9 +335,10 @@ curl -sS -X POST "$HOMECLOUD_API/api/v1/accounts/$ACCOUNT_ID/compute/load-balanc
 | `compute.lb_internal_unsupported` | ה-placement לא יכול להשמיט את הממשק הציבורי (`lb_internal=false`) |
 | `compute.load_balancer_quota` | בחשבון כבר יש 5 LBs |
 | `compute.load_balancer_exists` | השם כבר בשימוש |
-| `compute.load_balancer_region` | LB ויעדים באזורי HomeCloud שונים |
+| `compute.load_balancer_region` | LB ויעדים באזורי HomeCloud שונים (פנימי + overlay `ready` יכולים לחצות אזורים מחוברים) |
 | `compute.vpc_not_found` / `compute.vpc_busy` / `compute.vpc_region` | VPC של LB פנימי חסר, עדיין בעלייה, או באזור אחר |
-| `compute.unsupported_target` | המתאם לא מממש את סוג היעד, היעד לא ב-VPC הזה, או שה-underlay הנוכחי לא מגיע אליו |
+| `compute.unsupported_target` | המתאם לא מממש את סוג היעד, היעד לא ב-VPC הזה, או שה-underlay הנוכחי לא מגיע אליו (overlay לא מוכן) |
+| `compute.overlay_unavailable` | Overlay ב-`error`; לא מתייחסים ל-NIC המרוחק כ-backend בריא |
 | `compute.invalid_targets` | רשימת יעדים לא תקינה, או כתובת מחוץ ל-CIDR של ה-VPC |
 | `compute.invalid_listener` | פרוטוקול/פורט/hostname לא תקין, TCP+sticky, HTTPS על פנימי, או HTTPS/sticky לא זמין |
 
@@ -405,9 +406,10 @@ curl -sS -X POST "$HOMECLOUD_API/api/v1/accounts/$ACCOUNT_ID/compute/vpcs/$VPC_I
 
 | פעולה | בקשה |
 |--------|---------|
-| רשימת VPCs | `GET .../vpcs?region_code=` (מגדיר `can_create` כשהאזור תומך) |
-| קריאת VPC | `GET .../vpcs/{id}` (כולל `subnets` מקוננים) |
+| רשימת VPCs | `GET .../vpcs?region_code=` (מגדיר `can_create` ו-`can_bind_overlay` כשהאזור תומך) |
+| קריאת VPC | `GET .../vpcs/{id}` (כולל `subnets`, `overlay_status`, `underlay_regions`) |
 | יצירת VPC | `POST .../vpcs` `{ name, region_code, cidr, description? }` |
+| חיבור overlay | `POST .../vpcs/{id}/underlays` `{ region_code }` — אזור HomeCloud בלבד; בלי מזהי ספק |
 | מחיקת VPC | `DELETE .../vpcs/{id}` — subnets ריקים נמחקים יחד עם ה-VPC |
 | רשימת subnets | `GET .../vpcs/{id}/subnets` |
 | יצירת subnet | `POST .../vpcs/{id}/subnets` `{ name, cidr }` |
@@ -416,7 +418,34 @@ curl -sS -X POST "$HOMECLOUD_API/api/v1/accounts/$ACCOUNT_ID/compute/vpcs/$VPC_I
 | חיבור | `POST .../machines/{machine_id}/subnets/{subnet_id}` |
 | ניתוק | `DELETE .../machines/{machine_id}/subnets/{subnet_id}` |
 
-קריאות שינוי ל-VPC/subnet/NIC מחזירות **202** עם `operation_id`. מכונה ו-VPC חייבים לשתף **אזור** HomeCloud. אותו ספק הוא פרט מתאם: אם המתאם לא יכול לחבר את המכונה הוא מחזיר `compute.unsupported_target`.
+קריאות שינוי ל-VPC/subnet/NIC מחזירות **202** עם `operation_id`. מכונה ו-VPC חייבים לשתף **אזור** HomeCloud עד ש-overlay `ready` ל-binding שמכסה את אזור המכונה. אותו ספק הוא פרט מתאם: אם המתאם לא יכול לחבר את המכונה הוא מחזיר `compute.unsupported_target`.
+
+### Overlay
+
+VPC של HomeCloud הוא `vpc_id` + CIDR אחד. יצירה עדיין בוחרת אזור **בית** (underlay ראשון). Overlay מחבר אזור HomeCloud נוסף לאותו VPC כדי שחבילות פרטיות יוכלו לחצות fabrics. VIP פנימי נשאר אותו מוצר LB (`scheme=internal`); overlay **לא** ממציא ALB רב-ספקים.
+
+`GET` מציג `overlay_status` (`absent` | `pending` | `ready` | `error`) ו-`underlay_regions` (קודי אזור HomeCloud בלבד — לא מזהי רשת של ספק).
+
+יכולת `vpc_overlay`: אם false, `POST .../underlays` מחזיר `compute.overlay_unsupported`. ה-stub מממש שני fabrics בתהליך. placements של Hetzner ו-Scaleway נשארים כבויים עד שיהיו overlay gateways על ה-underlays האלה.
+
+PowerShell:
+
+```powershell
+Invoke-RestMethod -Method Post `
+  -Uri "$env:HOMECLOUD_API/api/v1/accounts/$accountId/compute/vpcs/$vpcId/underlays" `
+  -Headers @{ Authorization = "Bearer $token" } `
+  -ContentType "application/json" `
+  -Body '{"region_code":"eu-central"}'
+```
+
+bash:
+
+```bash
+curl -sS -X POST "$HOMECLOUD_API/api/v1/accounts/$ACCOUNT_ID/compute/vpcs/$VPC_ID/underlays" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"region_code":"eu-central"}'
+```
 
 | קוד | משמעות |
 |------|---------|
@@ -426,8 +455,11 @@ curl -sS -X POST "$HOMECLOUD_API/api/v1/accounts/$ACCOUNT_ID/compute/vpcs/$VPC_I
 | `compute.invalid_cidr` | CIDR לא תקין, או subnet לא בתוך CIDR של ה-VPC |
 | `compute.subnet_overlap` | CIDR של subnet חופף subnet אחר ב-VPC |
 | `compute.vpc_in_use` | מחיקה חסומה כל עוד למכונה יש NIC פרטי על ה-VPC |
-| `compute.vpc_region` | מכונה ו-VPC באזורי HomeCloud שונים |
-| `compute.unsupported_target` | המתאם לא יכול לחבר את המכונה ל-fabric |
+| `compute.vpc_region` | מכונה ו-VPC באזורי HomeCloud שונים (עד ש-overlay `ready` ל-binding הזה) |
+| `compute.overlay_unsupported` | ה-placement לא יכול לחבר underlay שני (`vpc_overlay=false`) |
+| `compute.overlay_unavailable` | Overlay ב-`error` או שנתיב ה-gateway נעלם |
+| `compute.overlay_bound` | אזור HomeCloud זה כבר מחובר ל-VPC |
+| `compute.unsupported_target` | המתאם לא יכול לחבר את המכונה ל-fabric, או overlay לא מוכן ל-NIC חוצה-underlay |
 | `compute.nic_busy` | חיבור/ניתוק עדיין בתהליך, או למכונה כבר יש subnet פרטי |
 | `compute.subnet_busy` | ה-subnet עדיין ב-provisioning |
 | `compute.vpc_not_found` / `compute.subnet_not_found` | מזהה לא מוכר |
