@@ -290,6 +290,8 @@ curl -sS -X POST "$HOMECLOUD_API/api/v1/accounts/$ACCOUNT_ID/compute/vpcs/$VPC_I
 
 ### חיבור / ניתוק מכונה
 
+`POST .../machines` יכול לכלול `subnet_id` אופציונלי (אותו UUID כמו בחיבור). אחרי שהשרת קיים, Compute מזמן את אותו חיבור NIC כמו בסקירה. בלי השדה המכונה ציבורית בלבד. `subnet_id` דורש placement לפי **אזור** (לא flex) כדי שהמכונה תישאר באזור ה-VPC. הגוף מדבר רק `subnet_id` — לא `server_ref` של ספק.
+
 `POST .../machines/{machine_id}/subnets/{subnet_id}` מחבר את ה-NIC הפרטי של המכונה (אותו אזור + placement כמו ה-VPC). `DELETE` באותו נתיב מנתק. קריאות שינוי מחזירות **202** `{ nic_id, machine_id, subnet_id, operation_id }` (בניתוק `subnet_id` מתאפס בתשובה).
 
 | פעולה | בקשה |
@@ -301,6 +303,7 @@ curl -sS -X POST "$HOMECLOUD_API/api/v1/accounts/$ACCOUNT_ID/compute/vpcs/$VPC_I
 | רשימת subnets | `GET .../vpcs/{id}/subnets` |
 | יצירת subnet | `POST .../vpcs/{id}/subnets` `{ name, cidr }` |
 | מחיקת subnet | `DELETE .../vpcs/{id}/subnets/{subnet_id}` או `DELETE .../subnets/{subnet_id}` |
+| יצירת מכונה (subnet אופציונלי) | `POST .../machines` `{ …, subnet_id? }` — חיבור אחרי שהשרת קיים |
 | חיבור | `POST .../machines/{machine_id}/subnets/{subnet_id}` |
 | ניתוק | `DELETE .../machines/{machine_id}/subnets/{subnet_id}` |
 
@@ -320,7 +323,7 @@ curl -sS -X POST "$HOMECLOUD_API/api/v1/accounts/$ACCOUNT_ID/compute/vpcs/$VPC_I
 | `compute.subnet_busy` | ה-subnet עדיין ב-provisioning |
 | `compute.vpc_not_found` / `compute.subnet_not_found` | מזהה לא מוכר |
 
-בקונסול: Compute → **VPC** (כשהאזור שנבחר יכול ליצור). ב**סקירה** של המכונה — IPv4 פרטי וחיבור/ניתוק כשה-placement תומך ברשת פרטית.
+בקונסול: Compute → **VPC** (כשהאזור שנבחר יכול ליצור). ב**יצירת מכונה** אפשר לבחור subnet אופציונלי כשיש `private_network` וה-placement הוא האזור הזה. ב**סקירה** של המכונה — IPv4 פרטי וחיבור/ניתוק כשה-placement תומך ברשת פרטית.
 
 אחרי חיבור אפשר לחבר Security group ל-NIC: `POST .../security-groups/{group_id}/attachments` עם `{"target_type":"nic","target_id":"<nic_id>"}` (`nic_id` מתשובת החיבור).
 

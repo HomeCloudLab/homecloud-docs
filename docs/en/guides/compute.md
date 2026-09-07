@@ -290,6 +290,8 @@ curl -sS -X POST "$HOMECLOUD_API/api/v1/accounts/$ACCOUNT_ID/compute/vpcs/$VPC_I
 
 ### Attach / detach machine
 
+`POST .../machines` may include optional `subnet_id` (same UUID as attach). After the provider server exists, Compute queues the same NIC attach as Overview. Omit it for a public-only machine. `subnet_id` requires **region** placement (not flex) so the machine stays in the VPC’s HomeCloud region. The body still speaks `subnet_id` only — never a vendor `server_ref`.
+
 `POST .../machines/{machine_id}/subnets/{subnet_id}` attaches the machine’s private NIC (same region + capacity placement as the VPC). `DELETE` on the same path detaches. Mutating calls return **202** `{ nic_id, machine_id, subnet_id, operation_id }` (detach clears `subnet_id` in the response).
 
 | Action | Request |
@@ -301,6 +303,7 @@ curl -sS -X POST "$HOMECLOUD_API/api/v1/accounts/$ACCOUNT_ID/compute/vpcs/$VPC_I
 | List subnets | `GET .../vpcs/{id}/subnets` |
 | Create subnet | `POST .../vpcs/{id}/subnets` `{ name, cidr }` |
 | Delete subnet | `DELETE .../vpcs/{id}/subnets/{subnet_id}` or `DELETE .../subnets/{subnet_id}` |
+| Create machine (optional subnet) | `POST .../machines` `{ …, subnet_id? }` — attach after the server exists |
 | Attach | `POST .../machines/{machine_id}/subnets/{subnet_id}` |
 | Detach | `DELETE .../machines/{machine_id}/subnets/{subnet_id}` |
 
@@ -320,7 +323,7 @@ Mutating VPC/subnet/NIC calls return **202** with an `operation_id`. Machine and
 | `compute.subnet_busy` | Subnet still provisioning |
 | `compute.vpc_not_found` / `compute.subnet_not_found` | Unknown id |
 
-Console: Compute → **VPC** (when the selected region can create). Machine **Overview** shows private IPv4 and attach/detach when the placement supports private networks.
+Console: Compute → **VPC** (when the selected region can create). **Create machine** can pick an optional subnet when the type has `private_network` and placement is this region. Machine **Overview** shows private IPv4 and attach/detach when the placement supports private networks.
 
 Security groups may target the NIC after attach: `POST .../security-groups/{group_id}/attachments` with `{"target_type":"nic","target_id":"<nic_id>"}` (`nic_id` from the attach response).
 
