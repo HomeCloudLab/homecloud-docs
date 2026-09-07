@@ -185,7 +185,7 @@ Console: Compute → **Floating IPs**, and the machine Overview card when the pl
 
 ## Load balancers
 
-A public Load Balancer is a **VIP** in front of Compute machines. Desired targets are HomeCloud objects — `machine`, `nic`, or `address` — not a vendor server id. `machine_ids` is a shorthand for `{ "type": "machine", "id": "…" }`. Current adapters implement **machine**, **nic**, and **address** in regions whose offerings advertise `load_balancer` (`eu-central` and `eu-west` today). A **nic** target uses the machine's private IPv4 after VPC attach; the adapter attaches the **same** public LB product to that VPC (not a separate vendor SKU). NIC without a private IP yet is skipped until attach finishes (same pending skip as a machine without a reachable address). Cross-adapter NIC (Hetzner LB + Scaleway VPC) returns `compute.unsupported_target`. Targets must share the HomeCloud **region**. Same create/update body works in both regions. Protocols in this release: **TCP** and **HTTP** (HTTPS later). Quota is **5** per account (`409 compute.load_balancer_quota`).
+A public Load Balancer is a **VIP** in front of Compute machines. Desired targets are HomeCloud objects — `machine`, `nic`, or `address` — not a vendor server id. `machine_ids` is a shorthand for `{ "type": "machine", "id": "…" }`. Current adapters implement **machine**, **nic**, and **address** in regions whose offerings advertise `load_balancer` (`eu-central` and `eu-west` today). A **nic** target uses the machine's private IPv4 after VPC attach; the adapter attaches the **same** public LB product to that VPC (not a separate vendor SKU). NIC without a private IP yet is skipped until attach finishes (same pending skip as a machine without a reachable address). Cross-adapter NIC (Hetzner LB + Scaleway VPC) returns `compute.unsupported_target`. Targets must share the HomeCloud **region**. Same create/update body works in both regions. Protocols: **TCP**, **HTTP**, and **HTTPS**. HTTPS terminates TLS at the load balancer: pass a DNS `hostname` (never a vendor certificate id), then point an **A** record at the VIP so the managed certificate can issue. Backends stay HTTP. Quota is **5** per account (`409 compute.load_balancer_quota`).
 
 PowerShell:
 
@@ -234,6 +234,27 @@ curl -sS -X POST "$HOMECLOUD_API/api/v1/accounts/$ACCOUNT_ID/compute/load-balanc
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"name":"web-priv","region_code":"eu-central","listeners":[{"protocol":"http","port":80,"target_port":8080}],"targets":[{"type":"nic","id":"NIC_ID"}]}'
+```
+
+HTTPS termination (managed certificate for a DNS hostname; backends stay HTTP). After create, point an A record at the VIP:
+
+PowerShell:
+
+```powershell
+Invoke-RestMethod -Method Post `
+  -Uri "$env:HOMECLOUD_API/api/v1/accounts/$accountId/compute/load-balancers" `
+  -Headers @{ Authorization = "Bearer $token" } `
+  -ContentType "application/json" `
+  -Body '{"name":"web-tls","region_code":"eu-central","listeners":[{"protocol":"https","port":443,"target_port":8080,"hostname":"app.example.com"}],"machine_ids":["MACHINE_ID"]}'
+```
+
+bash:
+
+```bash
+curl -sS -X POST "$HOMECLOUD_API/api/v1/accounts/$ACCOUNT_ID/compute/load-balancers" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"name":"web-tls","region_code":"eu-central","listeners":[{"protocol":"https","port":443,"target_port":8080,"hostname":"app.example.com"}],"machine_ids":["MACHINE_ID"]}'
 ```
 
 | Action | Request |
