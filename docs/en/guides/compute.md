@@ -185,7 +185,49 @@ Console: Compute → **Floating IPs**, and the machine Overview card when the pl
 
 ## Load balancers
 
-A public Load Balancer is a **VIP** in front of Compute machines. Desired targets are HomeCloud objects — `machine`, `nic`, or `address` — not a vendor server id. `machine_ids` is a shorthand for `{ "type": "machine", "id": "…" }`. Current adapters implement **machine**, **nic**, and **address** in regions whose offerings advertise `load_balancer` (`eu-central` and `eu-west` today). A **nic** target uses the machine's private IPv4 after VPC attach; the adapter attaches the **same** public LB product to that VPC (not a separate vendor SKU). NIC without a private IP yet is skipped until attach finishes (same pending skip as a machine without a reachable address). Cross-adapter NIC (Hetzner LB + Scaleway VPC) returns `compute.unsupported_target`. Targets must share the HomeCloud **region**. In `eu-west`, the load balancer is colocated with the target machine's capacity zone so HTTPS certificates and private NIC backends can provision. Same create/update body works in both regions. Protocols: **TCP**, **HTTP**, and **HTTPS**. HTTPS terminates TLS at the load balancer: pass a DNS `hostname` (never a vendor certificate id), then point an **A** record at the VIP so the managed certificate can issue. Backends stay HTTP. HTTP/HTTPS listeners accept `sticky: true` (cookie affinity; cookie name is adapter-private). HTTP health checks accept `path` (default `/`). Per-target weight is not available on the current public LB SKUs. Quota is **5** per account (`409 compute.load_balancer_quota`).
+A public Load Balancer is a **VIP** in front of Compute machines. Desired targets are HomeCloud objects — `machine`, `nic`, or `address` — not a vendor server id. `machine_ids` is a shorthand for `{ "type": "machine", "id": "…" }`. Current adapters implement **machine**, **nic**, and **address** in regions whose offerings advertise `load_balancer` (`eu-central` and `eu-west` today). A **nic** target uses the machine's private IPv4 after VPC attach; the adapter attaches the **same** public LB product to that VPC (not a separate vendor SKU). NIC without a private IP yet is skipped until attach finishes (same pending skip as a machine without a reachable address). Cross-adapter NIC (Hetzner LB + Scaleway VPC) returns `compute.unsupported_target`. Targets must share the HomeCloud **region**. In `eu-west`, the load balancer is colocated with the target machine's capacity zone so HTTPS certificates and private NIC backends can provision. Same create/update body works in both regions. Protocols: **TCP**, **HTTP**, and **HTTPS**. HTTPS terminates TLS at the load balancer: pass a DNS `hostname` (never a vendor certificate id), then point an **A** record at the VIP so the managed certificate can issue. Backends stay HTTP. HTTP/HTTPS listeners accept `sticky: true` (cookie affinity; cookie name is adapter-private). HTTP health checks accept `path` (default `/`). Per-target weight is not available on the current public LB SKUs. Quota is **5** per account (`409 compute.load_balancer_quota`) and covers public + internal.
+
+Omit `scheme` (or send `public`) for today’s public VIP. `scheme` and `vpc_id` are **immutable** after create.
+
+### Internal VIP (`scheme=internal`)
+
+An internal load balancer is the **same** HomeCloud LB product with a private VIP in a **HomeCloud VPC**. The domain is `vpc_id` + HomeCloud targets — not “a Scaleway network” or “a Hetzner network.” The adapter underlay is an implementation detail of the current placement.
+
+**This slice:** packets stay on the fabric that currently implements that VPC (one adapter, same as NIC-target LB). A NIC in the same HomeCloud VPC that this underlay cannot reach returns `compute.unsupported_target`. Cross-provider overlay / mesh is a **later** networking change. It will not add a new ALB type or a new target type.
+
+**Not in this slice:** public internet reachability, HomeCloud internal DNS, HTTPS / managed certificates (Let's Encrypt cannot issue for RFC1918), overlay between providers.
+
+PowerShell:
+
+```powershell
+Invoke-RestMethod -Method Post `
+  -Uri "$env:HOMECLOUD_API/api/v1/accounts/$accountId/compute/load-balancers" `
+  -Headers @{ Authorization = "Bearer $token" } `
+  -ContentType "application/json" `
+  -Body '{"name":"web-int","region_code":"eu-west","scheme":"internal","vpc_id":"VPC_ID","listeners":[{"protocol":"http","port":80,"target_port":8080,"sticky":true}],"health_check":{"path":"/readyz"},"targets":[{"type":"nic","id":"NIC_ID"}]}'
+```
+
+bash:
+
+```bash
+curl -sS -X POST "$HOMECLOUD_API/api/v1/accounts/$ACCOUNT_ID/compute/load-balancers" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"name":"web-int","region_code":"eu-west","scheme":"internal","vpc_id":"VPC_ID","listeners":[{"protocol":"http","port":80,"target_port":8080,"sticky":true}],"health_check":{"path":"/readyz"},"targets":[{"type":"nic","id":"NIC_ID"}]}'
+```
+
+Empty targets still return **202** and allocate a private VIP. Prove traffic from a machine NIC in that VPC — a public client must not hit it.
+
+| Capability | Public | Internal |
+|------------|--------|----------|
+| `scheme` | `public` (default) | `internal` (requires `vpc_id`) |
+| VIP | Public IPv4 | Private IPv4 in the VPC CIDR |
+| Listeners | TCP, HTTP, HTTPS | TCP, HTTP |
+| Sticky | HTTP / HTTPS | HTTP |
+| Hetzner / Scaleway / stub | yes | `lb_internal` |
+| OVH | no | `compute.lb_internal_unsupported` |
+
+List responses add `can_create_internal` next to `can_create`.
 
 PowerShell:
 
@@ -280,9 +322,9 @@ curl -sS -X POST "$HOMECLOUD_API/api/v1/accounts/$ACCOUNT_ID/compute/load-balanc
 
 | Action | Request |
 |--------|---------|
-| List | `GET .../load-balancers?region_code=` (sets `can_create`) |
+| List | `GET .../load-balancers?region_code=` (sets `can_create` and `can_create_internal`) |
 | Get | `GET .../load-balancers/{id}` |
-| Update | `PUT .../load-balancers/{id}` `{ listeners, machine_ids }` or `{ targets }` |
+| Update | `PUT .../load-balancers/{id}` `{ listeners, machine_ids }` or `{ targets }` (`scheme` / `vpc_id` immutable) |
 | Delete | `DELETE .../load-balancers/{id}` |
 
 Mutating calls return **202** `{ load_balancer_id, operation_id }`.
@@ -290,12 +332,14 @@ Mutating calls return **202** `{ load_balancer_id, operation_id }`.
 | Code | Meaning |
 |------|---------|
 | `compute.load_balancer_unsupported` | Placement has no LB capability |
+| `compute.lb_internal_unsupported` | Placement cannot omit the public interface (`lb_internal=false`) |
 | `compute.load_balancer_quota` | Account already has 5 LBs |
 | `compute.load_balancer_exists` | Name already used |
 | `compute.load_balancer_region` | LB and targets in different HomeCloud regions |
-| `compute.unsupported_target` | This adapter cannot implement that target type (or the target is not reachable yet) |
-| `compute.invalid_targets` | Bad target list |
-| `compute.invalid_listener` | Bad protocol/port/hostname, TCP+sticky, or HTTPS/sticky not available |
+| `compute.vpc_not_found` / `compute.vpc_busy` / `compute.vpc_region` | Internal LB VPC missing, still provisioning, or in another region |
+| `compute.unsupported_target` | This adapter cannot implement that target type, the target is not on this VPC, or the current underlay cannot reach it |
+| `compute.invalid_targets` | Bad target list, or address outside the VPC CIDR |
+| `compute.invalid_listener` | Bad protocol/port/hostname, TCP+sticky, HTTPS on internal, or HTTPS/sticky not available |
 
 Console: Compute → **Load balancers**. **Delete** on the row releases the VIP (`DELETE .../load-balancers/{id}`).
 

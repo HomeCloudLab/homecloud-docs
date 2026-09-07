@@ -185,7 +185,49 @@ curl -sS -X POST "$HOMECLOUD_API/api/v1/accounts/$ACCOUNT_ID/compute/floating-ip
 
 ## Load balancers
 
-Load Balancer ציבורי הוא **VIP** מול מכונות Compute. יעדים רצויים הם אובייקטי HomeCloud — `machine`, `nic` או `address` — לא מזהה שרת של ספק. `machine_ids` הוא קיצור ל-`{ "type": "machine", "id": "…" }`. המתאמים הנוכחיים מממשים **machine**, **nic** ו-**address** באזורים שה-offerings שלהם מפרסמים `load_balancer` (`eu-central` ו-`eu-west` היום). יעד **nic** משתמש ב-IPv4 הפרטי אחרי חיבור VPC; המתאם מחבר את **אותו** מוצר LB ציבורי ל-VPC (לא SKU נפרד). NIC בלי `private_ip` עדיין מדולג עד שהחיבור מסתיים. NIC ממספק אחר מחזיר `compute.unsupported_target`. היעדים חייבים לשתף **אזור** HomeCloud. ב-`eu-west` ה-LB יושב באותו אזור קיבולת כמו המכונה כדי שתעודות HTTPS ו-backends פרטיים יוכלו לעלות. אותו גוף create/update עובד בשני האזורים. פרוטוקולים: **TCP**, **HTTP** ו-**HTTPS**. HTTPS מסיים TLS ב-LB: מעבירים `hostname` DNS (לא מזהה תעודה של ספק) ומפנים רשומת **A** ל-VIP כדי שהתעודה המנוהלת תונפק. ה-backends נשארים HTTP. Listeners של HTTP/HTTPS מקבלים `sticky: true` (affinity בעוגייה; שם העוגיה נשאר במתאם). בדיקות HTTP מקבלות `path` (ברירת מחדל `/`). משקל ליעד אינו זמין ב-SKU הציבורי הנוכחי. מכסה: **5** לחשבון (`409 compute.load_balancer_quota`).
+Load Balancer ציבורי הוא **VIP** מול מכונות Compute. יעדים רצויים הם אובייקטי HomeCloud — `machine`, `nic` או `address` — לא מזהה שרת של ספק. `machine_ids` הוא קיצור ל-`{ "type": "machine", "id": "…" }`. המתאמים הנוכחיים מממשים **machine**, **nic** ו-**address** באזורים שה-offerings שלהם מפרסמים `load_balancer` (`eu-central` ו-`eu-west` היום). יעד **nic** משתמש ב-IPv4 הפרטי אחרי חיבור VPC; המתאם מחבר את **אותו** מוצר LB ציבורי ל-VPC (לא SKU נפרד). NIC בלי `private_ip` עדיין מדולג עד שהחיבור מסתיים. NIC ממספק אחר מחזיר `compute.unsupported_target`. היעדים חייבים לשתף **אזור** HomeCloud. ב-`eu-west` ה-LB יושב באותו אזור קיבולת כמו המכונה כדי שתעודות HTTPS ו-backends פרטיים יוכלו לעלות. אותו גוף create/update עובד בשני האזורים. פרוטוקולים: **TCP**, **HTTP** ו-**HTTPS**. HTTPS מסיים TLS ב-LB: מעבירים `hostname` DNS (לא מזהה תעודה של ספק) ומפנים רשומת **A** ל-VIP כדי שהתעודה המנוהלת תונפק. ה-backends נשארים HTTP. Listeners של HTTP/HTTPS מקבלים `sticky: true` (affinity בעוגייה; שם העוגיה נשאר במתאם). בדיקות HTTP מקבלות `path` (ברירת מחדל `/`). משקל ליעד אינו זמין ב-SKU הציבורי הנוכחי. מכסה: **5** לחשבון (`409 compute.load_balancer_quota`) וכוללת ציבורי + פנימי.
+
+משמיטים `scheme` (או שולחים `public`) ל-VIP הציבורי של היום. `scheme` ו-`vpc_id` **לא משתנים** אחרי יצירה.
+
+### VIP פנימי (`scheme=internal`)
+
+Load balancer פנימי הוא **אותו** מוצר LB של HomeCloud עם VIP פרטי ב-**VPC של HomeCloud**. ה-domain הוא `vpc_id` + יעדי HomeCloud — לא «רשת Scaleway» ולא «רשת Hetzner». ה-underlay הוא פרט מימוש של ה-placement הנוכחי.
+
+**ב-slice הזה:** החבילות נשארות על הבד שמממש כרגע את ה-VPC (מתאם אחד, כמו LB עם יעד NIC). NIC באותו VPC של HomeCloud שה-underlay לא מגיע אליו מחזיר `compute.unsupported_target`. Overlay / mesh בין ספקים הוא שינוי רשת **מאוחר יותר**. הוא לא יוסיף סוג ALB חדש ולא סוג יעד חדש.
+
+**לא ב-slice הזה:** נגישות מהאינטרנט הציבורי, DNS פנימי של HomeCloud, HTTPS / תעודות מנוהלות (Let's Encrypt לא מנפיק ל-RFC1918), overlay בין ספקים.
+
+PowerShell:
+
+```powershell
+Invoke-RestMethod -Method Post `
+  -Uri "$env:HOMECLOUD_API/api/v1/accounts/$accountId/compute/load-balancers" `
+  -Headers @{ Authorization = "Bearer $token" } `
+  -ContentType "application/json" `
+  -Body '{"name":"web-int","region_code":"eu-west","scheme":"internal","vpc_id":"VPC_ID","listeners":[{"protocol":"http","port":80,"target_port":8080,"sticky":true}],"health_check":{"path":"/readyz"},"targets":[{"type":"nic","id":"NIC_ID"}]}'
+```
+
+bash:
+
+```bash
+curl -sS -X POST "$HOMECLOUD_API/api/v1/accounts/$ACCOUNT_ID/compute/load-balancers" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"name":"web-int","region_code":"eu-west","scheme":"internal","vpc_id":"VPC_ID","listeners":[{"protocol":"http","port":80,"target_port":8080,"sticky":true}],"health_check":{"path":"/readyz"},"targets":[{"type":"nic","id":"NIC_ID"}]}'
+```
+
+יעדים ריקים עדיין מחזירים **202** ומקצים VIP פרטי. מוכיחים תעבורה מ-NIC של מכונה באותו VPC — לקוח ציבורי לא אמור להגיע אליו.
+
+| יכולת | ציבורי | פנימי |
+|--------|--------|--------|
+| `scheme` | `public` (ברירת מחדל) | `internal` (דורש `vpc_id`) |
+| VIP | IPv4 ציבורי | IPv4 פרטי ב-CIDR של ה-VPC |
+| Listeners | TCP, HTTP, HTTPS | TCP, HTTP |
+| Sticky | HTTP / HTTPS | HTTP |
+| Hetzner / Scaleway / stub | כן | `lb_internal` |
+| OVH | לא | `compute.lb_internal_unsupported` |
+
+תשובת הרשימה מוסיפה `can_create_internal` ליד `can_create`.
 
 PowerShell:
 
@@ -280,9 +322,9 @@ curl -sS -X POST "$HOMECLOUD_API/api/v1/accounts/$ACCOUNT_ID/compute/load-balanc
 
 | פעולה | בקשה |
 |--------|---------|
-| רשימה | `GET .../load-balancers?region_code=` (מציב `can_create`) |
+| רשימה | `GET .../load-balancers?region_code=` (מציב `can_create` ו-`can_create_internal`) |
 | קריאה | `GET .../load-balancers/{id}` |
-| עדכון | `PUT .../load-balancers/{id}` `{ listeners, machine_ids }` או `{ targets }` |
+| עדכון | `PUT .../load-balancers/{id}` `{ listeners, machine_ids }` או `{ targets }` (`scheme` / `vpc_id` לא משתנים) |
 | מחיקה | `DELETE .../load-balancers/{id}` |
 
 קריאות שינוי מחזירות **202** `{ load_balancer_id, operation_id }`.
@@ -290,12 +332,14 @@ curl -sS -X POST "$HOMECLOUD_API/api/v1/accounts/$ACCOUNT_ID/compute/load-balanc
 | קוד | משמעות |
 |------|---------|
 | `compute.load_balancer_unsupported` | אין יכולת LB ב-placement |
+| `compute.lb_internal_unsupported` | ה-placement לא יכול להשמיט את הממשק הציבורי (`lb_internal=false`) |
 | `compute.load_balancer_quota` | בחשבון כבר יש 5 LBs |
 | `compute.load_balancer_exists` | השם כבר בשימוש |
 | `compute.load_balancer_region` | LB ויעדים באזורי HomeCloud שונים |
-| `compute.unsupported_target` | המתאם לא מממש את סוג היעד (או שהיעד עדיין לא נגיש) |
-| `compute.invalid_targets` | רשימת יעדים לא תקינה |
-| `compute.invalid_listener` | פרוטוקול/פורט/hostname לא תקין, TCP+sticky, או HTTPS/sticky לא זמין |
+| `compute.vpc_not_found` / `compute.vpc_busy` / `compute.vpc_region` | VPC של LB פנימי חסר, עדיין בעלייה, או באזור אחר |
+| `compute.unsupported_target` | המתאם לא מממש את סוג היעד, היעד לא ב-VPC הזה, או שה-underlay הנוכחי לא מגיע אליו |
+| `compute.invalid_targets` | רשימת יעדים לא תקינה, או כתובת מחוץ ל-CIDR של ה-VPC |
+| `compute.invalid_listener` | פרוטוקול/פורט/hostname לא תקין, TCP+sticky, HTTPS על פנימי, או HTTPS/sticky לא זמין |
 
 בקונסול: Compute → **Load balancers**. **מחק** בשורה משחרר את ה-VIP (`DELETE .../load-balancers/{id}`).
 
