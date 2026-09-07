@@ -97,7 +97,8 @@ homecloud fn invoke hello --payload-file event.json
 
 homecloud fn url hello
 homecloud fn logs hello
-homecloud fn watch hello          # follow recent invocations / output
+homecloud fn watch hello          # live SSE follow for the next invocation
+homecloud fn logs hello --id <id> --follow
 ```
 
 See [CLI `fn`](../cli/commands/fn.md) for flags.

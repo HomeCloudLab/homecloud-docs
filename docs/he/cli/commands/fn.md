@@ -37,23 +37,28 @@ homecloud fn url hello --disable
 
 ## logs
 
-רשימת invocations אחרונות, או הדפסת פרטי ולוגי invocation אחד:
+רשימת invocations אחרונות, פרטי invocation, או מעקב חי ב-SSE:
 
 ```bash
 homecloud fn logs hello
 homecloud fn logs hello --id <invocation-id>
+homecloud fn logs hello --id <invocation-id> --follow
+homecloud fn logs hello --id <invocation-id> --follow --timeout 300
 homecloud fn logs hello --id <invocation-id> --output json
 ```
 
+`--follow` משתמש ב-`GET …/invocations/{id}/logs/stream` (סטטוס + שורות `log` בזמן אמת + blob סופי).
+
 ## watch
 
-המתנה ל-invocation הבא שהושלם והדפסת הלוגים שלו (לוגים זמינים אחרי סיום הריצה, לא בזרם באמצע):
+המתנה ל-invocation הבא ו**סטרימינג חי של הלוגים** (אותו חוזה SSE כמו `--follow`):
 
 ```bash
 homecloud fn watch hello
 homecloud fn watch hello --wait 300 --poll 2
 homecloud fn watch hello --wait 0              # wait forever
 homecloud fn watch hello --since-id <id>
+homecloud fn watch hello --follow-timeout 180
 ```
 
 קוד יציאה `1` אם חולפים `--wait` שניות בלי invocation חדש.

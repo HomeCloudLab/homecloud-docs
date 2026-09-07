@@ -116,6 +116,12 @@ client.functions.disable_url("hello")
 for row in client.functions.logs("hello"):
     print(row)
 detail = client.functions.get_invocation("hello", invocation_id)
+
+for event in client.functions.stream_logs("hello", invocation_id, timeout_seconds=120):
+    if event.get("type") == "log":
+        print(event.get("line"))
+    elif event.get("type") in {"end", "done"}:
+        break
 ```
 
 ## Mail
