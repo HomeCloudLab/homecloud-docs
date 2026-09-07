@@ -185,7 +185,7 @@ curl -sS -X POST "$HOMECLOUD_API/api/v1/accounts/$ACCOUNT_ID/compute/floating-ip
 
 ## Load balancers
 
-Load Balancer ציבורי הוא **VIP** מול מכונות Compute. יעדים רצויים הם אובייקטי HomeCloud — `machine`, `nic` או `address` — לא מזהה שרת של ספק. `machine_ids` הוא קיצור ל-`{ "type": "machine", "id": "…" }`. המתאמים הנוכחיים מממשים **machine** ו-**address** באזורים שה-offerings שלהם מפרסמים `load_balancer` (`eu-central` ו-`eu-west` היום). **nic** מחזיר `compute.unsupported_target` עד מתאם מאוחר יותר. היעדים חייבים לשתף **אזור** HomeCloud. אותו גוף create/update עובד בשני האזורים. פרוטוקולים בגרסה זו: **TCP** ו-**HTTP** (HTTPS בהמשך). מכסה: **5** לחשבון (`409 compute.load_balancer_quota`).
+Load Balancer ציבורי הוא **VIP** מול מכונות Compute. יעדים רצויים הם אובייקטי HomeCloud — `machine`, `nic` או `address` — לא מזהה שרת של ספק. `machine_ids` הוא קיצור ל-`{ "type": "machine", "id": "…" }`. המתאמים הנוכחיים מממשים **machine**, **nic** ו-**address** באזורים שה-offerings שלהם מפרסמים `load_balancer` (`eu-central` ו-`eu-west` היום). יעד **nic** משתמש ב-IPv4 הפרטי אחרי חיבור VPC; המתאם מחבר את **אותו** מוצר LB ציבורי ל-VPC (לא SKU נפרד). NIC בלי `private_ip` עדיין מדולג עד שהחיבור מסתיים. NIC ממספק אחר מחזיר `compute.unsupported_target`. היעדים חייבים לשתף **אזור** HomeCloud. אותו גוף create/update עובד בשני האזורים. פרוטוקולים בגרסה זו: **TCP** ו-**HTTP** (HTTPS בהמשך). מכסה: **5** לחשבון (`409 compute.load_balancer_quota`).
 
 PowerShell:
 
@@ -213,6 +213,27 @@ curl -sS -X POST "$HOMECLOUD_API/api/v1/accounts/$ACCOUNT_ID/compute/load-balanc
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"name":"web-front","region_code":"eu-central","listeners":[{"protocol":"http","port":80,"target_port":8080}],"targets":[{"type":"machine","id":"MACHINE_ID"},{"type":"address","address":"203.0.113.10"}]}'
+```
+
+יעד NIC פרטי (המכונה כבר מחוברת ל-subnet; משתמשים במזהה NIC של HomeCloud מהמלאי, לא ב-ref של ספק):
+
+PowerShell:
+
+```powershell
+Invoke-RestMethod -Method Post `
+  -Uri "$env:HOMECLOUD_API/api/v1/accounts/$accountId/compute/load-balancers" `
+  -Headers @{ Authorization = "Bearer $token" } `
+  -ContentType "application/json" `
+  -Body '{"name":"web-priv","region_code":"eu-central","listeners":[{"protocol":"http","port":80,"target_port":8080}],"targets":[{"type":"nic","id":"NIC_ID"}]}'
+```
+
+bash:
+
+```bash
+curl -sS -X POST "$HOMECLOUD_API/api/v1/accounts/$ACCOUNT_ID/compute/load-balancers" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"name":"web-priv","region_code":"eu-central","listeners":[{"protocol":"http","port":80,"target_port":8080}],"targets":[{"type":"nic","id":"NIC_ID"}]}'
 ```
 
 | פעולה | בקשה |
