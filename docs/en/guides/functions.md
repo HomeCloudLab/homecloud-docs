@@ -88,7 +88,11 @@ Ops chrome on the same tab:
 | `queue` | Consume from an MQ queue |
 | `cron` | Schedule (cron expression) |
 
-Create, enable, disable, and delete triggers on the **Triggers** tab (event subscriptions live on the same tab; `?tab=events` still deep-links there).
+Create, enable, disable, and delete triggers on the **Triggers** tab.
+
+### Events (Event Bus)
+
+Subscribe on the **Events** tab. Pick source → event → optional resource filters. SO needs a bucket (prefix optional with path suggestions). Tasks can filter by `item_id` / task `key`; Compute by `machine_id` / `operation_id`; Functions by function name. Empty optional filters match account-wide for that event type.
 
 ### Layers
 
@@ -102,7 +106,7 @@ A custom hostname for that URL is connected from [Domains](domains.md) → **Ser
 
 ### Configuration
 
-Set memory, timeout, environment variables, **resource bindings** (mq / so / secrets / mail pickers + JSON escape hatch), **execution role** (IAM Role ARN), retry/DLQ, and layers. Functions should assume a **Role**, not an Access Key name. After changing bindings, recreate or update the role if policies may be stale.
+Set memory, timeout, environment variables, **resource bindings** (logical names for mq / so / secrets / mail — routing only), and an **execution role** (IAM Role ARN). Permissions (Allow/Deny, prefixes, conditions) are edited on the role in [IAM Runtime](../guides/iam.md) — create or attach policies there. After changing bindings, recreate or update the role if policies may be stale.
 
 ## CLI
 

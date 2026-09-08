@@ -88,7 +88,11 @@ Rollback זמין מתוך סעיף **Versions** תחת לשונית **Code** / 
 | `queue` | צריכה מתור MQ |
 | `cron` | לוח זמנים (ביטוי cron) |
 
-צרו, הפעילו, השביתו ומחקו triggers בלשונית **Triggers** (מנויי אירועים באותה לשונית; `?tab=events` עדיין מפנה לשם).
+צרו, הפעילו, השביתו ומחקו triggers בלשונית **Triggers**.
+
+### Events (Event Bus)
+
+מנויים בלשונית **Events**. בחרו מקור → אירוע → מסנני משאב אופציונליים. ל-SO נדרש באקט (קידומת אופציונלית עם הצעות נתיב). משימות: `item_id` / מפתח משימה; Compute: `machine_id` / `operation_id`; פונקציות: שם פונקציה. מסננים אופציונליים ריקים = התאמה ברמת החשבון לסוג האירוע.
 
 ### Layers
 
@@ -102,7 +106,7 @@ hostname מותאם לכתובת הזו מחובר מ-[Domains](domains.md) → 
 
 ### Configuration
 
-הגדירו זיכרון, timeout, משתני סביבה, **resource bindings** (בוררי mq / so / secrets / mail + JSON), **execution role** (ARN של תפקיד IAM), retry/DLQ ו-layers. Functions צריכות להניח **Role**, לא שם Access Key. אחרי שינוי bindings, צרו מחדש או עדכנו את ה-role אם המדיניות עלולה להיות ישנה.
+הגדירו זיכרון, timeout, משתני סביבה, **resource bindings** (שמות לוגיים ל-mq / so / secrets / mail — ניתוב בלבד), ו-**execution role** (ARN של תפקיד IAM). הרשאות (Allow/Deny, קידומות, תנאים) נערכות על ה-role ב-[IAM Runtime](../guides/iam.md) — שם יוצרים או מצרפים מדיניות. אחרי שינוי bindings, צרו מחדש או עדכנו את ה-role אם המדיניות עלולה להיות ישנה.
 
 ## CLI
 
