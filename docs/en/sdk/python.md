@@ -113,8 +113,9 @@ print(client.functions.url("hello"))
 client.functions.enable_url("hello")
 client.functions.disable_url("hello")
 
-for row in client.functions.logs("hello"):
+for row in client.functions.logs("hello")["items"]:
     print(row)
+# Breaking (0.5.14+): logs() returns {"items", "next_cursor"} — not a bare list.
 detail = client.functions.get_invocation("hello", invocation_id)
 
 for event in client.functions.stream_logs("hello", invocation_id, timeout_seconds=120):

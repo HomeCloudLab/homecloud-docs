@@ -97,9 +97,22 @@ homecloud fn invoke hello --payload-file event.json
 
 homecloud fn url hello
 homecloud fn logs hello
+homecloud fn logs hello --limit 20 --cursor '<next_cursor>'
 homecloud fn watch hello          # live SSE follow for the next invocation
 homecloud fn logs hello --id <id> --follow
 ```
+
+### Invocations observability
+
+Three layers stay separate:
+
+| Layer | What | Where |
+|-------|------|--------|
+| **History (SoT)** | List metadata + detail by id | Postgres via REST (`…/invocations`) |
+| **Live stream** | Mid-run stdout/stderr | SSE `…/logs/stream` (Platform NATS; live-from-now) |
+| **Persisted logs** | Trimmed final blob on the invocation row | Postgres (free / basic retention) |
+
+The console list soft-refreshes on Realtime Gateway `function.invoke.*` hints (no Follow poller). Extended search / long retention (Loki/SO) is a future paid SKU — not part of basic observability.
 
 See [CLI `fn`](../cli/commands/fn.md) for flags.
 
@@ -122,8 +135,11 @@ See [CLI `fn`](../cli/commands/fn.md) for flags.
     client.functions.enable_url("hello")
     client.functions.disable_url("hello")
 
-    for line in client.functions.logs("hello"):
-        print(line)
+    page = client.functions.logs("hello", limit=50)
+    for row in page["items"]:
+        print(row["id"], row["status"])
+    if page.get("next_cursor"):
+        page = client.functions.logs("hello", cursor=page["next_cursor"])
     ```
 
 ## Example handler (Python)

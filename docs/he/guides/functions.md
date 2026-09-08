@@ -97,9 +97,22 @@ homecloud fn invoke hello --payload-file event.json
 
 homecloud fn url hello
 homecloud fn logs hello
+homecloud fn logs hello --limit 20 --cursor '<next_cursor>'
 homecloud fn watch hello          # מעקב SSE חי ל-invocation הבא
 homecloud fn logs hello --id <id> --follow
 ```
+
+### Observability ל-invocations
+
+שלוש שכבות נפרדות:
+
+| שכבה | מה | איפה |
+|------|-----|------|
+| **History (SoT)** | מטא-דאטה ברשימה + פירוט לפי id | Postgres דרך REST (`…/invocations`) |
+| **Live stream** | stdout/stderr באמצע הרצה | SSE `…/logs/stream` (Platform NATS; live-from-now) |
+| **Persisted logs** | blob סופי מקוצר על שורת ה-invocation | Postgres (retention בסיסי בחינם) |
+
+הרשימה בקונסול מתרעננת בעדינות על רמזי Realtime Gateway מסוג `function.invoke.*` (בלי Follow poller). חיפוש מורחב / retention ארוך (Loki/SO) הוא SKU עתידי — לא חלק מה-observability הבסיסי.
 
 ראו [CLI `fn`](../cli/commands/fn.md) לדגלים.
 
@@ -122,8 +135,11 @@ homecloud fn logs hello --id <id> --follow
     client.functions.enable_url("hello")
     client.functions.disable_url("hello")
 
-    for line in client.functions.logs("hello"):
-        print(line)
+    page = client.functions.logs("hello", limit=50)
+    for row in page["items"]:
+        print(row["id"], row["status"])
+    if page.get("next_cursor"):
+        page = client.functions.logs("hello", cursor=page["next_cursor"])
     ```
 
 ## דוגמת handler (Python)

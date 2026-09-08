@@ -37,17 +37,22 @@ homecloud fn url hello --disable
 
 ## logs
 
-רשימת invocations אחרונות, פרטי invocation, או מעקב חי ב-SSE:
+רשימת invocations (עמוד מטא-דאטה), פרטי invocation, או מעקב חי ב-SSE:
 
 ```bash
 homecloud fn logs hello
+homecloud fn logs hello --limit 20
+homecloud fn logs hello --cursor '<next_cursor>'
+homecloud fn logs hello --status succeeded --trigger http
 homecloud fn logs hello --id <invocation-id>
 homecloud fn logs hello --id <invocation-id> --follow
 homecloud fn logs hello --id <invocation-id> --follow --timeout 300
 homecloud fn logs hello --id <invocation-id> --output json
 ```
 
-`--follow` משתמש ב-`GET …/invocations/{id}/logs/stream` (סטטוס + שורות `log` בזמן אמת + blob סופי).
+רשימה ממוינת ב-cursor (`items` + `next_cursor`). בשורות **אין** לוגים או גוף תגובה — השתמשו ב-`--id` לפירוט.
+
+`--follow` משתמש ב-`GET …/invocations/{id}/logs/stream` (סטטוס + שורות `log` בזמן אמת + blob סופי). באמצע הרצה — live-from-now (בלי replay); אחרי סיום — Postgres.
 
 ## watch
 

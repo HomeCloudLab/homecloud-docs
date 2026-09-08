@@ -37,17 +37,22 @@ homecloud fn url hello --disable
 
 ## logs
 
-List recent invocations, print one invocation’s detail, or **follow live SSE**:
+List recent invocations (metadata page), print one invocation’s detail, or **follow live SSE**:
 
 ```bash
 homecloud fn logs hello
+homecloud fn logs hello --limit 20
+homecloud fn logs hello --cursor '<next_cursor>'
+homecloud fn logs hello --status succeeded --trigger http
 homecloud fn logs hello --id <invocation-id>
 homecloud fn logs hello --id <invocation-id> --follow
 homecloud fn logs hello --id <invocation-id> --follow --timeout 300
 homecloud fn logs hello --id <invocation-id> --output json
 ```
 
-`--follow` uses `GET …/invocations/{id}/logs/stream` (status + live `log` lines + final blob). Mid-run lines come from Platform NATS via the API gateway; history after completion is Postgres.
+List responses are cursor-paged (`items` + `next_cursor`). Rows do **not** include logs or response bodies — use `--id` for detail.
+
+`--follow` uses `GET …/invocations/{id}/logs/stream` (status + live `log` lines + final blob). Mid-run lines are live-from-now via Platform NATS (no replay); history after completion is Postgres.
 
 ## watch
 

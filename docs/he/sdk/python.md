@@ -112,8 +112,9 @@ print(client.functions.url("hello"))
 client.functions.enable_url("hello")
 client.functions.disable_url("hello")
 
-for row in client.functions.logs("hello"):
+for row in client.functions.logs("hello")["items"]:
     print(row)
+# Breaking (0.5.14+): logs() מחזיר {"items", "next_cursor"} — לא רשימה ישירה.
 detail = client.functions.get_invocation("hello", invocation_id)
 ```
 
