@@ -69,9 +69,9 @@ Rollback זמין מתוך סעיף **Versions** תחת לשונית **Code** / 
 פתחו **Invocations**:
 
 1. ערכו את **Event JSON**.  
-2. לחצו **Invoke**.  
-3. הרשימה מתרעננת דרך Realtime (`function.invoke.*`); כש-Realtime כבוי ויש pending/running, הקונסול עושה soft-poll כל ~5 שניות.  
-4. בדקו סטטוס (StatusBadge), תוצאה, משך ולוגים. הרחבת ריצה חיה פותחת SSE (`…/logs/stream`) — **live-from-now** (אין replay באמצע ריצה).
+2. לחצו **Invoke** — ה-API מחזיר מיד `running` + מזהה (`async_mode`), והריצה ממשיכה ברקע.  
+3. הרשימה מרחיבה אוטומטית את השורה ופותחת SSE (`…/logs/stream`) עם catch-up ואז לייב.  
+4. רענון רך דרך Realtime (`function.invoke.*`); כש-Realtime כבוי ויש pending/running, soft-poll כל ~5 שניות.
 
 כלי ops באותה לשונית:
 
@@ -127,7 +127,7 @@ homecloud fn logs hello --id <id> --follow
 | שכבה | מה | איפה |
 |------|-----|------|
 | **History (SoT)** | מטא-דאטה ברשימה + פירוט לפי id | Postgres דרך REST (`…/invocations`) |
-| **Live stream** | stdout/stderr באמצע הרצה | SSE `…/logs/stream` (Platform NATS; live-from-now) |
+| **Live stream** | stdout/stderr באמצע הרצה | SSE `…/logs/stream` (Platform NATS + באפר Redis ל-session catch-up) |
 | **Persisted logs** | blob סופי מקוצר על שורת ה-invocation | Postgres (retention בסיסי בחינם) |
 
 הרשימה בקונסול מתרעננת בעדינות על רמזי Realtime Gateway מסוג `function.invoke.*`. כש-Realtime כבוי ויש שורות pending/running, soft-poll כל ~5 שניות שומר על עדכניות (עדיין O(page) — בלי Follow poller על היסטוריה). חיפוש מורחב / retention ארוך (Loki/SO) הוא SKU עתידי — לא חלק מה-observability הבסיסי.

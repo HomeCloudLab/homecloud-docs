@@ -52,7 +52,7 @@ homecloud fn logs hello --id <invocation-id> --output json
 
 רשימה ממוינת ב-cursor (`items` + `next_cursor`). בשורות **אין** לוגים או גוף תגובה — השתמשו ב-`--id` לפירוט.
 
-`--follow` משתמש ב-`GET …/invocations/{id}/logs/stream` (סטטוס + שורות `log` בזמן אמת + blob סופי). באמצע הרצה — live-from-now (בלי replay); אחרי סיום — Postgres.
+`--follow` משתמש ב-`GET …/invocations/{id}/logs/stream` (סטטוס + שורות `log` בזמן אמת + blob סופי). באמצע הרצה — באפר Redis קצר לאותה invocation ואז לייב מ-Platform NATS (לא JetStream replay); אחרי סיום — Postgres.
 
 ## watch
 

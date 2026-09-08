@@ -52,7 +52,7 @@ homecloud fn logs hello --id <invocation-id> --output json
 
 List responses are cursor-paged (`items` + `next_cursor`). Rows do **not** include logs or response bodies — use `--id` for detail.
 
-`--follow` uses `GET …/invocations/{id}/logs/stream` (status + live `log` lines + final blob). Mid-run lines are live-from-now via Platform NATS (no replay); history after completion is Postgres.
+`--follow` uses `GET …/invocations/{id}/logs/stream` (status + live `log` lines + final blob). Mid-run opens with a short Redis session buffer for this invocation, then live Platform NATS lines (not JetStream replay); history after completion is Postgres.
 
 ## watch
 

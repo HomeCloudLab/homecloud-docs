@@ -69,9 +69,9 @@ Rollback is available from the **Versions** section under the **Code** tab / API
 Open **Invocations**:
 
 1. Edit the **Event JSON**.  
-2. Click **Invoke**.  
-3. The list soft-refreshes via Realtime (`function.invoke.*`); when Realtime is down and runs are pending/running, the console polls about every 5s.  
-4. Inspect status (StatusBadge), result, duration, and logs. Expanding a live run opens SSE (`…/logs/stream`) — **live-from-now** (no mid-run replay).
+2. Click **Invoke** — the API returns `running` + invocation id immediately (`async_mode`), then finishes in the background.  
+3. The list auto-expands that row and opens SSE (`…/logs/stream`) with session catch-up, then live lines.  
+4. Soft-refresh via Realtime (`function.invoke.*`); when Realtime is down and runs are pending/running, the console polls about every 5s.
 
 Ops chrome on the same tab:
 
@@ -96,7 +96,7 @@ Attach shared dependency layers under **Configuration** (Layers section). For Py
 
 ### Function URL
 
-Enable a Function URL from the Overview control when you need a stable HTTP entrypoint on `{name}.func.{apex}`. Disable it when the endpoint should no longer be reachable. CLI: `homecloud fn url`.
+Enable a Function URL from Overview (small checkboxes). When enabled, the URL and public/private badge appear in the Function summary next to the ARN. Details stay in the info panel. CLI: `homecloud fn url`.
 
 A custom hostname for that URL is connected from [Domains](domains.md) → **Services**, not from the function page.
 
@@ -127,7 +127,7 @@ Three layers stay separate:
 | Layer | What | Where |
 |-------|------|--------|
 | **History (SoT)** | List metadata + detail by id | Postgres via REST (`…/invocations`) |
-| **Live stream** | Mid-run stdout/stderr | SSE `…/logs/stream` (Platform NATS; live-from-now) |
+| **Live stream** | Mid-run stdout/stderr | SSE `…/logs/stream` (Platform NATS + Redis session buffer catch-up) |
 | **Persisted logs** | Trimmed final blob on the invocation row | Postgres (free / basic retention) |
 
 The console list soft-refreshes on Realtime Gateway `function.invoke.*` hints. When Realtime is offline and pending/running rows exist, a ~5s soft poll keeps the page honest (still O(page) — no Follow poller over history). Extended search / long retention (Loki/SO) is a future paid SKU — not part of basic observability.
