@@ -5,8 +5,19 @@ Functions are **managed serverless** units. You write a handler (Python 3.12 and
 | Item | Value |
 |------|--------|
 | Console | **Functions** → `/console/functions` |
-| Runtime host | `fn.{apex}` |
+| Customer Function URL | `{name}.func.{apex}` (optional; enable Function URL) |
+| Internal runtime host | `fn.{apex}` (platform only — not for apps) |
 | Auth (invoke via CLI/SDK) | Access Key / session as documented per command |
+
+## Access planes (do not mix)
+
+| Plane | Hostname | Who uses it |
+|-------|----------|-------------|
+| **Console / management** | Console + management API | Test invoke with JWT; operators |
+| **Function URL** | `{name}.func.{apex}` | Apps and integrations (Access Key HMAC or public) |
+| **Internal runtime** | `fn.{apex}` | Platform workers only (same idea as SO internal hosts) |
+
+These hostnames stay separate on purpose — do not merge them.
 
 ## Concepts
 
@@ -51,7 +62,7 @@ Use **Build & Deploy Preview** before a real deploy:
 
 Click **Deploy version**. The platform packages the workspace into a new immutable version and updates `$LATEST`. Artifacts are often stored as `so://…` URIs when Object Storage is available.
 
-Rollback is available from the **Versions** tab / API when you need a previous package.
+Rollback is available from the **Versions** section under the **Code** tab / API when you need a previous package.
 
 ### Invoke for testing
 
@@ -59,7 +70,14 @@ Open **Invocations**:
 
 1. Edit the **Event JSON**.  
 2. Click **Invoke**.  
-3. Inspect status, result, duration, and logs.
+3. The list soft-refreshes via Realtime (`function.invoke.*`); when Realtime is down and runs are pending/running, the console polls about every 5s.  
+4. Inspect status (StatusBadge), result, duration, and logs. Expanding a live run opens SSE (`…/logs/stream`) — **live-from-now** (no mid-run replay).
+
+Ops chrome on the same tab:
+
+- Filters: status, trigger, from/to (cursor resets; no full-history `COUNT(*)`)  
+- **Running now** chip — bounded `status=running|pending` queries only  
+- Find / open by invocation id  
 
 ### Triggers
 
@@ -70,21 +88,21 @@ Open **Invocations**:
 | `queue` | Consume from an MQ queue |
 | `cron` | Schedule (cron expression) |
 
-Create, enable, disable, and delete triggers on the **Triggers** (or Events) tab.
+Create, enable, disable, and delete triggers on the **Triggers** tab (event subscriptions live on the same tab; `?tab=events` still deep-links there).
 
 ### Layers
 
-Attach shared dependency layers on the **Layers** tab. For Python layers, include a top-level `python/` directory (or ensure the layer root is on `PYTHONPATH`).
+Attach shared dependency layers under **Configuration** (Layers section). For Python layers, include a top-level `python/` directory (or ensure the layer root is on `PYTHONPATH`).
 
 ### Function URL
 
-Enable a Function URL from the dedicated control when you need a stable HTTP entrypoint. Disable it when the endpoint should no longer be reachable. CLI: `homecloud fn url`.
+Enable a Function URL from the Overview control when you need a stable HTTP entrypoint on `{name}.func.{apex}`. Disable it when the endpoint should no longer be reachable. CLI: `homecloud fn url`.
 
 A custom hostname for that URL is connected from [Domains](domains.md) → **Services**, not from the function page.
 
 ### Configuration
 
-Set memory, timeout, environment variables, and **execution role** (IAM Role ARN) from configuration tabs. Functions should assume a **Role**, not an Access Key name.
+Set memory, timeout, environment variables, **resource bindings** (mq / so / secrets / mail pickers + JSON escape hatch), **execution role** (IAM Role ARN), retry/DLQ, and layers. Functions should assume a **Role**, not an Access Key name. After changing bindings, recreate or update the role if policies may be stale.
 
 ## CLI
 
@@ -112,7 +130,7 @@ Three layers stay separate:
 | **Live stream** | Mid-run stdout/stderr | SSE `…/logs/stream` (Platform NATS; live-from-now) |
 | **Persisted logs** | Trimmed final blob on the invocation row | Postgres (free / basic retention) |
 
-The console list soft-refreshes on Realtime Gateway `function.invoke.*` hints (no Follow poller). Extended search / long retention (Loki/SO) is a future paid SKU — not part of basic observability.
+The console list soft-refreshes on Realtime Gateway `function.invoke.*` hints. When Realtime is offline and pending/running rows exist, a ~5s soft poll keeps the page honest (still O(page) — no Follow poller over history). Extended search / long retention (Loki/SO) is a future paid SKU — not part of basic observability.
 
 See [CLI `fn`](../cli/commands/fn.md) for flags.
 

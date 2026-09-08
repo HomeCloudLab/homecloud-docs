@@ -5,8 +5,19 @@ Functions הן יחידות **serverless מנוהלות**. כותבים handler 
 | פריט | ערך |
 |------|--------|
 | Console | **Functions** → `/console/functions` |
-| Runtime host | `fn.{apex}` |
+| Function URL ללקוח | `{name}.func.{apex}` (אופציונלי; הפעילו Function URL) |
+| Runtime פנימי | `fn.{apex}` (פלטפורמה בלבד — לא לאפליקציות) |
 | Auth (invoke דרך CLI/SDK) | Access Key / סשן כמתועד לכל פקודה |
+
+## מישורי גישה (אל תערבבו)
+
+| מישור | Hostname | מי משתמש |
+|-------|----------|----------|
+| **קונסול / ניהול** | קונסול + management API | Test invoke עם JWT; מפעילים |
+| **Function URL** | `{name}.func.{apex}` | אפליקציות ואינטגרציות (Access Key HMAC או ציבורי) |
+| **Runtime פנימי** | `fn.{apex}` | workers של הפלטפורמה בלבד (בדומה ל-hosts פנימיים של SO) |
+
+ה-hostnames האלה נשארים מופרדים במכוון — אין למזג אותם.
 
 ## מושגים
 
@@ -51,7 +62,7 @@ Functions הן יחידות **serverless מנוהלות**. כותבים handler 
 
 לחצו **Deploy version**. הפלטפורמה אורזת את ה-workspace לגרסה חדשה ובלתי משתנה ומעדכנת `$LATEST`. ארטיפקטים לעיתים נשמרים כ-URIs של `so://…` כש-Object Storage זמין.
 
-Rollback זמין מלשונית **Versions** / API כשצריך חבילה קודמת.
+Rollback זמין מתוך סעיף **Versions** תחת לשונית **Code** / API כשצריך חבילה קודמת.
 
 ### Invoke לבדיקה
 
@@ -59,7 +70,14 @@ Rollback זמין מלשונית **Versions** / API כשצריך חבילה קו
 
 1. ערכו את **Event JSON**.  
 2. לחצו **Invoke**.  
-3. בדקו סטטוס, תוצאה, משך ולוגים.
+3. הרשימה מתרעננת דרך Realtime (`function.invoke.*`); כש-Realtime כבוי ויש pending/running, הקונסול עושה soft-poll כל ~5 שניות.  
+4. בדקו סטטוס (StatusBadge), תוצאה, משך ולוגים. הרחבת ריצה חיה פותחת SSE (`…/logs/stream`) — **live-from-now** (אין replay באמצע ריצה).
+
+כלי ops באותה לשונית:
+
+- מסננים: status, trigger, from/to (cursor מתאפס; בלי `COUNT(*)` על כל ההיסטוריה)  
+- שבב **Running now** — שאילתות מוגבלות ל-`status=running|pending` בלבד  
+- חיפוש / פתיחה לפי מזהה invocation  
 
 ### Triggers
 
@@ -70,21 +88,21 @@ Rollback זמין מלשונית **Versions** / API כשצריך חבילה קו
 | `queue` | צריכה מתור MQ |
 | `cron` | לוח זמנים (ביטוי cron) |
 
-צרו, הפעילו, השביתו ומחקו triggers בלשונית **Triggers** (או Events).
+צרו, הפעילו, השביתו ומחקו triggers בלשונית **Triggers** (מנויי אירועים באותה לשונית; `?tab=events` עדיין מפנה לשם).
 
 ### Layers
 
-צרפו שכבות תלויות משותפות בלשונית **Layers**. לשכבות Python כללו תיקיית `python/` ברמה העליונה (או ודאו ששורש השכבה ב-`PYTHONPATH`).
+צרפו שכבות תלויות משותפות תחת **Configuration** (סעיף Layers). לשכבות Python כללו תיקיית `python/` ברמה העליונה (או ודאו ששורש השכבה ב-`PYTHONPATH`).
 
 ### Function URL
 
-הפעילו Function URL מהבקרה הייעודית כשצריך נקודת כניסה HTTP יציבה. השביתו אותה כשהנקודה לא צריכה להיות נגישה יותר. CLI: `homecloud fn url`.
+הפעילו Function URL מבקרת Overview כשצריך נקודת כניסה HTTP יציבה על `{name}.func.{apex}`. השביתו אותה כשהנקודה לא צריכה להיות נגישה יותר. CLI: `homecloud fn url`.
 
 hostname מותאם לכתובת הזו מחובר מ-[Domains](domains.md) → **שירותים**, לא מדף הפונקציה.
 
 ### Configuration
 
-הגדירו זיכרון, timeout, משתני סביבה ו**execution role** (ARN של תפקיד IAM) מלשוניות תצורה. Functions צריכות להניח **Role**, לא שם Access Key.
+הגדירו זיכרון, timeout, משתני סביבה, **resource bindings** (בוררי mq / so / secrets / mail + JSON), **execution role** (ARN של תפקיד IAM), retry/DLQ ו-layers. Functions צריכות להניח **Role**, לא שם Access Key. אחרי שינוי bindings, צרו מחדש או עדכנו את ה-role אם המדיניות עלולה להיות ישנה.
 
 ## CLI
 
@@ -112,7 +130,7 @@ homecloud fn logs hello --id <id> --follow
 | **Live stream** | stdout/stderr באמצע הרצה | SSE `…/logs/stream` (Platform NATS; live-from-now) |
 | **Persisted logs** | blob סופי מקוצר על שורת ה-invocation | Postgres (retention בסיסי בחינם) |
 
-הרשימה בקונסול מתרעננת בעדינות על רמזי Realtime Gateway מסוג `function.invoke.*` (בלי Follow poller). חיפוש מורחב / retention ארוך (Loki/SO) הוא SKU עתידי — לא חלק מה-observability הבסיסי.
+הרשימה בקונסול מתרעננת בעדינות על רמזי Realtime Gateway מסוג `function.invoke.*`. כש-Realtime כבוי ויש שורות pending/running, soft-poll כל ~5 שניות שומר על עדכניות (עדיין O(page) — בלי Follow poller על היסטוריה). חיפוש מורחב / retention ארוך (Loki/SO) הוא SKU עתידי — לא חלק מה-observability הבסיסי.
 
 ראו [CLI `fn`](../cli/commands/fn.md) לדגלים.
 
