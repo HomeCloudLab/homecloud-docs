@@ -15,6 +15,7 @@ https://homecloud-cli.so.holab.abrdns.com/releases/latest/homecloud-windows-amd6
 
 | Version | Highlights |
 |---------|------------|
+| v0.2.46 | Smoke-test fix for Typer Click `Exit` (binary release) |
 | v0.2.45 | `domains record-update` / `record-delete` / `detach` |
 | v0.2.44 | `fn logs` cursor pagination (`--limit` / `--cursor` / filters); list is metadata-only |
 | v0.2.43 | `fn logs --follow` / `fn watch` live SSE invocation logs |
