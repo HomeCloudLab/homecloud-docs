@@ -30,7 +30,7 @@
 
 ## DNS חיצוני
 
-השאירו DNS אצל הרשם. אחרי אימות TXT, פתחו **שירותים** וחברו אפליקציה, Function URL או אתר SO (קודם הפעילו website hosting על ה-bucket). אפשר לחבר יותר משם אחד על אותו דומיין. כדי ש-HomeCloud יארח את האזור אחר כך, פתחו **הגדרות** ועברו ל-**DNS של HomeCloud**, ואז החליפו nameservers אצל הרשם.
+השאירו DNS אצל הרשם. אחרי אימות TXT, פתחו **Hosts** וחברו אפליקציה, Function URL או אתר SO (קודם הפעילו website hosting על ה-bucket). אפשר לחבר יותר משם אחד על אותו דומיין. כדי ש-HomeCloud יארח את האזור אחר כך, פתחו **הגדרות** ועברו ל-**DNS של HomeCloud**, ואז החליפו nameservers אצל הרשם.
 
 | מה מחברים | איזו רשומה להוסיף |
 |-----------|-------------------|
@@ -43,16 +43,37 @@
 
 כשהמצב זמין, העבירו nameservers ל-`ns1.{apex}` ו-`ns2.{apex}`, ואז Verify. זה יוצר **אזור מארח**: SOA ו-NS לקריאה בלבד. נהלו A, AAAA, CNAME, TXT, MX, CAA ו-SRV בטאב **DNS**. Apex לשירות הוא **צירוף**, לא סוג רשומה בשם ALIAS. בטאב אפשר גם **לייצא או לייבא** קובץ אזור BIND.
 
-אחרי שה-NS תואמים, **צירוף** כותב את הרשומה ומפעיל ניתוב — בלי Verify שני. חברו את השם הראשי (host ריק), `www`, `api` או כל תווית אחרת. בצירוף apex אפשר גם ליצור alias ל-**www** לאותו שירות (תיבת סימון בצירוף; כבויה כברירת מחדל). הפעילו **DNSSEC** בטאב DNS והעתיקו את רשומות ה-DS אצל הרשם.
+אחרי שה-NS תואמים, **חיבור** במפת Hosts כותב את הרשומה ומפעיל ניתוב — בלי Verify שני. חברו את השם הראשי (host ריק), `www`, `api` או כל תווית אחרת. בצירוף apex אפשר גם ליצור alias ל-**www** לאותו שירות (תיבת סימון בחיבור; כבויה כברירת מחדל). הפעילו **DNSSEC** בטאב DNS והעתיקו את רשומות ה-DS אצל הרשם.
+
+לכל רשומה מארחת יש **מקור** (`origin`): `system` (SOA/NS), `service` (חיבור), `mail` (תיקון Deliverability), `user` (אתם / CLI / Terraform), או `dynamic` (DDNS). טאב DNS עורך או מוחק רק שורות `user`. ניתוק מסיר שורות `service`; תיקון דואר מעדכן שורות `mail`.
+
+### DNS דינמי
+
+על רשומת **A** או **AAAA** מארחת אפשר להפעיל DNS דינמי. הקונסול מציג טוקן **פעם אחת**. הפנו ddclient (או דומה) ל-dyndns2:
+
+```text
+protocol=dyndns2
+server=console.holab.abrdns.com
+login=home.example.com
+password=TOKEN
+```
+
+```bash
+curl -u 'home.example.com:TOKEN' \
+  'https://console.holab.abrdns.com/nic/update?hostname=home.example.com&myip=203.0.113.10'
+```
+
+אותו עדכון זמין גם ב־`/api/v1/dyn/nic/update`. בלי JWT של החשבון. גוף התשובה הוא טקסט dyndns2 (`good`, `nochg`, `badauth`, `nohost`, `abuse`). סובבו או בטלו את הטוקן מטאב DNS.
 
 חלק מהרשמים דוחים את שרתי השמות של HomeCloud עד שהם רשומים ב-TLD. עד שהפלטפורמה תסיים את זה (שלב מאוחר יותר עם דומיין ייצור), **השאירו DNS חיצוני**.
 
 ## דף הדומיין
 
-לכל דומיין יש **סקירה**, **DNS**, **SSL**, **שירותים**, **דואר** ו-**הגדרות**.
+לכל דומיין יש **Hosts** (ברירת מחדל), **DNS**, **SSL**, **דואר** ו-**הגדרות**. קישור עם `tab=overview` או `tab=services` פותח את Hosts.
 
-- **שירותים** — צירוף או ניתוק של אפליקציה, Function URL או אתר SO. בשדה תת-שם אפשר להגדיר או לשנות שם ממתין (`test`, `www`, או ריק לשם הראשי). כל יעד מקבל HTTPS על ה-hostname. אין custom domain ל-Compute. שלבי ה-DNS המלאים לחיבור שממתין נשארים בטאב הזה.
-- **דואר** — הפעילו דואר על ה-hostname המאומת, ואז צרו תיבות (`hello@הדומיין-שלכם`). DNS חיצוני: העתיקו את שורות MX / SPF / DKIM / DMARC אצל הרשם — **בלי להחליף nameservers**. ב-DNS של HomeCloud אפשר לכתוב את הרשומות (Deliverability → תיקון). בדיקות חיות באותו טאב.
+- **Hosts** — hostname → אפליקציה, Function URL או אתר SO, עם DNS / ניתוב / TLS. חיבור וניתוק מהמפה. לצירוף DNS חיצוני שממתין, העתיקו את רשומת ה-discovery (CNAME, או A/AAAA/ALIAS ב-apex) שמוצגת בשורה. אין custom domain ל-Compute.
+- **DNS** — עורך אזור מארח (עם מקור). DNS חיצוני אינו עורך אזור; הוראות discovery ממתינות ב-Hosts.
+- **דואר** — הפעילו דואר על ה-hostname המאומת, ואז צרו תיבות (`hello@הדומיין-שלכם`). DNS חיצוני: העתיקו את שורות MX / SPF / DKIM / DMARC אצל הרשם — **בלי להחליף nameservers**. ב-DNS של HomeCloud אפשר לכתוב את הרשומות (Deliverability → תיקון). בדיקות חיות באותו טאב. דואר אינו עורך DNS שני.
 - **הגדרות** — מעבר בין DNS חיצוני ל-DNS של HomeCloud, ואז מחיקת הדומיין אחרי ניתוק שירותים.
 
 באפליקציות, Function URL ואתרי SO מוצגים hostnames כ-**מנוהל ב-Domains**. הצירוף רק מדף הדומיין. `custom_domain` באפליקציה אינו שדה לכתיבה.
@@ -62,10 +83,13 @@
 ```bash
 homecloud domains create example.com --dns-mode homecloud
 homecloud domains record-create DOMAIN_ID --type A --record 1.2.3.4 --host www
+homecloud domains record-update DOMAIN_ID RECORD_ID --type A --record 1.2.3.5 --host www
+homecloud domains record-delete DOMAIN_ID RECORD_ID
 homecloud domains attach DOMAIN_ID --target-id FUNCTION_ID --target-type function --host test
+homecloud domains detach ATTACHMENT_ID
 ```
 
-`--host` הוא התווית היחסית (`test`, `www`). ריק = השם הראשי. שינוי שם ממתין או ניתוק הם בקונסול (שירותים). ב-Terraform `homecloud_domain_attachment.host` גם יחסי; שינוי שלו מחליף את המשאב.
+`--host` הוא התווית היחסית (`test`, `www`). ריק = השם הראשי. `homecloud domains records` כולל `origin` ו-`mode`. ב-Terraform `homecloud_dns_record.origin` מחושב; `mode` אופציונלי (`static` או `dynamic`). `homecloud_domain_attachment.host` גם יחסי; שינוי שלו מחליף את המשאב.
 
 משאבי Terraform: `homecloud_domain` (`wait_for_verified` אופציונלי), `homecloud_dns_record`, `homecloud_domain_attachment`. חיפוש וקניית דומיין הם רק בקונסול/API.
 
