@@ -480,7 +480,7 @@ Guest tools are IAM-gated (viewers can list/preview/download; they cannot Sessio
 |--------|------------|
 | List / read / download guest files | `compute.read` |
 | Session PTY and `POST …/exec` | `compute.terminal` (or legacy `compute.update`) |
-| Create / upload / edit / mkdir / delete guest files | `compute.files.write` (or legacy `compute.update`) |
+| Create / upload / edit / mkdir / rename / move / delete guest files | `compute.files.write` (or legacy `compute.update`) |
 | Start / stop / rebuild / firewall | `compute.update` |
 
 Exec and files require Agent **ONLINE**. When the channel is up they run as RPC (and Session as `stream.*` PTY) on that socket:
@@ -492,26 +492,30 @@ Exec and files require Agent **ONLINE**. When the channel is up they run as RPC 
 - `GET .../machines/{id}/files/blob?path=` — download (up to 1 MiB)
 - `POST .../machines/{id}/files/blob?path=` — upload binary (chunked `write_b64`, up to 32 MiB)
 - `POST .../machines/{id}/files/mkdir` `{"path"}` — create a folder
+- `POST .../machines/{id}/files/rename` `{"path","dest"}` — rename or move a file or directory
+- `DELETE .../machines/{id}/files?path=` — delete a file or directory (recursive when the agent supports it)
 - `GET .../machines/{id}/metrics/history?range=1h|24h|7d|30d` — downsampled series (Compute Postgres, not the guest)
 
 Otherwise `409 compute.agent_offline`.
 
-The console **Session** tab does not connect until you choose a method and click Connect. Linux machines offer **Shell** (PTY). Windows machines also show **Desktop** (not shipped yet). SSH `:22` stays break-glass and is not a Session method.
+The console **Session** tab does not connect until you choose a method and click Connect. Linux machines offer **Shell** (PTY). Windows machines also show **Desktop** (not shipped yet). SSH `:22` stays break-glass and is not a Session method. The managed shell starts at filesystem root (`/` on Linux, `C:\` on Windows) — the same root as Files Explorer — not under `$HOME`. Login user matches the image (`ubuntu` / `debian` / `alma`); the prompt looks like `ubuntu@hostname:/`. Machines created before this change may still use `homecloud` until **rebuild**. Empty machine names become `i-{12 hex}` (hostname follows).
 
 Full screen covers the **entire browser**: no Session title, no side padding. The live-session toolbar follows the console **page theme** (background, borders, and buttons) so controls stay readable — in AWS that is a light bar with orange primary actions, not the dark top chrome. The terminal canvas stays dark. Esc or Exit full screen returns without dropping the session. Find sits on its own row under status and session actions (match case / whole word / regex, result count, previous / next). Type to search. Ctrl+F focuses it. The session stays connected while the browser tab is visible (WebSocket protocol pings every 20s so idle proxies do not drop it). Leaving the tab for **4 minutes** disconnects and shows Reconnect. End session, leaving Session, or a dropped WebSocket also close it. Idle typing does not. Copy/paste: right-click menu or **Ctrl+Shift+C** / Ctrl+V / **Ctrl+Shift+X**. Plain **Ctrl+C** is always SIGINT to the shell (same as SSH).
 
 The **Files** tab has two modes (preference is stored locally):
 
 - **Explorer** — list or grid, like Object Storage. The default folder is the filesystem root (`/` or `C:\` on Windows). Folders open in place. Files open on `/console/compute/{id}/file?path=` (Monaco, **manual Save** only). Images preview; oversized or binary files offer download.
-- **VS Code** — a tree plus editor tabs **inside** Files, rooted at the same filesystem root. Opening a file does not navigate away. Dirty tabs; never autosave. The workspace toolbar has the same **New**, **Upload**, **Rename**, **Download**, and **Delete** actions as Explorer (New/Upload target the focused folder, or the parent of the focused file).
+- **VS Code** — a tree plus editor tabs **inside** Files, rooted at the same filesystem root. Opening a file does not navigate away. Dirty tabs; never autosave. The workspace toolbar has the same **New**, **Upload**, **Cut**, **Copy**, **Paste**, **Rename**, **Download**, and **Delete** actions as Explorer (New/Upload/Paste target the focused folder, or the parent of the focused file).
 
-Drop rules match Object Storage: drop on a **folder** uploads into that folder (or copies a file already in Explorer); drop on empty chrome uploads into the **current directory**; a **file** is not a drop target. The full upload overlay appears only when dragging files from the OS. Upload a folder from the **Upload** menu or by dragging a directory. Cap is **32 MiB** per file.
+Drop rules match Object Storage: drop on a **folder** uploads into that folder, or **moves** items already in Explorer/VS Code; drop on empty chrome uploads into the **current directory**; a **file** is not a drop target. The full upload overlay appears only when dragging files from the OS. Upload a folder from the **Upload** menu or by dragging a directory. Cap is **32 MiB** per file.
 
-Toolbar: one **New** menu (file or folder) and one **Upload** menu (files or folder). **Rename**, **Delete**, and **Download** appear after you select a file (Explorer), open the file page, or focus/open a file in VS Code. Right-click a file or folder in Explorer (list or grid) or in the VS Code tree/tabs for the actions that apply to that item. On a narrow viewport the toolbar actions are icon-only. Rename is **same-directory, files only** (copy then delete; there is no rename RPC). Folders cannot be renamed or downloaded as a zip from the console.
+Toolbar: one **New** menu (file or folder) and one **Upload** menu (files or folder). **Cut**, **Copy**, **Paste**, **Rename**, **Delete**, and **Download** appear after you select items (Explorer), open the file page, or focus/open an item in VS Code. Paste uses the current folder (Explorer) or focused folder (VS Code). Cut moves files and folders via agent rename; copy pastes **files only**. Right-click a file or folder in Explorer (list or grid) or in the VS Code tree/tabs for the actions that apply to that item. On a narrow viewport the toolbar actions are icon-only. Rename is **same-directory** for files and folders (agent `rename` RPC). Folders can be deleted recursively when the agent supports directory delete; download stays files-only (no zip from the console).
 
 Name filter applies to the **current listing only**. Find-in-file is Monaco’s Ctrl+F on a loaded file. There is no guest-wide grep.
 
-Platform paths are omitted from list and rejected on read/write: `/etc/homecloud/**`, `/home/homecloud/**`, `/usr/local/bin/homecloud-agent`, the systemd unit, and Windows `C:\ProgramData\HomeCloud\` plus `C:\Users\homecloud\`. Names starting with `.` are hidden in Explorer.
+Platform paths are omitted from list and rejected on read/write: `/etc/homecloud/**`, `/home/homecloud/**` (legacy), `/usr/local/bin/homecloud-agent`, the systemd unit, and Windows `C:\ProgramData\HomeCloud\` plus `C:\Users\homecloud\`. Customer login homes (`/home/ubuntu`, `/home/debian`, `/home/alma`) are **not** denylisted. Names starting with `.` are hidden in Explorer.
+
+Older VMs may need **rebuild** so the agent includes directory delete (`rmtree`) and the `rename` job used by move/rename in the console.
 
 ## Providers
 
