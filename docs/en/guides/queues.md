@@ -35,6 +35,8 @@ Message Queues let one part of your system **publish** work and another part **c
 2. Paste a JSON body and send.  
 3. Confirm depth increases on Overview / Monitoring.
 
+The queues **list** page loads names immediately, then fills depth / in-flight / DLQ from live JetStream stats. Counts also refresh every 30 seconds and when you click **Refresh**, without blanking the previous numbers.
+
 ### Receive and inspect
 
 Use the console message browser for debugging. For workers, prefer the CLI or SDK so you can ack/delete reliably.
