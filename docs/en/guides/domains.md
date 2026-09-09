@@ -30,12 +30,13 @@ If HomeCloud DNS is not enabled in this environment, that option is visible but 
 
 ## External DNS
 
-Keep DNS at your registrar. After TXT verify, open **Hosts** and connect an Application, Function URL, or SO website (enable website hosting on the bucket first). You can attach more than one hostname on the same domain. To let HomeCloud host the zone later, open **Settings** and switch to **HomeCloud DNS**, then change nameservers at the registrar.
+Keep DNS at your registrar. After TXT verify, open **Hosts** and connect an Application, Function URL, SO website (enable website hosting on the bucket first), **machine**, or **public load balancer**. You can attach more than one hostname on the same domain. To let HomeCloud host the zone later, open **Settings** and switch to **HomeCloud DNS**, then change nameservers at the registrar.
 
 | What you connect | Record to add |
 |------------------|---------------|
-| A subdomain (`www`, `app`, `api`, `test`, …) | Set **Host** to that label, connect, then add a **CNAME** whose Name is only that label (not the full hostname) to the platform hostname shown |
-| The root name (`example.com`) | Leave Host empty. **ALIAS** or **ANAME** for `@` to that hostname, if your DNS host supports it. Otherwise change Host to a subdomain, save, and use a CNAME. |
+| A subdomain (`www`, `app`, `api`, `test`, …) to Application / Function / SO | Set **Host** to that label, connect, then add a **CNAME** whose Name is only that label (not the full hostname) to the platform hostname shown |
+| The root name (`example.com`) to Application / Function / SO | Leave Host empty. **ALIAS** or **ANAME** for `@` to that hostname, if your DNS host supports it. Otherwise change Host to a subdomain, save, and use a CNAME. |
+| A machine or public load balancer | Connect the hostname to that resource. Discovery is **A** / **AAAA** from the resource’s public address or VIP — not a CNAME to the Function/SO edge. |
 
 On a pending connection you can **change the host** and **Disconnect**. Check DNS looks up the saved host only. SSL is issued automatically after DNS points here. The **SSL** tab shows Active / Pending / Failed / Expiring / Expired and **Refresh**.
 
@@ -46,6 +47,28 @@ When enabled, point nameservers at `ns1.{apex}` and `ns2.{apex}`, then Verify. T
 After nameservers match, **Connect** on the Host Map writes the record and activates routing — no second Verify. Attach the root (empty host), `www`, `api`, or any other label. Connecting the apex can also create a **www** alias to the same service (checkbox on Connect; off by default). Enable **DNSSEC** on the DNS tab and copy the DS records at the registrar.
 
 Every hosted record has an **origin**: `system` (SOA/NS), `service` (Connect), `mail` (Deliverability Fix), `user` (you / CLI / Terraform), or `dynamic` (DDNS). The DNS tab can edit or delete **user** rows only. Detach removes `service` rows; Mail Fix updates `mail` rows.
+
+### Compute hostnames { #compute-hostnames }
+
+A hostname is bound to a **resource** (`machine` or `load_balancer`), not to a pasted address. HomeCloud DNS writes **A** / **AAAA** (`origin=service`, `mode=static`) from the observed public IPv4, public IPv6, associated Floating IP (preferred over sticky IPv4), or public LB VIP. When that address or VIP changes, the attachment rewrites the record — that is not DDNS (`nic/update` / `myip` is a later change).
+
+- A machine with **no public IPv4 and no public IPv6** cannot take a public hostname. Attach the hostname to a **public load balancer** whose backends can be private NICs.
+- Public attach to an **internal** load balancer (`scheme=internal`) is rejected.
+- **Agent Session** is a console path to a private machine. It is not DNS.
+- TLS for a public HTTPS load balancer stays **Compute-managed** (point the hostname at the VIP). Machine guest TLS is on the guest. Compute attach does not create a Function/SO edge ingress.
+
+CLI:
+
+```bash
+homecloud domains attach DOMAIN_ID --target-id MACHINE_ID --target-type machine --host api
+homecloud domains attach DOMAIN_ID --target-id LB_ID --target-type load_balancer
+```
+
+PowerShell (JSON unchanged):
+
+```powershell
+homecloud domains attach $domainId --target-id $machineId --target-type machine --host api
+```
 
 ### Dynamic DNS
 
@@ -71,7 +94,7 @@ Some registrars reject HomeCloud nameservers until those hostnames are registere
 
 Each domain has **Hosts** (default), **DNS**, **SSL**, **Mail**, and **Settings**. Links with `tab=overview` or `tab=services` open Hosts.
 
-- **Hosts** — hostname → Application, Function URL, or SO website, with DNS / routing / TLS. Connect and Detach from this map. For External DNS pending attachments, copy the discovery CNAME (or apex A/AAAA/ALIAS) shown on the row. Compute cannot use a custom domain.
+- **Hosts** — hostname → Application, Function URL, SO website, machine, or public load balancer, with DNS / routing / TLS. Connect and Detach from this map. For External DNS pending attachments, copy the discovery CNAME (or apex A/AAAA/ALIAS) shown on the row. A private machine uses an LB (or Agent Session — not DNS).
 - **DNS** — HomeCloud hosted zone editor (origin-aware). External DNS is not a zone editor; pending discovery stays on Hosts.
 - **Mail** — Enable Mail on this verified hostname, then create mailboxes (`hello@your-domain`). External DNS: copy the MX / SPF / DKIM / DMARC rows at the registrar — **you do not change nameservers**. HomeCloud DNS can write those records (Deliverability → Fix). Live checks stay on this tab. Mail is not a second DNS editor.
 - **Settings** — switch External DNS ↔ HomeCloud DNS, then delete the domain after you detach services.
@@ -86,10 +109,11 @@ homecloud domains record-create DOMAIN_ID --type A --record 1.2.3.4 --host www
 homecloud domains record-update DOMAIN_ID RECORD_ID --type A --record 1.2.3.5 --host www
 homecloud domains record-delete DOMAIN_ID RECORD_ID
 homecloud domains attach DOMAIN_ID --target-id FUNCTION_ID --target-type function --host test
+homecloud domains attach DOMAIN_ID --target-id MACHINE_ID --target-type machine --host api
 homecloud domains detach ATTACHMENT_ID
 ```
 
-`--host` is the relative label (`test`, `www`). Empty is the root name. `homecloud domains records` includes `origin` and `mode`. Terraform `homecloud_dns_record.origin` is computed; `mode` is optional (`static` or `dynamic`). `homecloud_domain_attachment.host` is relative; changing it replaces the resource.
+`--host` is the relative label (`test`, `www`). Empty is the root name. `target-type` for Compute is `machine` or `load_balancer` (`compute` / `vm` are aliases for `machine`). `homecloud domains records` includes `origin` and `mode`. Terraform `homecloud_dns_record.origin` is computed; `mode` is optional (`static` or `dynamic`). `homecloud_domain_attachment.host` is relative; changing it replaces the resource.
 
 Terraform resources: `homecloud_domain` (optional `wait_for_verified`), `homecloud_dns_record`, `homecloud_domain_attachment`. Domain search and purchase are console/API only.
 

@@ -132,7 +132,7 @@ Disk is **grow-only**: `POST .../volumes/{volume_id}/resize` `{"size_gb":80}`.
 - Console: Compute → **Security groups** (quick create dialog; full-page edit). The list shows attached machines. Detach removes the vendor firewall from the VM; delete removes the firewall object. Delete is blocked while a group is attached to a **live** machine or NIC. Deleting a machine detaches its groups. Attachments to a machine that is already gone are cleaned up and do not block delete. `PUT .../machines/{id}/firewall` is a compatibility shim that writes the account **default** group.
 - Attach API: `POST .../security-groups/{group_id}/attachments` `{"target_type":"machine"|"nic","target_id":"…"}`. Machine shorthand `POST .../machines/{id}/security-groups/{group_id}` always uses `target_type=machine`.
 - Drivers without a vendor firewall (Scaleway today) store the policy in HomeCloud and do not pretend the vendor applied it.
-- Public IPv4 is allocated on the machine NIC; private IPv4 appears after [VPC subnet attach](#vpc-subnets-private-nic). New machines on placements that advertise `ipv6` are **dual-stack**: the NIC also stores observed `public_ipv6`. Existing machines stay IPv4-only until recreate. VPC/subnet CIDR remains IPv4 — a vendor IPv6 prefix is not the HomeCloud subnet. Hostname **AAAA** is a Domain attach change (`domains-compute-attach`), not Compute. Load balancer `vip_address` stays IPv4; IPv6 address targets are rejected unless the placement advertises `lb_ipv6`.
+- Public IPv4 is allocated on the machine NIC; private IPv4 appears after [VPC subnet attach](#vpc-subnets-private-nic). New machines on placements that advertise `ipv6` are **dual-stack**: the NIC also stores observed `public_ipv6`. Existing machines stay IPv4-only until recreate. VPC/subnet CIDR remains IPv4 — a vendor IPv6 prefix is not the HomeCloud subnet. A Domain hostname on a machine or public LB is an **attachment** (A/AAAA from the resource; Floating IP preferred for A). See [Domains — Compute hostnames](domains.md#compute-hostnames). Load balancer `vip_address` stays IPv4; IPv6 address targets are rejected unless the placement advertises `lb_ipv6`.
 - Snapshot a **volume** (`POST .../volumes/{id}/snapshots`), list with `GET .../volumes/{id}/snapshots`, restore to a **new volume** (`POST .../snapshots/{id}/restore`). Not a machine snapshot.
 
 ## Floating IP
@@ -278,7 +278,7 @@ curl -sS -X POST "$HOMECLOUD_API/api/v1/accounts/$ACCOUNT_ID/compute/load-balanc
   -d '{"name":"web-priv","region_code":"eu-central","listeners":[{"protocol":"http","port":80,"target_port":8080}],"targets":[{"type":"nic","id":"NIC_ID"}]}'
 ```
 
-HTTPS termination (managed certificate for a DNS hostname; backends stay HTTP). Create returns an **active** VIP even if the certificate is still waiting for DNS. Point an A record at that VIP, then **update** the load balancer (same body) so the adapter can attach the certificate:
+HTTPS termination (managed certificate for a DNS hostname; backends stay HTTP). Create returns an **active** VIP even if the certificate is still waiting for DNS. Attach the hostname to the load balancer on [Domains → Hosts](domains.md#compute-hostnames) (or point an A record at that VIP), then **update** the load balancer (same body) so the adapter can attach the certificate:
 
 PowerShell:
 

@@ -30,12 +30,13 @@
 
 ## DNS חיצוני
 
-השאירו DNS אצל הרשם. אחרי אימות TXT, פתחו **Hosts** וחברו אפליקציה, Function URL או אתר SO (קודם הפעילו website hosting על ה-bucket). אפשר לחבר יותר משם אחד על אותו דומיין. כדי ש-HomeCloud יארח את האזור אחר כך, פתחו **הגדרות** ועברו ל-**DNS של HomeCloud**, ואז החליפו nameservers אצל הרשם.
+השאירו DNS אצל הרשם. אחרי אימות TXT, פתחו **Hosts** וחברו אפליקציה, Function URL, אתר SO (קודם הפעילו website hosting על ה-bucket), **מכונה**, או **מאזן עומסים ציבורי**. אפשר לחבר יותר משם אחד על אותו דומיין. כדי ש-HomeCloud יארח את האזור אחר כך, פתחו **הגדרות** ועברו ל-**DNS של HomeCloud**, ואז החליפו nameservers אצל הרשם.
 
 | מה מחברים | איזו רשומה להוסיף |
 |-----------|-------------------|
-| תת-שם (`www`, `app`, `api`, `test`, …) | בשדה **תת-שם** הזינו רק את התווית, חברו, ואז הוסיפו **CNAME** ששם הרשומה הוא אותה תווית (לא השם המלא) ליעד שמוצג |
-| השם הראשי (`example.com`) | השאירו תת-שם ריק. **ALIAS** או **ANAME** עבור `@` לשם הזה, אם מארח ה-DNS תומך. אחרת שנו את השם לתת-שם, שמרו, והשתמשו ב-CNAME. |
+| תת-שם (`www`, `app`, `api`, `test`, …) לאפליקציה / Function / SO | בשדה **תת-שם** הזינו רק את התווית, חברו, ואז הוסיפו **CNAME** ששם הרשומה הוא אותה תווית (לא השם המלא) ליעד שמוצג |
+| השם הראשי (`example.com`) לאפליקציה / Function / SO | השאירו תת-שם ריק. **ALIAS** או **ANAME** עבור `@` לשם הזה, אם מארח ה-DNS תומך. אחרת שנו את השם לתת-שם, שמרו, והשתמשו ב-CNAME. |
+| מכונה או מאזן עומסים ציבורי | חברו את ה-hostname למשאב. הגילוי הוא **A** / **AAAA** מכתובת ציבורית או VIP — לא CNAME לקצה Function/SO. |
 
 בצירוף ממתין אפשר **לשנות את השם** ו**לנתק**. בדיקת DNS בודקת רק את השם השמור. SSL מונפק אוטומטית אחרי שה-DNS מצביע לכאן. טאב **SSL** מציג פעיל / ממתין / נכשל / עומד לפוג / פג ו-**Refresh**.
 
@@ -46,6 +47,28 @@
 אחרי שה-NS תואמים, **חיבור** במפת Hosts כותב את הרשומה ומפעיל ניתוב — בלי Verify שני. חברו את השם הראשי (host ריק), `www`, `api` או כל תווית אחרת. בצירוף apex אפשר גם ליצור alias ל-**www** לאותו שירות (תיבת סימון בחיבור; כבויה כברירת מחדל). הפעילו **DNSSEC** בטאב DNS והעתיקו את רשומות ה-DS אצל הרשם.
 
 לכל רשומה מארחת יש **מקור** (`origin`): `system` (SOA/NS), `service` (חיבור), `mail` (תיקון Deliverability), `user` (אתם / CLI / Terraform), או `dynamic` (DDNS). טאב DNS עורך או מוחק רק שורות `user`. ניתוק מסיר שורות `service`; תיקון דואר מעדכן שורות `mail`.
+
+### שמות מארח ל-Compute { #compute-hostnames }
+
+Hostname נקשר ל-**משאב** (`machine` או `load_balancer`), לא לכתובת שהודבקה. DNS של HomeCloud כותב **A** / **AAAA** (`origin=service`, `mode=static`) מ-IPv4 ציבורי, IPv6 ציבורי, Floating IP משויך (מועדף על פני IPv4 דביק), או VIP ציבורי של LB. כשהכתובת או ה-VIP משתנים, הצירוף כותב מחדש את הרשומה — זה לא DDNS (`nic/update` / `myip` הוא שינוי מאוחר יותר).
+
+- מכונה **בלי IPv4 ציבורי ובלי IPv6 ציבורי** לא יכולה לקבל hostname ציבורי. חברו את השם ל-**מאזן עומסים ציבורי** שה-backends שלו יכולים להיות NIC פרטיים.
+- צירוף ציבורי ל-LB **פנימי** (`scheme=internal`) נדחה.
+- **Agent Session** הוא נתיב קונסול למכונה פרטית. זה לא DNS.
+- TLS ל-LB ציבורי עם HTTPS נשאר **מנוהל ב-Compute**. TLS על המכונה הוא על האורח. צירוף Compute לא יוצר ingress של Function/SO.
+
+CLI:
+
+```bash
+homecloud domains attach DOMAIN_ID --target-id MACHINE_ID --target-type machine --host api
+homecloud domains attach DOMAIN_ID --target-id LB_ID --target-type load_balancer
+```
+
+PowerShell (JSON זהה):
+
+```powershell
+homecloud domains attach $domainId --target-id $machineId --target-type machine --host api
+```
 
 ### DNS דינמי
 
@@ -71,7 +94,7 @@ curl -u 'home.example.com:TOKEN' \
 
 לכל דומיין יש **Hosts** (ברירת מחדל), **DNS**, **SSL**, **דואר** ו-**הגדרות**. קישור עם `tab=overview` או `tab=services` פותח את Hosts.
 
-- **Hosts** — hostname → אפליקציה, Function URL או אתר SO, עם DNS / ניתוב / TLS. חיבור וניתוק מהמפה. לצירוף DNS חיצוני שממתין, העתיקו את רשומת ה-discovery (CNAME, או A/AAAA/ALIAS ב-apex) שמוצגת בשורה. אין custom domain ל-Compute.
+- **Hosts** — hostname → אפליקציה, Function URL, אתר SO, מכונה, או מאזן עומסים ציבורי, עם DNS / ניתוב / TLS. חיבור וניתוק מהמפה. לצירוף DNS חיצוני שממתין, העתיקו את רשומת ה-discovery (CNAME, או A/AAAA/ALIAS ב-apex) שמוצגת בשורה. מכונה פרטית עוברת דרך LB (או Agent Session — לא DNS).
 - **DNS** — עורך אזור מארח (עם מקור). DNS חיצוני אינו עורך אזור; הוראות discovery ממתינות ב-Hosts.
 - **דואר** — הפעילו דואר על ה-hostname המאומת, ואז צרו תיבות (`hello@הדומיין-שלכם`). DNS חיצוני: העתיקו את שורות MX / SPF / DKIM / DMARC אצל הרשם — **בלי להחליף nameservers**. ב-DNS של HomeCloud אפשר לכתוב את הרשומות (Deliverability → תיקון). בדיקות חיות באותו טאב. דואר אינו עורך DNS שני.
 - **הגדרות** — מעבר בין DNS חיצוני ל-DNS של HomeCloud, ואז מחיקת הדומיין אחרי ניתוק שירותים.
@@ -86,10 +109,11 @@ homecloud domains record-create DOMAIN_ID --type A --record 1.2.3.4 --host www
 homecloud domains record-update DOMAIN_ID RECORD_ID --type A --record 1.2.3.5 --host www
 homecloud domains record-delete DOMAIN_ID RECORD_ID
 homecloud domains attach DOMAIN_ID --target-id FUNCTION_ID --target-type function --host test
+homecloud domains attach DOMAIN_ID --target-id MACHINE_ID --target-type machine --host api
 homecloud domains detach ATTACHMENT_ID
 ```
 
-`--host` הוא התווית היחסית (`test`, `www`). ריק = השם הראשי. `homecloud domains records` כולל `origin` ו-`mode`. ב-Terraform `homecloud_dns_record.origin` מחושב; `mode` אופציונלי (`static` או `dynamic`). `homecloud_domain_attachment.host` גם יחסי; שינוי שלו מחליף את המשאב.
+`--host` הוא התווית היחסית (`test`, `www`). ריק = השם הראשי. ל-Compute: `machine` או `load_balancer` (`compute` / `vm` הם כינויים ל-`machine`). `homecloud domains records` כולל `origin` ו-`mode`. ב-Terraform `homecloud_dns_record.origin` מחושב; `mode` אופציונלי (`static` או `dynamic`). `homecloud_domain_attachment.host` גם יחסי; שינוי שלו מחליף את המשאב.
 
 משאבי Terraform: `homecloud_domain` (`wait_for_verified` אופציונלי), `homecloud_dns_record`, `homecloud_domain_attachment`. חיפוש וקניית דומיין הם רק בקונסול/API.
 

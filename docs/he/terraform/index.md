@@ -224,6 +224,13 @@ resource "homecloud_domain_attachment" "fn" {
   target_type = "function"
   host        = "www"
 }
+
+resource "homecloud_domain_attachment" "vm" {
+  domain_id   = homecloud_domain.site.id
+  target_id   = homecloud_machine.web.id
+  target_type = "machine"
+  host        = "api"
+}
 ```
 
 מחיקת פונקציה דורשת owner/admin. יצירה/עדכון עובדים עם מפתח developer.
