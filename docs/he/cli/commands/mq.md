@@ -49,6 +49,8 @@ homecloud mq delete-dlq my-queue 7
 homecloud mq purge-dlq my-queue
 ```
 
+אחרי **מקסימום שליפות** ל-worker בלי מחיקה, ההודעה עוברת ל-DLQ כשנגמר חלון ה-visibility האחרון (בלי `receive` נוסף).
+
 ## queues (JWT קונסול)
 
 ```bash

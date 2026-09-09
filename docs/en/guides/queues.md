@@ -41,7 +41,7 @@ Use the console message browser for debugging. For workers, prefer the CLI or SD
 
 ### DLQ
 
-Failed or expired messages may land in the **DLQ** tab. Inspect payloads, fix the consumer, then delete or purge DLQ messages when done.
+Failed messages land in the **DLQ** tab after they exhaust **max receive count**. Each failed delivery still reaches your worker; if you do not delete before visibility expires on the last attempt, the platform moves the message to the DLQ automatically (no extra receive required). Inspect payloads, fix the consumer, then delete or purge DLQ messages when done.
 
 ### Settings
 
@@ -169,15 +169,18 @@ Full reference: [CLI `mq`](../cli/commands/mq.md).
 
 ### Poison messages
 
-1. Watch **DLQ** count on `queues list --live`.  
-2. `receive-dlq`, inspect payload, fix bug.  
-3. `purge-dlq` or delete individual sequences when resolved.
+1. Set **max receive count** (for example `5`) on the queue.  
+2. After five deliveries without delete, when the fifth visibility window expires, the message moves to the DLQ.  
+3. Watch **DLQ** count on `queues list --live`.  
+4. `receive-dlq`, inspect payload, fix bug.  
+5. `purge-dlq` or delete individual sequences when resolved.
 
 ## Tips and pitfalls
 
 - Access Key needs `mq:*` (or narrower send/receive actions).  
 - `queues list` needs login; `mq send` needs Access Key — easy to mix up.  
 - Always **delete** (ack) after successful processing, or use `receive(..., delete=True)` for simple consumers.  
+- **Max receive count** caps worker deliveries. After the last attempt, DLQ move happens when visibility expires — not on a later receive.  
 - Keep payloads reasonably small; store large blobs in SO and put the `so://` URI in the message.
 
 ## Related

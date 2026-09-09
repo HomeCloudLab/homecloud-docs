@@ -49,6 +49,8 @@ homecloud mq delete-dlq my-queue 7
 homecloud mq purge-dlq my-queue
 ```
 
+After **max receive count** worker deliveries without delete, the message moves to the DLQ when the last visibility window expires (no extra `receive` required).
+
 ## queues (console JWT)
 
 ```bash
