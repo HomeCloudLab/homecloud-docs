@@ -132,7 +132,7 @@ Stop / reboot / delete עוברים בספק גם כש-`agent_state=OFFLINE`. מ
 - בקונסול: Compute → **Security groups** (יצירה מהירה בפופאפ; עריכה בעמוד מלא). הרשימה מציגה מכונות מחוברות. ניתוק מסיר את ה-firewall מה-VM אצל הספק; מחיקה מוחקת את אובייקט ה-firewall. מחיקה חסומה כל עוד הקבוצה מחוברת למכונה או NIC **חיים**. מחיקת מכונה מנתקת את הקבוצות שלה. חיבור למכונה שכבר נמחקה מנוקה ואינו חוסם מחיקה. `PUT .../machines/{id}/firewall` הוא shim תאימות שכותב לקבוצת **default**.
 - API חיבור: `POST .../security-groups/{group_id}/attachments` `{"target_type":"machine"|"nic","target_id":"…"}`. קיצור מכונה `POST .../machines/{id}/security-groups/{group_id}` תמיד משתמש ב-`target_type=machine`.
 - דרייברים בלי firewall אצל הספק (Scaleway כרגע) שומרים את המדיניות ב-HomeCloud ולא מתיימרים שהספק החיל אותה.
-- IPv4 ציבורי מוקצה על NIC של המכונה; IPv4 פרטי מופיע אחרי [חיבור ל-subnet ב-VPC](#vpc-subnets-private-nic). IPv6 נשמר כ-null ולא נדרש.
+- IPv4 ציבורי מוקצה על NIC של המכונה; IPv4 פרטי מופיע אחרי [חיבור ל-subnet ב-VPC](#vpc-subnets-private-nic). מכונות חדשות ב-placement שמפרסם `ipv6` הן **dual-stack**: ה-NIC שומר גם `public_ipv6` שנצפה. מכונות קיימות נשארות IPv4 בלבד עד recreate. CIDR של VPC/subnet נשאר IPv4 — קידומת IPv6 אצל הספק אינה ה-subnet של HomeCloud. **AAAA** לשם מארח הוא שינוי Domain attach (`domains-compute-attach`), לא Compute. `vip_address` של Load balancer נשאר IPv4; יעדי כתובת IPv6 נדחים אלא אם ה-placement מפרסם `lb_ipv6`.
 - Snapshot ל-**volume** (`POST .../volumes/{id}/snapshots`), רשימה ב-`GET .../volumes/{id}/snapshots`, שחזור ל-**volume חדש** (`POST .../snapshots/{id}/restore`). לא snapshot של מכונה.
 
 ## Floating IP
