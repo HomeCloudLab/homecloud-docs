@@ -70,14 +70,15 @@ Rollback זמין מתוך סעיף **Versions** תחת לשונית **Code** / 
 
 1. ערכו את **Event JSON**.  
 2. לחצו **Invoke** — ה-API מחזיר מיד `running` + מזהה (`async_mode`), והריצה ממשיכה ברקע.  
-3. הרשימה מרחיבה אוטומטית את השורה ופותחת SSE (`…/logs/stream`) עם catch-up ואז לייב.  
+3. הקונסול פותח את **עמוד הפירוט** של הריצה וזורם SSE (`…/logs/stream`) עם catch-up ואז לייב.  
 4. רענון רך דרך Realtime (`function.invoke.*`); כש-Realtime כבוי ויש pending/running, soft-poll כל ~5 שניות.
 
-כלי ops באותה לשונית:
+כלי ops ברשימה:
 
-- מסננים: status, trigger, from/to (cursor מתאפס; בלי `COUNT(*)` על כל ההיסטוריה)  
-- שבב **Running now** — שאילתות מוגבלות ל-`status=running|pending` בלבד  
-- חיפוש / פתיחה לפי מזהה invocation  
+- שורת מסננים אחת: status, trigger, טווח תאריכים וחיפוש עם debounce (על שורות שנטענו; UUID נמשך לרשימה)  
+- עמודת **לוג אחרון** (מקוצר); התגובה רק בעמוד הפירוט  
+- לחיצה על שורה → עמוד invocation ייעודי (סיכום, לוגים מעל תגובה)  
+- שבב **Running now** — שאילתות מוגבלות ל-`status=running|pending` בלבד 
 
 ### Triggers
 

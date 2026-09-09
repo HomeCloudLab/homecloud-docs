@@ -70,14 +70,15 @@ Open **Invocations**:
 
 1. Edit the **Event JSON**.  
 2. Click **Invoke** — the API returns `running` + invocation id immediately (`async_mode`), then finishes in the background.  
-3. The list auto-expands that row and opens SSE (`…/logs/stream`) with session catch-up, then live lines.  
-4. Soft-refresh via Realtime (`function.invoke.*`); when Realtime is down and runs are pending/running, the console polls about every 5s.
+3. The console opens that run’s **detail page** and streams SSE (`…/logs/stream`) with session catch-up, then live lines.  
+4. Soft-refresh via Realtime (`function.invoke.*`); when Realtime is down and runs are pending/running, the list polls about every 5s.
 
-Ops chrome on the same tab:
+Ops chrome on the list:
 
-- Filters: status, trigger, from/to (cursor resets; no full-history `COUNT(*)`)  
-- **Running now** chip — bounded `status=running|pending` queries only  
-- Find / open by invocation id  
+- One filter row: status, trigger, date range, and debounced search (matches id / last log / response on **loaded** rows; UUID can be fetched into the list)  
+- Table columns include **Last log** (truncated); response is only on the detail page  
+- Click a row → dedicated invocation page (summary, logs above response)  
+- **Running now** chip — bounded `status=running|pending` queries only 
 
 ### Triggers
 
