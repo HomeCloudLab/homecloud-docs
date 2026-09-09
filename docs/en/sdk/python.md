@@ -125,6 +125,14 @@ for event in client.functions.stream_logs("hello", invocation_id, timeout_second
         break
 ```
 
+## Domains (0.5.15+)
+
+```python
+hosts = client.domains.list_hosts(domain_id)
+client.domains.update_record(domain_id, record_id, record_type="A", record="1.2.3.5", host="www")
+client.domains.detach(attachment_id)
+```
+
 ## Mail
 
 ```python

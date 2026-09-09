@@ -76,8 +76,11 @@ Details: [fn](fn.md).
 | `homecloud domains get` | JWT | Domain detail |
 | `homecloud domains verify` | JWT | Verify TXT or nameservers |
 | `homecloud domains attach` | JWT | Connect a hostname (`--host test` relative; empty = root) |
+| `homecloud domains detach` | JWT | Detach a hostname attachment |
 | `homecloud domains records` | JWT | List HomeCloud DNS records |
 | `homecloud domains record-create` | JWT | Create a hosted DNS record |
+| `homecloud domains record-update` | JWT | Update a hosted DNS record |
+| `homecloud domains record-delete` | JWT | Delete a hosted DNS record |
 | `homecloud domains delete` | JWT | Delete a domain (detach services first) |
 
 Details: [domains](domains.md). Guide: [Domains](../../guides/domains.md).

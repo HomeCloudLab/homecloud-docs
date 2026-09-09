@@ -15,6 +15,7 @@ https://homecloud-cli.so.holab.abrdns.com/releases/latest/homecloud-windows-amd6
 
 | Version | Highlights |
 |---------|------------|
+| v0.2.45 | `domains record-update` / `record-delete` / `detach` |
 | v0.2.44 | `fn logs` cursor pagination (`--limit` / `--cursor` / filters); list is metadata-only |
 | v0.2.43 | `fn logs --follow` / `fn watch` live SSE invocation logs |
 | v0.2.40 | `so sync` bucket↔bucket (`so://` → `so://`); unified SDK `so.sync(source, dest)` |

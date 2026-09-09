@@ -15,6 +15,7 @@ https://homecloud-cli.so.holab.abrdns.com/releases/latest/homecloud-windows-amd6
 
 | Version | Highlights |
 |---------|------------|
+| v0.2.45 | `domains record-update` / `record-delete` / `detach` |
 | v0.2.44 | `fn logs` — pagination ב-cursor (`--limit` / `--cursor` / פילטרים); הרשימה מטא-דאטה בלבד |
 | v0.2.43 | `fn logs --follow` / `fn watch` — לוגים חיים ב-SSE |
 | v0.2.40 | `so sync` באקט↔באקט (`so://` → `so://`); SDK מאוחד `so.sync(source, dest)` |

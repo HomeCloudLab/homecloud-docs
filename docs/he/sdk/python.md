@@ -118,6 +118,14 @@ for row in client.functions.logs("hello")["items"]:
 detail = client.functions.get_invocation("hello", invocation_id)
 ```
 
+## דומיינים (0.5.15+)
+
+```python
+hosts = client.domains.list_hosts(domain_id)
+client.domains.update_record(domain_id, record_id, record_type="A", record="1.2.3.5", host="www")
+client.domains.detach(attachment_id)
+```
+
 ## Mail
 
 ```python
