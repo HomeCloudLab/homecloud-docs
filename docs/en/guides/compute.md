@@ -4,7 +4,7 @@ Compute is HomeCloud **IaaS**: you ask for a **machine concept** in a HomeCloud 
 
 You buy `hc.general.small` in `eu-central`, not “CX22 in Falkenstein”. The control plane picks a **Provider Offering** internally. Customer list price is on the concept. Wholesale cost is on the offering and is never returned to you.
 
-The console workspace is **`/console/compute`**: **Machines**, **SSH keys**, **Security groups**, **Floating IPs**, **Load balancers**, and **VPC** tabs (VPC is capability-gated), plus a machine detail workspace (Overview, Terminal, Files, Performance, Snapshots). CLI/SDK commands will follow when this contract is soaked.
+The console workspace is **`/console/compute`**: **Machines**, **SSH keys**, **Security groups**, **Floating IPs**, **Load balancers**, and **VPC** tabs (VPC is capability-gated), plus a machine detail workspace (Overview, Network, Session, Files, Performance, Snapshots). CLI/SDK commands will follow when this contract is soaked.
 
 | Item | Value |
 |------|--------|
@@ -46,7 +46,7 @@ Create with `image_id` only — the adapter maps it to a vendor image internally
 
 `windows-2022` stays `available=false` when the private bootstrap image is unset **or the configured UUID is gone** on Scaleway. A stale env var must not sell a create that 404s. Catalog `available=true` means a live image UUID exists — not that guest bootstrap or Agent ONLINE is proven. Session still requires `agent_state=ONLINE`.
 
-AlmaLinux Agent install uses the `wheel` group (not Ubuntu `sudo`) and `pip` for `websocket-client`. The Agent script is **Python 3.9 compatible** (AlmaLinux 9 ships 3.9; `datetime.UTC` is 3.11+). Guests created before that cloud-init stay **Booting guest** until you **rebuild**.
+AlmaLinux Agent install uses the `wheel` group (not Ubuntu `sudo`) and `pip` for `websocket-client`. The Agent script is **Python 3.9 compatible** (AlmaLinux 9 ships 3.9; `datetime.UTC` is 3.11+). Machines created before that cloud-init stay **Server starting** until you **rebuild**.
 
 ## Create
 
@@ -496,11 +496,20 @@ Exec and files require Agent **ONLINE**. When the channel is up they run as RPC 
 
 Otherwise `409 compute.agent_offline`.
 
-The console **Session** tab does not connect until you choose a method and click Connect. Linux guests offer **Agent shell** (PTY). Windows guests also show **Guest desktop** (not shipped yet). SSH `:22` stays break-glass and is not a Session method.
+The console **Session** tab does not connect until you choose a method and click Connect. Linux machines offer **Shell** (PTY). Windows machines also show **Desktop** (not shipped yet). SSH `:22` stays break-glass and is not a Session method.
 
-Full screen covers the **entire browser**: no Session title, no side padding. The live-session toolbar follows the console **page theme** (background, borders, and buttons) so controls stay readable — in AWS that is a light bar with orange primary actions, not the dark top chrome. The terminal canvas stays dark. Esc or Exit full screen returns without dropping the session. Find sits on its own row under status and session actions (match case / whole word / regex, result count, previous / next). Type to search. Ctrl+F focuses it. The session stays connected while the browser tab is visible (WebSocket protocol pings every 20s so idle proxies do not drop it). Leaving the tab for **4 minutes** disconnects and shows Reconnect. End session, leaving Session, a dropped WebSocket, or Agent OFFLINE also close it. Idle typing does not. Copy/paste: right-click menu or **Ctrl+Shift+C** / Ctrl+V / **Ctrl+Shift+X**. Plain **Ctrl+C** is always SIGINT to the shell (same as SSH).
+Full screen covers the **entire browser**: no Session title, no side padding. The live-session toolbar follows the console **page theme** (background, borders, and buttons) so controls stay readable — in AWS that is a light bar with orange primary actions, not the dark top chrome. The terminal canvas stays dark. Esc or Exit full screen returns without dropping the session. Find sits on its own row under status and session actions (match case / whole word / regex, result count, previous / next). Type to search. Ctrl+F focuses it. The session stays connected while the browser tab is visible (WebSocket protocol pings every 20s so idle proxies do not drop it). Leaving the tab for **4 minutes** disconnects and shows Reconnect. End session, leaving Session, or a dropped WebSocket also close it. Idle typing does not. Copy/paste: right-click menu or **Ctrl+Shift+C** / Ctrl+V / **Ctrl+Shift+X**. Plain **Ctrl+C** is always SIGINT to the shell (same as SSH).
 
-The **Explorer** tab lists folders and files (list or grid). Create, upload (drag-and-drop, up to 32 MiB), mkdir, download, and delete files. Folder move/rename is not in this release. Rebuild the VM to pick up `write_b64` chunked upload.
+The **Files** tab has two modes (preference is stored locally):
+
+- **Explorer** — list or grid, like Object Storage. The default folder is guest home (`/home/homecloud`, or `C:\Users\homecloud` on Windows). Folders open in place. Files open on `/console/compute/{id}/file?path=` (Monaco, **manual Save** only). Images preview; oversized or binary files offer download.
+- **VS Code** — a tree plus editor tabs **inside** Files. Opening a file does not navigate away. Dirty tabs; never autosave.
+
+Drop rules match Object Storage: drop on a **folder** uploads into that folder; drop on empty chrome uploads into the **current directory**; a **file** is not a drop target. Upload a folder with the toolbar control or by dragging a directory. Cap is **32 MiB** per file.
+
+Name filter applies to the **current listing only**. Find-in-file is Monaco’s Ctrl+F on a loaded file. There is no guest-wide grep.
+
+Platform paths are omitted from list and rejected on read/write: `/etc/homecloud/**`, `/usr/local/bin/homecloud-agent`, the systemd unit, and Windows `C:\ProgramData\HomeCloud\`. Guest user home `/home/homecloud` is **not** hidden.
 
 ## Providers
 
@@ -513,7 +522,11 @@ HomeCloud is the cloud. You choose a **concept** and a **region**. Offerings (He
 | Machines + SSH keys + Security groups + Floating IPs + Load balancers + VPC | `/console/compute` |
 | Workspace | `/console/compute/{machine_id}` |
 
-Service tabs: **Machines**, **SSH keys**, **Security groups**, **Floating IPs**, **Load balancers**, **VPC** (hidden when the region has no `private_network` capability). The Machines list **defaults to every region** so a Windows VM in `eu-west` is not hidden while the header is on `eu-central` — those machines still bill. Create / VPC / LB stay scoped to the selected region. Machine tabs: **Overview** (health triad, lifecycle, attached groups, Floating IP, private NIC / IPv4), **Session** (choose Agent shell then Connect; full screen edge-to-edge), **Explorer**, **Performance**, **Snapshots**. Session and Explorer require `agent_state=ONLINE`. Without `HETZNER_API_TOKEN` a create still returns HTTP 202; the Operation is **FAILED**.
+Service tabs: **Machines**, **SSH keys**, **Security groups**, **Floating IPs**, **Load balancers**, **VPC** (hidden when the region has no `private_network` capability). The Machines list **defaults to every region** so a Windows VM in `eu-west` is not hidden while the header is on `eu-central` — those machines still bill. Create / VPC / LB stay scoped to the selected region.
+
+Machine workspace tabs: **Overview** (health, access, resize — lifecycle actions live in the header), **Network** (Security groups / Floating IP / VPC panels when the placement supports them), **Session**, **Files**, **Performance**, **Snapshots**. Session and Files wait until the server responds. While a machine is busy, the list **state** cell and detail header show a compact **progress ring** (stroke fill, no percent text) plus a short phase tag (provisioning, server starting, stop, reboot, …). The ring hides when the VM is Running and the server responds. A stuck starting-server state surfaces after 20 minutes.
+
+Without `HETZNER_API_TOKEN` a create still returns HTTP 202; the Operation is **FAILED**.
 
 ## Live updates
 
