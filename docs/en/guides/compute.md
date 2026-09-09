@@ -502,14 +502,16 @@ Full screen covers the **entire browser**: no Session title, no side padding. Th
 
 The **Files** tab has two modes (preference is stored locally):
 
-- **Explorer** — list or grid, like Object Storage. The default folder is guest home (`/home/homecloud`, or `C:\Users\homecloud` on Windows). Folders open in place. Files open on `/console/compute/{id}/file?path=` (Monaco, **manual Save** only). Images preview; oversized or binary files offer download.
-- **VS Code** — a tree plus editor tabs **inside** Files. Opening a file does not navigate away. Dirty tabs; never autosave.
+- **Explorer** — list or grid, like Object Storage. The default folder is the filesystem root (`/` or `C:\` on Windows). Folders open in place. Files open on `/console/compute/{id}/file?path=` (Monaco, **manual Save** only). Images preview; oversized or binary files offer download.
+- **VS Code** — a tree plus editor tabs **inside** Files, rooted at the same filesystem root. Opening a file does not navigate away. Dirty tabs; never autosave. The workspace toolbar has the same **New**, **Upload**, **Rename**, **Download**, and **Delete** actions as Explorer (New/Upload target the focused folder, or the parent of the focused file).
 
-Drop rules match Object Storage: drop on a **folder** uploads into that folder; drop on empty chrome uploads into the **current directory**; a **file** is not a drop target. Upload a folder with the toolbar control or by dragging a directory. Cap is **32 MiB** per file.
+Drop rules match Object Storage: drop on a **folder** uploads into that folder (or copies a file already in Explorer); drop on empty chrome uploads into the **current directory**; a **file** is not a drop target. The full upload overlay appears only when dragging files from the OS. Upload a folder from the **Upload** menu or by dragging a directory. Cap is **32 MiB** per file.
+
+Toolbar: one **New** menu (file or folder) and one **Upload** menu (files or folder). **Rename**, **Delete**, and **Download** appear after you select a file (Explorer), open the file page, or focus/open a file in VS Code. Right-click a file or folder in Explorer (list or grid) or in the VS Code tree/tabs for the actions that apply to that item. On a narrow viewport the toolbar actions are icon-only. Rename is **same-directory, files only** (copy then delete; there is no rename RPC). Folders cannot be renamed or downloaded as a zip from the console.
 
 Name filter applies to the **current listing only**. Find-in-file is Monaco’s Ctrl+F on a loaded file. There is no guest-wide grep.
 
-Platform paths are omitted from list and rejected on read/write: `/etc/homecloud/**`, `/usr/local/bin/homecloud-agent`, the systemd unit, and Windows `C:\ProgramData\HomeCloud\`. Guest user home `/home/homecloud` is **not** hidden.
+Platform paths are omitted from list and rejected on read/write: `/etc/homecloud/**`, `/home/homecloud/**`, `/usr/local/bin/homecloud-agent`, the systemd unit, and Windows `C:\ProgramData\HomeCloud\` plus `C:\Users\homecloud\`. Names starting with `.` are hidden in Explorer.
 
 ## Providers
 
