@@ -47,6 +47,7 @@ Open the **Code** tab:
 - Create / rename / delete files and folders; autosave  
 - Format, outline, problems, search  
 - Language intelligence (completions / diagnostics) when the language service is connected  
+- **Language Lab** (experimental): switch to a browser Pyright worker on the same Code tab to compare against server BasedPyright. Production stays on the server engine until a documented GO from that spike.
 
 Work in the workspace until you are ready to deploy — deploy packages what is in the tree (with packaging rules that exclude things like `.env` and Markdown docs).
 
