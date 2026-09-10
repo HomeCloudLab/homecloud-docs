@@ -22,7 +22,7 @@ Sticky public IPv4 on a NIC is not a reserved-IP SKU. Overlay gateways are not c
 
 **One formula, one line per SKU type.** Every Compute meter uses the same list-price pipeline: `FX(wholesale) × GTM markup (2×–4×)`. Billing prices each machine from its offering snapshot (add-ons from the published catalog), then **folds Explorer and invoice lines by metric** — not per VM or volume. Machine hours from many VMs become one `compute.machine.hours` row (blended unit price if offerings differ). Volume, snapshot, LB, VPC, FIP, and egress each get one quantity × catalog rate. The meter may still store `resource_arn` so snapshots can be applied; that is not a breakdown row.
 
-Deleting a VM does **not** erase its metered hours. Billing still resolves the list price from the platform resource (`offering_id` on `desired_spec`, plus a sticky USD snapshot when the machine is purged). Days with usage stay on the chart; they are not $0 just because the inventory row is gone.
+Deleting a VM does **not** erase its metered hours. Billing still resolves the list price from the platform resource: sticky USD snapshot when present, otherwise the same FX × GTM markup from `offering_id` on `desired_spec`. Explorer and invoices stay **one `compute.machine.hours` line** (quantity-weighted blend if offerings differ). Days with usage stay on the chart; they are not $0 just because the inventory row is gone.
 
 ## How usage is recorded
 

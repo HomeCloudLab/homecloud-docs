@@ -22,7 +22,7 @@ IPv4 דביק על NIC אינו SKU של reserved IP. שערי overlay אינם 
 
 **נוסחה אחת, שורה אחת לכל סוג SKU.** כל מטר Compute עובר את אותו צינור מחירון: `FX(wholesale) × GTM markup (2×–4×)`. Billing מחשב כל מכונה לפי snapshot ה-offering (תוספות לפי הקטלוג), ואז **מקפל שורות Explorer וחשבונית לפי מדד** — לא לפי VM או ווליום. שעות מכל המכונות מצטרפות לשורת `compute.machine.hours` אחת (מחיר יחידה ממוצע אם ה-offerings שונים). ווליום, snapshot, LB, VPC, FIP ויציאה — כל אחד כמות כוללת × מחיר קטלוג. המטר עדיין יכול לשמור `resource_arn` לצורך snapshot; זו לא שורת פירוט.
 
-מחיקת VM **לא** מוחקת את שעות המטר. Billing ממשיך לחשב מחיר מה-resource בפלטפורמה (`offering_id` ב-`desired_spec`, ו-snapshot דביק ב-USD כשהמכונה נמחקת מהמלאי). ימים עם שימוש נשארים בגרף — לא $0 רק כי שורת המלאי נמחקה.
+מחיקת VM **לא** מוחקת את שעות המטר. Billing ממשיך לחשב מחיר מה-resource בפלטפורמה: snapshot דביק ב-USD אם יש, אחרת אותו FX × GTM markup מ-`offering_id` ב-`desired_spec`. Explorer וחשבוניות נשארים **שורה אחת של `compute.machine.hours`** (ממוצע משוקלל לפי כמות אם ה-offerings שונים). ימים עם שימוש נשארים בגרף — לא $0 רק כי שורת המלאי נמחקה.
 
 ## איך נרשם שימוש
 
