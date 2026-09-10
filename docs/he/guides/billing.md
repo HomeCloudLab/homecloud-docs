@@ -2,7 +2,23 @@
 
 **Billing** הוא שירות קונסול עצמאי (`/console/billing`). **Billing Explorer** משתמש בלוגיקת ניתוח בסגנון Cost Explorer (טווח תאריכים, מגמה, לפי שירות) עם עיצוב HomeCloud — לא העתקה ויזואלית של AWS.
 
-המטר שומר **כמויות בלבד**. Billing עושה `שימוש × מחיר מחירון נטו ב-USD = חיוב`. מע״מ הוא שורה נפרדת בחשבונית — לא בתוך מחירי SKU. חשבוניות עדיין מופקות; **מחירי המחירון כרגע זמניים** (לבדיקת מוצר, לא מחיר GTM סופי). תשלום בכרטיס עדיין לא פעיל — סימון שולם ידני בלבד. נתיב PDF: `so://billing/{account_id}/{period}.pdf`.
+המטר שומר **כמויות בלבד**. Billing עושה `שימוש × מחיר מחירון נטו ב-USD = חיוב`. מע״מ הוא שורה נפרדת בחשבונית — לא בתוך מחירי SKU. חשבוניות עדיין מופקות. תשלום בכרטיס עדיין לא פעיל — סימון שולם ידני בלבד. נתיב PDF: `so://billing/{account_id}/{period}.pdf`.
+
+**Compute** מחויב ממחירון Compute: wholesale של הספק → FX (EURUSD) → markup בטווח **2×–4×** (ברירת מחדל **2×**). שעות מכונה לפי ה-**Offering/SKU שמומש** (`offering_id`), ב-snapshot ב-USD. שירותים אחרים (SO, MQ, Mail, …) עדיין עשויים להשתמש במחירי placeholder עד שיהיה להם wholesale.
+
+### מטרים של Compute
+
+| מטר | מה מחויב |
+|--------|----------------|
+| `compute.machine.hours` | מכונה RUNNING × זמן, במחיר ה-snapshot מה-offering |
+| `compute.volume.gb_hours` | GiB ווליום × זמן |
+| `compute.snapshot.gb_hours` | GiB snapshot × זמן |
+| `compute.lb.hours` | LB פעיל × זמן |
+| `compute.vpc.hours` | VPC פעיל × זמן (לעיתים **$0** אם הרשת אצל הספק חינם) |
+| `compute.fip.hours` | Floating IP מוקצה × זמן |
+| `compute.egress.gb` | GiB יציאה שנצפה ב-Compute |
+
+IPv4 דביק על NIC אינו SKU של reserved IP. שערי overlay אינם מכונות לקוח ואינם מחויבים. אין SKU נפרד לכתובת IPv6.
 
 ## איך נרשם שימוש
 
@@ -24,7 +40,7 @@ Billing לא שולף טבלאות Compute / SO / Mail לחישוב עלות —
 
 | שירות | מדידה | Watermark |
 |---------|--------|-----------|
-| Compute | RUNNING × זמן | timestamp |
+| Compute | RUNNING × זמן; volume/snapshot GiB·h; שעות LB / VPC / FIP; GiB יציאה | timestamp / bytes שנצפו |
 | SO | bytes × זמן (גודל חי מ-MinIO) | timestamp |
 | IR | storage bytes × זמן | timestamp |
 | MDB | instance / storage × זמן | timestamp |

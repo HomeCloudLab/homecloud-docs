@@ -19,7 +19,7 @@ homecloud billing forecast --horizon 7
 homecloud billing invoices
 ```
 
-USD estimates using temporary placeholder list prices (final GTM rates later). Mark paid is manual — card capture is not enabled yet.
+USD estimates. **Compute** uses catalog list prices (wholesale × FX × 2×–4× markup; default 2×). Other services may still use placeholder rates. Mark paid is manual — card capture is not enabled yet.
 
 ## monitoring
 

@@ -2,7 +2,23 @@
 
 HomeCloud **Billing** is a first-class console service (`/console/billing`). The console **Billing Explorer** uses Cost Explorer–style analysis (date range, trend, by-service) with HomeCloud design — it is not an AWS UI clone.
 
-The meter stores **quantities only**. Billing does `Usage × net USD catalog price = Charge`. VAT is a separate invoice line — never baked into SKU prices. Homelab still issues invoices. Current **list prices are temporary placeholders** (not final GTM rates) so Estimate / Forecast / Invoice show real money math. Card payment is **not** enabled — Mark paid is manual only.
+The meter stores **quantities only**. Billing does `Usage × net USD catalog price = Charge`. VAT is a separate invoice line — never baked into SKU prices. Homelab still issues invoices. Card payment is **not** enabled — Mark paid is manual only.
+
+**Compute** list prices come from the Compute catalog: provider wholesale → operator FX (EURUSD) → GTM markup in the **2×–4×** band (default **2×**). Machine hours use the **fulfilled Offering/SKU** (`offering_id`), snapshotted in USD. Other services (SO, MQ, Mail, …) may still use temporary placeholder rates until they have wholesale.
+
+### Compute meters
+
+| Metric | What is billed |
+|--------|----------------|
+| `compute.machine.hours` | RUNNING machine × time, at the offering-derived snapshot |
+| `compute.volume.gb_hours` | Volume GiB × time |
+| `compute.snapshot.gb_hours` | Snapshot GiB × time |
+| `compute.lb.hours` | Active load balancer × time |
+| `compute.vpc.hours` | Active VPC × time (often **$0** if the vendor network is free) |
+| `compute.fip.hours` | Allocated Floating IP × time |
+| `compute.egress.gb` | Observed Compute egress GiB |
+
+Sticky public IPv4 on a NIC is not a reserved-IP SKU. Overlay gateways are not customer machines and are not billed. IPv6 address SKUs are not in this catalog.
 
 ## How usage is recorded
 
@@ -24,7 +40,7 @@ Billing never queries Compute, SO, Mail, or other service tables for cost. It on
 
 | Service | What is measured | Cursor |
 |---------|------------------|--------|
-| Compute | RUNNING × time | timestamp |
+| Compute | RUNNING × time; volume/snapshot GiB·h; LB / VPC / FIP hours; egress GiB | timestamp / observed bytes |
 | SO | bytes × time (live MinIO size) | timestamp |
 | IR | storage bytes × time | timestamp |
 | MDB | instance / storage × time | timestamp |

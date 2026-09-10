@@ -2,7 +2,7 @@
 
 Compute הוא שכבת ה-**IaaS** של HomeCloud: קונים **קונספט מכונה** באזור HomeCloud. HomeCloud הוא הענן. ספקי קיבולת נשארים מאחורי ה-API — לא שולחים שם ספק, SKU של ספק, או image id של ספק.
 
-קונים `hc.general.small` ב-`eu-central`, לא “CX22 ב-Falkenstein”. מישור הבקרה בוחר **Provider Offering** בפנים. מחיר הלקוח חי על הקונספט. עלות הספק חיה על ה-Offering ואינה חוזרת ללקוח.
+קונים `hc.general.small` ב-`eu-central`, לא “CX22 ב-Falkenstein”. מישור הבקרה בוחר **Provider Offering** בפנים. מחיר הלקוח הוא **USD**: FX(wholesale) × markup GTM (ברירת מחדל **2×**, תקרה **4×**). עלות הספק חיה על ה-Offering ואינה חוזרת ללקוח. שעות מכונה רצה מחויבות מה-snapshot של אותו offering, לא ממחיר קונספט גנרי.
 
 Workspace בקונסול: **`/console/compute`** — טאבים **מכונות**, **מפתחות SSH**, **Security groups**, **Floating IPs**, **Load balancers** ו-**VPC** (VPC מסונן לפי יכולת), ו-workspace לפרטי מכונה (סקירה, רשת, סשן, קבצים, ביצועים, Snapshots). פקודות CLI/SDK יגיעו אחרי שהחוזה יתייצב.
 

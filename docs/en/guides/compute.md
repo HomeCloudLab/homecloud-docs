@@ -2,7 +2,7 @@
 
 Compute is HomeCloud **IaaS**: you ask for a **machine concept** in a HomeCloud **region**. HomeCloud is the cloud. Capacity vendors stay behind the API — you never send a vendor name, a vendor SKU, or a vendor image id.
 
-You buy `hc.general.small` in `eu-central`, not “CX22 in Falkenstein”. The control plane picks a **Provider Offering** internally. Customer list price is on the concept. Wholesale cost is on the offering and is never returned to you.
+You buy `hc.general.small` in `eu-central`, not “CX22 in Falkenstein”. The control plane picks a **Provider Offering** internally. Customer list price is **USD**: FX(wholesale) × GTM markup (default **2×**, cap **4×**). Wholesale cost is on the offering and is never returned to you. Running machine hours are billed from that offering’s snapshot, not a generic concept placeholder.
 
 The console workspace is **`/console/compute`**: **Machines**, **SSH keys**, **Security groups**, **Floating IPs**, **Load balancers**, and **VPC** tabs (VPC is capability-gated), plus a machine detail workspace (Overview, Network, Session, Files, Performance, Snapshots). CLI/SDK commands will follow when this contract is soaked.
 

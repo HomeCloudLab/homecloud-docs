@@ -19,7 +19,7 @@ homecloud billing forecast --horizon 7
 homecloud billing invoices
 ```
 
-אומדנים ב-USD לפי מחירון זמני (מחירים סופיים בהמשך). סימון שולם ידני — אין גביית כרטיס עדיין.
+אומדנים ב-USD. **Compute** לפי מחירון הקטלוג (wholesale × FX × markup 2×–4×; ברירת מחדל 2×). שירותים אחרים עשויים עדיין להשתמש במחירי placeholder. סימון שולם ידני — אין גביית כרטיס עדיין.
 
 ## monitoring
 
