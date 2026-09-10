@@ -20,44 +20,51 @@ The meter stores **quantities only**. Billing does `Usage × net USD catalog pri
 
 Sticky public IPv4 on a NIC is not a reserved-IP SKU. Overlay gateways are not customer machines and are not billed. IPv6 address SKUs are not in this catalog.
 
+**One formula, one line per SKU type.** Every Compute meter uses the same list-price pipeline: `FX(wholesale) × GTM markup (2×–4×)`. Billing prices each machine from its offering snapshot (add-ons from the published catalog), then **folds Explorer and invoice lines by metric** — not per VM or volume. Machine hours from many VMs become one `compute.machine.hours` row (blended unit price if offerings differ). Volume, snapshot, LB, VPC, FIP, and egress each get one quantity × catalog rate. The meter may still store `resource_arn` so snapshots can be applied; that is not a breakdown row.
+
+Deleting a VM does **not** erase its metered hours. Billing still resolves the list price from the platform resource (`offering_id` on `desired_spec`, plus a sticky USD snapshot when the machine is purged). Days with usage stay on the chart; they are not $0 just because the inventory row is gone.
+
 ## How usage is recorded
 
-Meter is the only ledger. It stores **quantities**, not prices. The user operation never waits on Meter: if Meter is down, the durable business record still exists and the next drain or holdings tick writes the usage.
+Meter is the only ledger. It stores **quantities**, not prices. The user operation never waits on Meter.
 
-HomeCloud does **not** add an outbox table, a usage NATS stream, or a central billing scanner. Each SKU is reconstructed from state that already exists:
+`usage.refresh` is a **dirty hint only** — it never creates a usage event. A worker claims the watermark (`lock → read last_size/last_at → calculate → write usage + watermark` in one transaction), so duplicate refreshes do not duplicate charges. The hint is published on the internal subject `hc.usage.refresh` (queue group), **not** on `hc.events.>` (browser SSE).
+
+If the hint is dropped, the next **hourly checkpoint** or signed reconcile still reconstructs from durable state (fail-open).
 
 ```text
-Business fact (MailMessage, FunctionInvocation, JetStream seq, Compute / MinIO / IR / MDB / Redis / Secrets)
+Business fact (commit) → return immediately
         ↓
-usage drain or holdings worker  (same DB transaction as record_usage + watermark)
+mark dirty + usage.refresh  (identity only — not a bill)
         ↓
-Meter ledger (immutable)
+usage worker  (lock watermark → delta → usage_events + usage_daily + new watermark)
         ↓
-Billing Explorer (presentation only)
+Billing Explorer / invoice  ← usage_daily × catalog/snapshot
 ```
 
-Billing never queries Compute, SO, Mail, or other service tables for cost. It only consumes Meter via `query_usage`.
+Raw `usage_events` remain for audit and reconcile. Opening Billing does **not** scan raw rows.
 
-| Service | What is measured | Cursor |
-|---------|------------------|--------|
-| Compute | RUNNING × time; volume/snapshot GiB·h; LB / VPC / FIP hours; egress GiB | timestamp / observed bytes |
-| SO | bytes × time (live MinIO size) | timestamp |
-| IR | storage bytes × time | timestamp |
-| MDB | instance / storage × time | timestamp |
-| Redis | instance × time | timestamp |
-| Secrets | secrets × time | timestamp |
-| MQ | publish / deliver | JetStream sequence |
-| MQ | messages / bytes × time | timestamp |
-| Mail | sent | row id (`mail.sent:{id}`) |
-| Functions | invocation | invocation id (`fn.invoke:{id}`) |
+Three primitives only:
 
-**Time holdings** bill the gap since `last_reported_at`, not a fixed 60-second slot. If the worker wakes 7 minutes late, the interval is 7 minutes. If it was down for 17 minutes, the interval is 17 minutes. There is no hole.
+| Type | Meaning | When a row is written |
+|------|---------|------------------------|
+| A Occupancy | `from → to` | stop/delete or hourly checkpoint |
+| B Size × time | `size × Δt` | size change or hourly checkpoint |
+| C Counter | seq/id delta | after work, or drain (Mail / Functions) |
 
-**Mail and Functions** are a durable business record plus an idempotent drain. `MailMessage.status = sent` is the source of truth; the drain later calls `record_usage` with a deterministic `source_id`. A retry never invents a new UUID.
+| Service | Model |
+|---------|--------|
+| Compute machine, LB, FIP, VPC | A |
+| Compute volume / snapshot | B |
+| Compute egress | C |
+| SO, IR, MQ backlog (`mq.gb_hours`) | B |
+| MQ publish / deliver | C |
+| Mail, Functions | C / drain |
+| Secrets | A at account (quota/table, not a 60s cluster list) |
+| MDB | A (instance hours) + B (storage) |
+| Redis | A |
 
-**MQ publish/deliver** meters JetStream sequence deltas (`current_seq − last_metered_seq`). The first observation sets the watermark without billing historical backlog.
-
-**Reconcile** is a safety net, not the measurement method. It compares meter totals to inventory and writes a **signed** delta (positive or negative). The original row is never updated. Over-meter is corrected, not ignored.
+`mq.message_hours` is **not** billed in v1. There is no per-minute holdings writer.
 
 ```bash
 # quantities only — no prices
@@ -85,7 +92,7 @@ Single page — no separate Overview / Cost Explorer / Budgets routes.
 | **Forecast** | Current calendar month, with a short basis line (run-rate + RUNNING hours) |
 | **What is driving cost?** | Top services with a clear usage summary (e.g. avg GB stored) |
 | **Cost over time** | Stacked bars **grouped by service**; Daily / Monthly. Each period has a **fixed slot** (inner chart scrolls sideways — bars never shrink to hairlines or stretch to fill the card). Monthly canvas is **at least 6 UTC months** through the current month (`$0` padding). |
-| **Cost breakdown** | One row per service; expand for metric / unit price / quantity |
+| **Cost breakdown** | One row per service; expand for **SKU type** (machine hours, volume GB·h, …) — not per VM |
 | **Invoices** | Generate on demand; Mark paid is manual |
 | **Spend alerts** | Notify only — never stop or suspend resources |
 

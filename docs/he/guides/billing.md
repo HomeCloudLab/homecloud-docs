@@ -20,44 +20,31 @@
 
 IPv4 דביק על NIC אינו SKU של reserved IP. שערי overlay אינם מכונות לקוח ואינם מחויבים. אין SKU נפרד לכתובת IPv6.
 
+**נוסחה אחת, שורה אחת לכל סוג SKU.** כל מטר Compute עובר את אותו צינור מחירון: `FX(wholesale) × GTM markup (2×–4×)`. Billing מחשב כל מכונה לפי snapshot ה-offering (תוספות לפי הקטלוג), ואז **מקפל שורות Explorer וחשבונית לפי מדד** — לא לפי VM או ווליום. שעות מכל המכונות מצטרפות לשורת `compute.machine.hours` אחת (מחיר יחידה ממוצע אם ה-offerings שונים). ווליום, snapshot, LB, VPC, FIP ויציאה — כל אחד כמות כוללת × מחיר קטלוג. המטר עדיין יכול לשמור `resource_arn` לצורך snapshot; זו לא שורת פירוט.
+
+מחיקת VM **לא** מוחקת את שעות המטר. Billing ממשיך לחשב מחיר מה-resource בפלטפורמה (`offering_id` ב-`desired_spec`, ו-snapshot דביק ב-USD כשהמכונה נמחקת מהמלאי). ימים עם שימוש נשארים בגרף — לא $0 רק כי שורת המלאי נמחקה.
+
 ## איך נרשם שימוש
 
-המטר הוא ה-ledger היחיד. הוא שומר **כמויות**, לא מחירים. פעולת המשתמש לא ממתינה למטר: אם המטר נפל, הרשומה העסקית נשארת, וה-drain או ה-holdings הבא כותבים את השימוש.
+המטר הוא ה-ledger היחיד. הוא שומר **כמויות**, לא מחירים. פעולת המשתמש לא ממתינה למטר.
 
-אין טבלת Outbox חדשה, אין NATS stream לשימוש, ואין סורק Billing מרכזי. כל SKU משוחזר ממצב שכבר קיים:
+`usage.refresh` הוא **רמז dirty בלבד** — הוא לא יוצר אירוע חיוב. Worker נועל את ה-watermark (`lock → קריאת last_size/last_at → חישוב → כתיבת usage + watermark` באותה טרנזקציה), כך שרענונים כפולים לא מכפילים חיוב. ה-hint מתפרסם ב-subject פנימי `hc.usage.refresh` (queue group), **לא** על `hc.events.>` (SSE לדפדפן).
+
+אם ה-hint נפל, ה-**hourly checkpoint** או reconcile חתום עדיין משחזרים ממצב עמיד (fail-open).
 
 ```text
-עובדה עסקית (MailMessage, FunctionInvocation, JetStream seq, Compute / MinIO / IR / MDB / Redis / Secrets)
+עובדה עסקית (commit) → חזרה מיידית
         ↓
-drain או holdings  (אותה טרנזקציית DB כמו record_usage + watermark)
+סימון dirty + usage.refresh  (זהות בלבד — לא חשבון)
         ↓
-Ledger של המטר (בלתי ניתן לשינוי)
+usage worker  (lock watermark → דלתא → usage_events + usage_daily + watermark חדש)
         ↓
-Billing Explorer (תצוגה בלבד)
+Billing Explorer / חשבונית  ← usage_daily × catalog/snapshot
 ```
 
-Billing לא שולף טבלאות Compute / SO / Mail לחישוב עלות — רק Meter דרך `query_usage`.
+`usage_events` גולמי נשאר ל-audit ול-reconcile. פתיחת Billing **לא** סורקת שורות גולמיות.
 
-| שירות | מדידה | Watermark |
-|---------|--------|-----------|
-| Compute | RUNNING × זמן; volume/snapshot GiB·h; שעות LB / VPC / FIP; GiB יציאה | timestamp / bytes שנצפו |
-| SO | bytes × זמן (גודל חי מ-MinIO) | timestamp |
-| IR | storage bytes × זמן | timestamp |
-| MDB | instance / storage × זמן | timestamp |
-| Redis | instance × זמן | timestamp |
-| Secrets | secrets × זמן | timestamp |
-| MQ | publish / deliver | רצף JetStream |
-| MQ | הודעות / bytes × זמן | timestamp |
-| Mail | sent | מזהה שורה (`mail.sent:{id}`) |
-| Functions | invocation | מזהה הפעלה (`fn.invoke:{id}`) |
-
-**החזקות לפי זמן** מחייבות את המרווח מאז `last_reported_at`, לא slot קבוע של 60 שניות. אם העובד התעורר באיחור של 7 דקות — המרווח הוא 7 דקות. אם הוא נפל ל-17 דקות — המרווח הוא 17 דקות. אין חור.
-
-**Mail ו-Functions** הם רשומה עסקית עמידה + drain אסינכרוני עם idempotency. `MailMessage.status = sent` הוא מקור האמת; ה-drain קורא אחר כך ל-`record_usage` עם `source_id` דטרמיניסטי. ניסיון חוזר לא יוצר UUID חדש.
-
-**MQ publish/deliver** מודד דלתא של רצף JetStream (`current_seq − last_metered_seq`). התצפית הראשונה רק שומרת watermark, בלי לחייב backlog היסטורי.
-
-**Reconcile** הוא רשת ביטחון, לא שיטת המדידה. הוא משווה את המטר למלאי וכותב דלתא **חתומה** (חיובית או שלילית). השורה המקורית לא מתעדכנת. עודף מדידה מתוקן, לא מתעלמים ממנו.
+שלושה primitives בלבד: **A** occupancy `from → to`, **B** `size × Δt`, **C** counter/drain. מיפוי: Compute machine/LB/FIP/VPC = A; volume/snapshot = B; egress = C; SO/IR/MQ `gb_hours` = B; MQ publish/deliver = C; Mail/Functions = C/drain; Secrets = A ברמת חשבון; MDB = A+B; Redis = A. `mq.message_hours` **לא** מחויב ב-v1. אין writer של holdings כל דקה.
 
 ```bash
 homecloud usage list
@@ -84,7 +71,7 @@ PowerShell: אותן פקודות (אין הבדל בציטוט).
 | **Forecast** | החודש הקלנדרי השוטף, עם הסבר קצר (קצב ריצה + שעות RUNNING) |
 | **מה גורם לעלות?** | שירותים מובילים עם סיכום שימוש ברור (למשל ממוצע GB באחסון) |
 | **עלות לאורך זמן** | עמודות מוערמות **לפי שירות**; יומי / חודשי. לכל תקופה **רוחב קבוע** (הגרף הפנימי נגלל הצידה — העמודות לא מצטמצמות לקווים ולא נמתחות על כל הכרטיס). בתצוגה חודשית מוצגים **לפחות 6 חודשי UTC** עד החודש הנוכחי (ריפוד `$0`). |
-| **פירוט עלויות** | שורה אחת לכל שירות; פתיחה למדד / מחיר יחידה / כמות |
+| **פירוט עלויות** | שורה אחת לכל שירות; בפתיחה — לפי **סוג SKU** (שעות מכונה, נפח GB·h, …), לא לפי VM |
 | **חשבוניות** | הפקה לפי דרישה; סימון שולם ידני |
 | **התראות הוצאה** | התראה בלבד — לא עוצרות ולא משעות משאבים |
 

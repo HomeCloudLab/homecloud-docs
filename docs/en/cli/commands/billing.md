@@ -9,7 +9,7 @@ homecloud usage list
 homecloud usage list --group-by service_id --output json
 ```
 
-Returns **quantities only** — no prices. Usage is reconstructed from durable business state: time holdings use a `last_reported_at` watermark (elapsed time × size), Mail/Functions drain sent/invocation rows, and MQ publish/deliver meters JetStream sequence deltas. An hourly reconcile job writes signed corrections (including negative); it is not the measurement method.
+Returns **quantities only** — no prices. The CLI reads daily SKU totals (`usage_daily`). Writers are a dirty worker plus an hourly checkpoint: `usage.refresh` is identity-only (not a bill). Time holdings use a locked `last_reported_at` watermark (elapsed time × size). Mail/Functions drain sent/invocation rows. MQ publish/deliver meters JetStream sequence deltas. An hourly reconcile job writes signed corrections (including negative); it is not the measurement method.
 
 ## billing
 
