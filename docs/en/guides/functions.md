@@ -69,8 +69,8 @@ Rollback is available from the **Versions** section under the **Code** tab / API
 Open **Invocations**:
 
 1. Edit the **Event JSON**.  
-2. Click **Invoke** — the API returns `running` + invocation id immediately (`async_mode`), then finishes in the background.  
-3. The console opens that run’s **detail page** and streams SSE (`…/logs/stream`) with session catch-up, then live lines.  
+2. Click **Invoke** — the API returns `pending` + `phase=queued` + invocation id immediately (`async_mode`). A control-plane leader worker claims the row (`running` / `preparing`), then finishes the run. This survives API restart (unlike in-process tasks).  
+3. The console opens that run’s **detail page** and streams SSE (`…/logs/stream`) with session catch-up, then live lines. Mid-run `phase` from FN is mirrored into Postgres when possible.  
 4. Soft-refresh via Realtime (`function.invoke.*`); when Realtime is down and runs are pending/running, the list polls about every 5s.
 
 Ops chrome on the list:
@@ -142,7 +142,7 @@ The console list soft-refreshes on Realtime Gateway `function.invoke.*` hints. W
 | Field | Meaning |
 |-------|---------|
 | `status` | Outcome / filter: `pending`, `running`, `succeeded`, `failed`, `timeout` |
-| `phase` | In-flight only: `queued` → `preparing` (STS/package/extract) → `executing` (handler subprocess); `null` when terminal |
+| `phase` | In-flight only: `queued` (accepted, waiting for durable worker) → `preparing` (STS/package/extract) → `executing` (handler subprocess); `null` when terminal |
 | `warm` | Executor cache hit — **not** proof that your handler started |
 
 Do not treat `warm=false` alone as “code never ran”. Use `phase` / logs / `error_message` to separate control-plane prepare failures from runtime failures.

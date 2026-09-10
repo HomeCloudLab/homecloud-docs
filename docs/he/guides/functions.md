@@ -69,8 +69,8 @@ Rollback זמין מתוך סעיף **Versions** תחת לשונית **Code** / 
 פתחו **Invocations**:
 
 1. ערכו את **Event JSON**.  
-2. לחצו **Invoke** — ה-API מחזיר מיד `running` + מזהה (`async_mode`), והריצה ממשיכה ברקע.  
-3. הקונסול פותח את **עמוד הפירוט** של הריצה וזורם SSE (`…/logs/stream`) עם catch-up ואז לייב.  
+2. לחצו **Invoke** — ה-API מחזיר מיד `pending` + `phase=queued` + מזהה (`async_mode`). Worker מוביל ב-control plane תופס את השורה (`running` / `preparing`) ומסיים את הריצה. זה שורד restart של ה-API (בניגוד ל-tasks בתהליך).  
+3. הקונסול פותח את **עמוד הפירוט** של הריצה וזורם SSE (`…/logs/stream`) עם catch-up ואז לייב. `phase` מאמצע הריצה מ-FN משוקף ל-Postgres כשאפשר.  
 4. רענון רך דרך Realtime (`function.invoke.*`); כש-Realtime כבוי ויש pending/running, soft-poll כל ~5 שניות.
 
 כלי ops ברשימה:
@@ -142,7 +142,7 @@ homecloud fn logs hello --id <id> --follow
 | שדה | משמעות |
 |-----|--------|
 | `status` | תוצאה / סינון: `pending`, `running`, `succeeded`, `failed`, `timeout` |
-| `phase` | באמצע הרצה בלבד: `queued` → `preparing` (STS/חבילה/extract) → `executing` (subprocess); `null` כשההרצה הסתיימה |
+| `phase` | באמצע הרצה בלבד: `queued` (התקבל, ממתין ל-worker דורבל) → `preparing` (STS/חבילה/extract) → `executing` (subprocess); `null` כשההרצה הסתיימה |
 | `warm` | פגיעה במטמון של ה-executor — **לא** הוכחה שה-handler התחיל |
 
 אל תסיקו מ־`warm=false` לבד שהקוד לא רץ. השתמשו ב־`phase` / לוגים / `error_message` כדי להפריד כשלי הכנה ב־control plane מכשלי runtime.
