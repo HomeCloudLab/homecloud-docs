@@ -137,6 +137,16 @@ Three layers stay separate:
 
 The console list soft-refreshes on Realtime Gateway `function.invoke.*` hints. When Realtime is offline and pending/running rows exist, a ~5s soft poll keeps the page honest (still O(page) — no Follow poller over history). Extended search / long retention (Loki/SO) is a future paid SKU — not part of basic observability.
 
+**Status vs phase vs warm**
+
+| Field | Meaning |
+|-------|---------|
+| `status` | Outcome / filter: `pending`, `running`, `succeeded`, `failed`, `timeout` |
+| `phase` | In-flight only: `queued` → `preparing` (STS/package/extract) → `executing` (handler subprocess); `null` when terminal |
+| `warm` | Executor cache hit — **not** proof that your handler started |
+
+Do not treat `warm=false` alone as “code never ran”. Use `phase` / logs / `error_message` to separate control-plane prepare failures from runtime failures.
+
 See [CLI `fn`](../cli/commands/fn.md) for flags.
 
 ## SDK

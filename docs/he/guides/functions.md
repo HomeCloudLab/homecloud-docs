@@ -137,6 +137,16 @@ homecloud fn logs hello --id <id> --follow
 
 הרשימה בקונסול מתרעננת בעדינות על רמזי Realtime Gateway מסוג `function.invoke.*`. כש-Realtime כבוי ויש שורות pending/running, soft-poll כל ~5 שניות שומר על עדכניות (עדיין O(page) — בלי Follow poller על היסטוריה). חיפוש מורחב / retention ארוך (Loki/SO) הוא SKU עתידי — לא חלק מה-observability הבסיסי.
 
+**Status מול phase מול warm**
+
+| שדה | משמעות |
+|-----|--------|
+| `status` | תוצאה / סינון: `pending`, `running`, `succeeded`, `failed`, `timeout` |
+| `phase` | באמצע הרצה בלבד: `queued` → `preparing` (STS/חבילה/extract) → `executing` (subprocess); `null` כשההרצה הסתיימה |
+| `warm` | פגיעה במטמון של ה-executor — **לא** הוכחה שה-handler התחיל |
+
+אל תסיקו מ־`warm=false` לבד שהקוד לא רץ. השתמשו ב־`phase` / לוגים / `error_message` כדי להפריד כשלי הכנה ב־control plane מכשלי runtime.
+
 ראו [CLI `fn`](../cli/commands/fn.md) לדגלים.
 
 ## SDK
