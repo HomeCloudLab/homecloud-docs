@@ -147,6 +147,8 @@ The console list soft-refreshes on Realtime Gateway `function.invoke.*` hints. W
 
 Do not treat `warm=false` alone as “code never ran”. Use `phase` / logs / `error_message` to separate control-plane prepare failures from runtime failures.
 
+When a version artifact lives in Object Storage (`so://…`), the control plane passes that URI to `homecloud-fn` and the FN pod **pulls** the zip during `preparing` (via an internal API). Inline base64 packages remain supported for older versions without an SO URI.
+
 See [CLI `fn`](../cli/commands/fn.md) for flags.
 
 ## SDK
