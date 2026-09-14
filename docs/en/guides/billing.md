@@ -96,11 +96,34 @@ Single page — no separate Overview / Cost Explorer / Budgets routes.
 | **Forecast** | Current calendar month, with a short basis line (run-rate + RUNNING hours) |
 | **What is driving cost?** | Top services with a clear usage summary (e.g. avg GB stored) |
 | **Cost over time** | Stacked bars **grouped by service**; Daily / Monthly. Each period has a **fixed slot** (inner chart scrolls sideways — bars never shrink to hairlines or stretch to fill the card). Monthly canvas is **at least 6 UTC months** through the current month (`$0` padding). |
-| **Cost breakdown** | One row per service; expand for **SKU type** (machine hours, volume GB·h, …) — not per VM |
+| **Cost breakdown** | One row per service; expand for **SKU type** (machine hours, volume GB·h, …), then **totals per resource kind** — not one row per resource |
 | **Invoices** | Generate on demand; Mark paid is manual |
 | **Spend alerts** | Notify only — never stop or suspend resources |
 
 Object Storage cost accumulates while objects exist (GB × time). A large SO figure after “recent” Monitoring activity usually means existing objects were metered across the selected days — not only new uploads.
+
+### Reading a Compute expand
+
+Expanding Compute shows three levels, all views of the **same** amount — nothing is billed twice:
+
+1. **SKU rows** — machine hours, volume GB·h, egress GB
+2. **Resource-kind rows** — machines / volumes / snapshots / load balancers …, each with how many resources contributed in the range
+3. **Top resources** (optional) — the biggest individual resources, marked *billing now* or *historical*; remaining resources stay folded into the kind totals
+
+Volume quantity is capacity × time, so the helper line reads as **average total capacity** across the range (all volumes summed), not the size of one disk. Machine quantity is wall-clock hours.
+
+### Days are the days it happened
+
+Holdings usage is filed on the **UTC day it occurred**, including when a machine stops or a volume disappears from inventory: a multi-day backlog is split into one entry per day. If the cost chart ever shows a spike on today for resources that stopped earlier, the rollups predate this behavior — rebuild them:
+
+```bash
+# dry run
+python scripts/rebuild_usage_rollups.py --from 2026-09-01 --to 2026-09-14
+# write
+python scripts/rebuild_usage_rollups.py --account <account-uuid> --from 2026-09-01 --to 2026-09-14 --apply
+```
+
+The script re-spreads `usage_events` (whose `source_id` carries the interval start) across the days each interval covers and rewrites `usage_daily` / `usage_resource_daily`. Amounts do not change — only which day they land on.
 
 ### Timezone contract (v1)
 
@@ -113,6 +136,12 @@ GET /api/v1/accounts/{id}/billing/explore?from=&to=
 ```
 
 Returns `timezone`, `estimate`, `daily_series`, `by_service`, `prices_are_placeholder`, `has_usage`, and `has_unpriced_usage`.
+
+```http
+GET /api/v1/accounts/{id}/billing/explore/resources?metric=&from=&to=&limit=20
+```
+
+Returns `groups` (one aggregate per resource kind), `items` (top `limit` resources), `resource_count`, and `truncated`.
 
 `GET …/billing/forecast` stays separate for the current month.
 
