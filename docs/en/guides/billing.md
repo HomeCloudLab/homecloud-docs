@@ -4,7 +4,7 @@ HomeCloud **Billing** is a first-class console service (`/console/billing`). The
 
 The meter stores **quantities only**. Billing does `Usage × net USD catalog price = Charge`. VAT is a separate invoice line — never baked into SKU prices. Homelab still issues invoices. Card payment is **not** enabled — Mark paid is manual only.
 
-**Compute** list prices come from the Compute catalog: provider wholesale → operator FX (EURUSD) → GTM markup in the **2×–4×** band (default **2×**). Machine hours use the **fulfilled Offering/SKU** (`offering_id`), snapshotted in USD. Other services (SO, MQ, Mail, …) may still use temporary placeholder rates until they have wholesale.
+**Compute** list prices come from the Compute catalog: provider wholesale → operator FX (EURUSD) → GTM markup in the **2×–4×** band (default **3×**). Machine hours use the **fulfilled Offering/SKU** (`offering_id`), snapshotted in USD. Other services (SO, MQ, Mail, …) may still use temporary placeholder rates until they have wholesale.
 
 ### Compute meters
 
@@ -20,9 +20,11 @@ The meter stores **quantities only**. Billing does `Usage × net USD catalog pri
 
 Sticky public IPv4 on a NIC is not a reserved-IP SKU. Overlay gateways are not customer machines and are not billed. IPv6 address SKUs are not in this catalog.
 
-**One formula, one line per SKU type.** Every Compute meter uses the same list-price pipeline: `FX(wholesale) × GTM markup (2×–4×)`. Billing prices each machine from its offering snapshot (add-ons from the published catalog), then **folds Explorer and invoice lines by metric** — not per VM or volume. Machine hours from many VMs become one `compute.machine.hours` row (blended unit price if offerings differ). Volume, snapshot, LB, VPC, FIP, and egress each get one quantity × catalog rate. The meter may still store `resource_arn` so snapshots can be applied; that is not a breakdown row.
+**One formula; Explorer can expand.** Every Compute meter uses `FX(wholesale) × GTM markup (2×–4×, default 3×)`. Invoice lines stay folded by metric. In the console, expand a Compute service row to see **per-resource** quantities (from a compact daily rollup — not a scan of every meter tick). A **Currently billable** strip shows what holdings are accruing *right now*, so historical machine hours in the range are not confused with live VMs.
 
-Deleting a VM does **not** erase its metered hours. Billing still resolves the list price from the platform resource: sticky USD snapshot when present, otherwise the same FX × GTM markup from `offering_id` on `desired_spec`. Explorer and invoices stay **one `compute.machine.hours` line** (quantity-weighted blend if offerings differ). Days with usage stay on the chart; they are not $0 just because the inventory row is gone.
+Deleting a machine marks attached boot/data volumes as deleting so they **stop metering immediately**; purge then removes them. Detached volumes you keep remain billable until you delete them. Past machine hours stay on the chart with sticky/offering pricing.
+
+Quantity is always wall-clock hours or GiB×time — never “effective hours” inflated by cost.
 
 ## How usage is recorded
 
@@ -37,9 +39,11 @@ Business fact (commit) → return immediately
         ↓
 mark dirty + usage.refresh  (identity only — not a bill)
         ↓
-usage worker  (lock watermark → delta → usage_events + usage_daily + new watermark)
+usage worker  (lock watermark → delta → usage_events + usage_daily + usage_resource_daily + new watermark)
         ↓
 Billing Explorer / invoice  ← usage_daily × catalog/snapshot
+Explorer expand             ← usage_resource_daily × resolve
+Currently billable          ← Compute holdings
 ```
 
 Raw `usage_events` remain for audit and reconcile. Opening Billing does **not** scan raw rows.

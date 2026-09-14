@@ -4,7 +4,7 @@
 
 המטר שומר **כמויות בלבד**. Billing עושה `שימוש × מחיר מחירון נטו ב-USD = חיוב`. מע״מ הוא שורה נפרדת בחשבונית — לא בתוך מחירי SKU. חשבוניות עדיין מופקות. תשלום בכרטיס עדיין לא פעיל — סימון שולם ידני בלבד. נתיב PDF: `so://billing/{account_id}/{period}.pdf`.
 
-**Compute** מחויב ממחירון Compute: wholesale של הספק → FX (EURUSD) → markup בטווח **2×–4×** (ברירת מחדל **2×**). שעות מכונה לפי ה-**Offering/SKU שמומש** (`offering_id`), ב-snapshot ב-USD. שירותים אחרים (SO, MQ, Mail, …) עדיין עשויים להשתמש במחירי placeholder עד שיהיה להם wholesale.
+**Compute** מחויב ממחירון Compute: wholesale של הספק → FX (EURUSD) → markup בטווח **2×–4×** (ברירת מחדל **3×**). שעות מכונה לפי ה-**Offering/SKU שמומש** (`offering_id`), ב-snapshot ב-USD. שירותים אחרים (SO, MQ, Mail, …) עדיין עשויים להשתמש במחירי placeholder עד שיהיה להם wholesale.
 
 ### מטרים של Compute
 
@@ -20,9 +20,11 @@
 
 IPv4 דביק על NIC אינו SKU של reserved IP. שערי overlay אינם מכונות לקוח ואינם מחויבים. אין SKU נפרד לכתובת IPv6.
 
-**נוסחה אחת, שורה אחת לכל סוג SKU.** כל מטר Compute עובר את אותו צינור מחירון: `FX(wholesale) × GTM markup (2×–4×)`. Billing מחשב כל מכונה לפי snapshot ה-offering (תוספות לפי הקטלוג), ואז **מקפל שורות Explorer וחשבונית לפי מדד** — לא לפי VM או ווליום. שעות מכל המכונות מצטרפות לשורת `compute.machine.hours` אחת (מחיר יחידה ממוצע אם ה-offerings שונים). ווליום, snapshot, LB, VPC, FIP ויציאה — כל אחד כמות כוללת × מחיר קטלוג. המטר עדיין יכול לשמור `resource_arn` לצורך snapshot; זו לא שורת פירוט.
+**נוסחה אחת; אפשר לפתוח פירוט.** כל מטר Compute: `FX(wholesale) × GTM markup (2×–4×, ברירת מחדל 3×)`. שורות חשבונית נשארות מקופלות לפי מדד. בקונסול אפשר לפתוח שורת Compute ולראות **כמויות לפי משאב** (rollup יומי קומפקטי — לא סריקה של כל tick). פס **מחויב כרגע** מציג מה נצבר *עכשיו* מהמלאי, כדי לא לבלבל שעות מכונה היסטוריות עם VM חי.
 
-מחיקת VM **לא** מוחקת את שעות המטר. Billing ממשיך לחשב מחיר מה-resource בפלטפורמה: snapshot דביק ב-USD אם יש, אחרת אותו FX × GTM markup מ-`offering_id` ב-`desired_spec`. Explorer וחשבוניות נשארים **שורה אחת של `compute.machine.hours`** (ממוצע משוקלל לפי כמות אם ה-offerings שונים). ימים עם שימוש נשארים בגרף — לא $0 רק כי שורת המלאי נמחקה.
+מחיקת מכונה מסמנת ווליומי boot/data מצורפים כ-deleting כדי **שיפסיקו להימדד מיד**; ה-purge מוחק אותם אחר כך. ווליום מנותק שנשמר נשאר מחויב עד מחיקה. שעות מכונה מהעבר נשארות בגרף עם תמחור sticky/offering.
+
+הכמות תמיד שעות שעון או GiB×זמן — לא «שעות אפקטיביות» לפי עלות.
 
 ## איך נרשם שימוש
 
@@ -37,9 +39,11 @@ IPv4 דביק על NIC אינו SKU של reserved IP. שערי overlay אינם 
         ↓
 סימון dirty + usage.refresh  (זהות בלבד — לא חשבון)
         ↓
-usage worker  (lock watermark → דלתא → usage_events + usage_daily + watermark חדש)
+usage worker  (lock watermark → דלתא → usage_events + usage_daily + usage_resource_daily + watermark חדש)
         ↓
 Billing Explorer / חשבונית  ← usage_daily × catalog/snapshot
+פתיחת פירוט                 ← usage_resource_daily × resolve
+מחויב כרגע                  ← holdings של Compute
 ```
 
 `usage_events` גולמי נשאר ל-audit ול-reconcile. פתיחת Billing **לא** סורקת שורות גולמיות.
