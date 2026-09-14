@@ -114,12 +114,13 @@
 #tasks/12
 #k8s/default
 #apps/web
+#diagrams/00000000-0000-0000-0000-000000000001
 #ssl/console-cert
 #mon/cpu
 #billing
 ```
 
-- `#` — כינוי שירות (`mail`, `so`, `compute`, `mq`, `mdb`, `redis`, `fn`, `ir`, `dns`, `secrets`, `iam`, `tasks`, `k8s`, `apps`, `ssl`, `mon`, `billing`)
+- `#` — כינוי שירות (`mail`, `so`, `compute`, `mq`, `mdb`, `redis`, `fn`, `ir`, `dns`, `secrets`, `iam`, `tasks`, `k8s`, `apps`, `diagrams`, `ssl`, `mon`, `billing`)
 - `/` — משאב מהרשימה של השירות. ל-Mail גם תיקיות; ל-SO גם קידומות וקבצים.
 
 השלמה אוטומטית לפי השלבים האלה. טוקן לא תקין נשאר טקסט רגיל. ל-`#billing` אין רשימת משאבים. IAM/SSL/Monitoring נפתחים בדף השירות כשאין דף פריט נפרד.

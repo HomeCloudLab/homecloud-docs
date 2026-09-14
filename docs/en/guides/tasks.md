@@ -114,13 +114,14 @@ Stored text stays plain. `#` starts a service token until whitespace or end of l
 #tasks/12
 #k8s/default
 #apps/web
+#diagrams/00000000-0000-0000-0000-000000000001
 #ssl/console-cert
 #mon/cpu
 #billing
 ```
 
-- `#` — service alias (`mail`, `so`, `compute`, `mq`, `mdb`, `redis`, `fn`, `ir`, `dns`, `secrets`, `iam`, `tasks`, `k8s`, `apps`, `ssl`, `mon`, `billing`)
-- `/` — resource from that service’s list (mailbox, bucket, machine, queue, …). Mail also has folders; SO also has prefixes and objects.
+- `#` — service alias (`mail`, `so`, `compute`, `mq`, `mdb`, `redis`, `fn`, `ir`, `dns`, `secrets`, `iam`, `tasks`, `k8s`, `apps`, `diagrams`, `ssl`, `mon`, `billing`)
+- `/` — resource from that service’s list (mailbox, bucket, machine, queue, diagram id, …). Mail also has folders; SO also has prefixes and objects.
 
 Autocomplete follows those stages. Invalid or unknown tokens stay as plain text. `#billing` has no resource list (billing home only). IAM/SSL/Monitoring resources open the service page when there is no dedicated detail route.
 
