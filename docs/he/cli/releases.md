@@ -15,6 +15,7 @@ https://homecloud-cli.so.holab.abrdns.com/releases/latest/homecloud-windows-amd6
 
 | Version | Highlights |
 |---------|------------|
+| v0.2.47 | זהות ציבורית במספר חשבון בן 12 ספרות (`account_number`; עזרת IR / whoami דרך SDK 0.5.16) |
 | v0.2.46 | תיקון smoke-test ל-Typer Click `Exit` (פרסום בינארי) |
 | v0.2.45 | `domains record-update` / `record-delete` / `detach` |
 | v0.2.44 | `fn logs` — pagination ב-cursor (`--limit` / `--cursor` / פילטרים); הרשימה מטא-דאטה בלבד |
