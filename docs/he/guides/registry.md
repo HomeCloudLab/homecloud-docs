@@ -6,8 +6,10 @@ IR הוא **registry פרטי של OCI / Docker** לחשבון שלכם. דחפ�
 |------|--------|
 | Console | **Registry** → `/console/registry` |
 | Registry host | `ir.{apex}` |
-| Image reference | `ir.{apex}/{account_short_id}/{repository}:{tag}` |
+| Image reference | `ir.{apex}/{account_number}/{repository}:{tag}` |
 | Auth | `homecloud ir login` (פרופיל Access Key) עם `ir:Push` / `ir:Pull` |
+
+`account_number` הוא מזהה החשבון הציבורי בן **12 ספרות** (כמו בלוגין / ARN של IAM). נתיבים ישנים עם short id נשארים קריאים בחלון המעבר; repositories חדשים וכל הדוגמאות משתמשים במספר החשבון.
 
 GHCR של הפלטפורמה (אם קיים) מיועד ל-CI של HomeCloud עצמה — לא לתמונות ה-tenant שלכם.
 
@@ -47,18 +49,18 @@ homecloud ir get-login-password | docker login --username <AccessKeyId> --passwo
 
 ```bash
 docker build -t myapp:1.0 .
-docker tag myapp:1.0 ir.holab.abrdns.com/abc123def456/myapp:1.0
-docker push ir.holab.abrdns.com/abc123def456/myapp:1.0
+docker tag myapp:1.0 ir.holab.abrdns.com/996476522433/myapp:1.0
+docker push ir.holab.abrdns.com/996476522433/myapp:1.0
 ```
 
-החליפו `abc123def456` ב-**account short id** שלכם (מוצג בדף registry בקונסול / סקירת חשבון).
+החליפו `996476522433` ב-**מספר החשבון** שלכם (תפריט משתמש / פקודות push ב-Registry).
 
 ### Pull
 
 ```bash
-docker pull ir.holab.abrdns.com/abc123def456/myapp:1.0
+docker pull ir.holab.abrdns.com/996476522433/myapp:1.0
 # production:
-docker pull ir.holab.abrdns.com/abc123def456/myapp@sha256:...
+docker pull ir.holab.abrdns.com/996476522433/myapp@sha256:...
 ```
 
 ## CLI
@@ -83,21 +85,7 @@ client.ir.create("myapp", keep_last=10)
 print(client.ir.usage())
 ```
 
-## שימוש עם Applications / Kubernetes
+## Related
 
-1. דחפו `myapp:1.0` ל-IR.  
-2. ביצירה/הגדרות של Application, הגדירו את ה-image להפניית IR.  
-3. ודאו שה-runtime יכול למשוך (pull secrets של הפלטפורמה / זהות עומס כפי שמוגדר לחשבון).
-
-## טיפים
-
-- הגנו על `latest` או tags של שחרור בהגדרות lifecycle אם אתם מסתמכים עליהם.  
-- העדיפו נעיצת digest לפרודקשן.  
-- סובבו Access Keys שבשימוש ב-CI כמו כל סוד אחר.
-
-## קשור
-
-- [Applications](applications.md)  
-- [Kubernetes](kubernetes.md)  
-- [Access Keys](../getting-started/access-keys.md)  
-- [Terraform](../terraform/index.md) (`homecloud_ir_repository` — תגיות image לא ב-Terraform)  
+- [CLI `ir`](../cli/commands/ir.md)
+- [Access Keys](../getting-started/access-keys.md)

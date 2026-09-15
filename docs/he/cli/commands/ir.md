@@ -52,11 +52,11 @@ homecloud ir usage --output json
 
 ```bash
 docker build -t myapp:1.0 .
-docker tag myapp:1.0 ir.holab.abrdns.com/<account_short_id>/myapp:1.0
-docker push ir.holab.abrdns.com/<account_short_id>/myapp:1.0
+docker tag myapp:1.0 ir.holab.abrdns.com/<account_number>/myapp:1.0
+docker push ir.holab.abrdns.com/<account_number>/myapp:1.0
 ```
 
-Account short id ומארח ה-registry מוצגים בדף Registry בקונסול (**פקודות push**) ונגזרים מ-apex ב-`ir login`.
+השתמשו ב-**מספר חשבון** בן 12 ספרות (מסך Registry בקונסול — **פקודות push**). Host מדויק לפי ה-apex (`ir.{apex}`).
 
 ## קשור
 

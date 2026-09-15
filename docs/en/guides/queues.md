@@ -6,8 +6,11 @@ Message Queues let one part of your system **publish** work and another part **c
 |------|--------|
 | Console | **Queues** → `/console/queues` |
 | Data-plane host | `https://mq.{apex}` |
+| Queue URL | `https://mq.{apex}/{account_number}/{queue}` |
 | Auth (send/receive) | Access Key |
 | Auth (list/create in CLI) | `homecloud login` for `queues list` / `queues get` |
+
+`account_number` is the 12-digit public account id. Legacy queue URLs that used the account UUID still work during migration; the console always shows the numeric form.
 
 ## Concepts
 

@@ -6,8 +6,10 @@ IR is your account’s **private OCI / Docker registry**. Push images here for A
 |------|--------|
 | Console | **Registry** → `/console/registry` |
 | Registry host | `ir.{apex}` |
-| Image reference | `ir.{apex}/{account_short_id}/{repository}:{tag}` |
+| Image reference | `ir.{apex}/{account_number}/{repository}:{tag}` |
 | Auth | `homecloud ir login` (Access Key profile) with `ir:Push` / `ir:Pull` |
+
+`account_number` is the **12-digit** public account id (same as login / IAM ARNs). Legacy paths that used a generated short id remain readable during migration; new repositories and all docs/examples use the account number.
 
 Platform GHCR (if any) is for HomeCloud’s own CI — not for your tenant images.
 
@@ -47,18 +49,18 @@ In the console, open the repository and use **View push commands** for host/acco
 
 ```bash
 docker build -t myapp:1.0 .
-docker tag myapp:1.0 ir.holab.abrdns.com/abc123def456/myapp:1.0
-docker push ir.holab.abrdns.com/abc123def456/myapp:1.0
+docker tag myapp:1.0 ir.holab.abrdns.com/996476522433/myapp:1.0
+docker push ir.holab.abrdns.com/996476522433/myapp:1.0
 ```
 
-Replace `abc123def456` with your **account short id** (shown in the console registry page / account overview).
+Replace `996476522433` with your **account number** (console user menu / Registry **View push commands**).
 
 ### Pull
 
 ```bash
-docker pull ir.holab.abrdns.com/abc123def456/myapp:1.0
+docker pull ir.holab.abrdns.com/996476522433/myapp:1.0
 # production:
-docker pull ir.holab.abrdns.com/abc123def456/myapp@sha256:...
+docker pull ir.holab.abrdns.com/996476522433/myapp@sha256:...
 ```
 
 ## CLI
@@ -83,21 +85,8 @@ client.ir.create("myapp", keep_last=10)
 print(client.ir.usage())
 ```
 
-## Use with Applications / Kubernetes
-
-1. Push `myapp:1.0` to IR.  
-2. In Application create/settings, set the image to the IR reference.  
-3. Ensure the runtime can pull (platform pull secrets / workload identity as configured for your account).
-
-## Tips
-
-- Protect `latest` or release tags in lifecycle settings if you rely on them.  
-- Prefer digest pins for production.  
-- Rotate Access Keys used in CI just like any other secret.
-
 ## Related
 
-- [Applications](applications.md)  
-- [Kubernetes](kubernetes.md)  
-- [Access Keys](../getting-started/access-keys.md)  
-- [Terraform](../terraform/index.md) (`homecloud_ir_repository` — image tags stay out of Terraform)  
+- [CLI `ir`](../cli/commands/ir.md)
+- [Access Keys](../getting-started/access-keys.md)
+- [IAM guide](iam.md)

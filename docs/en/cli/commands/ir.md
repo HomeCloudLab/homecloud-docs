@@ -52,11 +52,11 @@ homecloud ir usage --output json
 
 ```bash
 docker build -t myapp:1.0 .
-docker tag myapp:1.0 ir.holab.abrdns.com/<account_short_id>/myapp:1.0
-docker push ir.holab.abrdns.com/<account_short_id>/myapp:1.0
+docker tag myapp:1.0 ir.holab.abrdns.com/<account_number>/myapp:1.0
+docker push ir.holab.abrdns.com/<account_number>/myapp:1.0
 ```
 
-Account short id and exact registry host are shown in the console Registry page (**View push commands**) and derived by `ir login` from your apex.
+Use the 12-digit **account number** (console Registry **View push commands** / user menu). Exact registry host comes from your apex (`ir.{apex}`).
 
 ## Related
 
