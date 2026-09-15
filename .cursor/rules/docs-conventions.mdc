@@ -1,0 +1,35 @@
+---
+description: Docs conventions and strict MkDocs build for this site
+alwaysApply: true
+---
+
+# homecloud-docs conventions
+
+**Live site:** https://docs.web.holab.abrdns.com  
+This repo auto-deploys on push to `main` (CI syncs to `so://docs/`).
+
+## Product language
+
+- **SO** not "storage" — URIs: `so://bucket/key` (never `s3://` in new docs)
+- **MQ**, **MDB**, **Secrets** — use service short names consistently
+- CLI examples: show PowerShell **and** bash when quoting/JSON differs
+- Code blocks, commands, JSON: always **LTR**; keep `docs/he/` in sync for key user-facing pages
+
+## What a page update should include
+
+1. **What changed** — one-line summary
+2. **Syntax / API** — exact commands or request shapes
+3. **Examples** — copy-paste ready
+4. **Breaking changes** — migration note if behavior changed
+5. **CLI releases** — bump version note in `docs/en/cli/releases.md` (and HE) when tagging a release
+
+## Before ship
+
+```bash
+mkdocs build --strict
+```
+
+## Do not
+
+- Document only in a product README when the feature is user-facing (README can link here)
+- Leave Hebrew key pages out of sync with EN

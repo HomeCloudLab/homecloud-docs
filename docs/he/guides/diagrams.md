@@ -6,7 +6,7 @@
 |------|------|
 | קונסול | **דיאגרמות** → `/console/diagrams` |
 | הרשאות | `diagrams.read` / `diagrams.create` / `diagrams.update` / `diagrams.delete` |
-| דלי נכסים | `so://diagrams-{account_number}/…` (מופיע גם ב־Object Storage) |
+| דלי נכסים | `so://diagrams-{account_number}/diagrams/{diagram_id}/assets/…` (מופיע ב־Object Storage; בבעלות החשבון ובתשלום שלו) |
 
 ## רשימה ויצירה
 
@@ -57,7 +57,7 @@
 
 ## דלי נכסי SO
 
-תמונות מותאמות ל־nodes מועלות לדלי `diagrams-{account_number}` תחת `{diagram_id}/assets/…`. אפשר לדפדף בו ב־**Object Storage** כמו בכל דלי אחר.
+תמונות מותאמות ל־nodes מועלות לדלי `diagrams-{account_number}` תחת `diagrams/{diagram_id}/assets/…` (URI: `so://diagrams-{account_number}/diagrams/{diagram_id}/assets/{filename}`). אפשר לדפדף ולמחוק ב־**Object Storage** כמו בכל דלי של החשבון — האחסון בבעלות החשבון ובתשלום שלו. קישורי שיתוף **לא** מעתיקים קבצים; הם עושים presign מחדש לאותם `so://`. הקידומת `shared/{share_id}/` שמורה למצב עתידי של עותק קפוא ואינה בשימוש כרגע.
 
 ## הפניות במשימות
 

@@ -1,0 +1,12 @@
+---
+description: Never git push unless user asks; push to main deploys the docs site
+alwaysApply: true
+---
+
+# Ship policy (push only when asked)
+
+**Do not `git push`** unless the user explicitly asks in that message.
+
+Push to `main` deploys the docs site (CI syncs to `so://docs/`). Treat push as a live docs roll.
+
+If unclear: **commit only**, ask before any push. Run `mkdocs build --strict` before shipping.
