@@ -1,6 +1,6 @@
 # Billing
 
-HomeCloud **Billing** is a first-class console service (`/console/billing`). The console **Billing Explorer** uses Cost Explorer–style analysis (date range, trend, by-service) with HomeCloud design — it is not an AWS UI clone.
+HomeCloud **Billing** is a first-class console service (`/console/billing`). Overview has a calendar **Glance** (Spending + Forecast) and a **Billing Explorer** below for range analysis — Cost Explorer–style chart and breakdown with HomeCloud design, not an AWS UI clone.
 
 The meter stores **quantities only**. Billing does `Usage × net USD catalog price = Charge`. VAT is a separate invoice line — never baked into SKU prices. Homelab still issues invoices. Card payment is **not** enabled — Mark paid is manual only.
 
@@ -85,19 +85,33 @@ PowerShell: the same commands (no quoting difference).
 | Currency | USD |
 | Payments (v1) | Manual (platform admin marks paid). Stripe is the next adapter, not this release. |
 
-## Billing Explorer
+## Billing Overview
 
-Single page — no separate Overview / Cost Explorer / Budgets routes.
+Single page — Overview and Invoices tabs only (no separate Cost Explorer / Budgets routes).
+
+### Glance (calendar truth)
+
+Fixed at the top of Overview. Never follows the Explorer date range.
+
+| Card | Behavior |
+|------|----------|
+| **Spending** | Current calendar month **MTD** and previous calendar month **Final** in one card. MoM compares MTD to the same elapsed period last month. |
+| **Forecast** | Projected **full** cost of the current calendar month (existing forecast API). MoM vs previous month total. |
+| **Currently billable** | Live holdings accruing now — separate from Explorer history. |
+
+There is no Overview **Estimate** KPI and no Overview **VAT** KPI. VAT stays on invoices.
+
+### Billing Explorer (user analysis)
+
+Below Glance. Date range and granularity affect **only** the chart and breakdown.
 
 | Area | Behavior |
 |------|----------|
-| **Date range** | Shadcn range calendar (presets + highlighted range). Days billed as UTC. |
-| **Estimate** | Usage × catalog for the **selected range** |
-| **Forecast** | Current calendar month, with a short basis line (run-rate + RUNNING hours) |
-| **What is driving cost?** | Top services with a clear usage summary (e.g. avg GB stored) |
-| **Cost over time** | Stacked bars **grouped by service**; Daily / Monthly. Each period has a **fixed slot** (inner chart scrolls sideways — bars never shrink to hairlines or stretch to fill the card). Monthly canvas is **at least 6 UTC months** through the current month (`$0` padding). |
-| **Cost breakdown** | One row per service; expand for **SKU type** (machine hours, volume GB·h, …), then **totals per resource kind** — not one row per resource |
-| **Invoices** | Generate on demand; Mark paid is manual |
+| **Date range** | Range calendar (presets + custom). Days billed as UTC. |
+| **Granularity** | **Day** / **Week** / **Month** (week buckets are Monday-start UTC weeks from daily series) |
+| **Cost over time** | Stacked bars **grouped by service**. Each period has a **fixed slot** (inner chart scrolls sideways). Monthly canvas is **at least 6 UTC months** through the current month (`$0` padding). |
+| **Cost breakdown** | One row per service; expand for **SKU type**, then **totals per resource kind** |
+| **Invoices** | Generate on demand; Mark paid is manual; VAT appears on invoice totals |
 | **Spend alerts** | Notify only — never stop or suspend resources |
 
 Object Storage cost accumulates while objects exist (GB × time). A large SO figure after “recent” Monitoring activity usually means existing objects were metered across the selected days — not only new uploads.
