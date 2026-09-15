@@ -97,19 +97,18 @@ Fixed at the top of Overview. Never follows the Explorer date range.
 |------|----------|
 | **Spending** | Current calendar month **MTD** and previous calendar month **Final** in one card. MoM compares MTD to the same elapsed period last month. |
 | **Forecast** | Projected **full** cost of the current calendar month (existing forecast API). MoM vs previous month total. |
-| **Currently billable** | Live holdings accruing now — separate from Explorer history. |
 
 There is no Overview **Estimate** KPI and no Overview **VAT** KPI. VAT stays on invoices.
 
 ### Billing Explorer (user analysis)
 
-Below Glance. Date range and granularity affect **only** the chart and breakdown.
+One card below Glance: date range + Day / Week / Month, then the cost chart. Controls affect **only** the chart and the breakdown card under it.
 
 | Area | Behavior |
 |------|----------|
 | **Date range** | Range calendar (presets + custom). Days billed as UTC. |
 | **Granularity** | **Day** / **Week** / **Month** (week buckets are Monday-start UTC weeks from daily series) |
-| **Cost over time** | Stacked bars **grouped by service**. Each period has a **fixed slot** (inner chart scrolls sideways). Monthly canvas is **at least 6 UTC months** through the current month (`$0` padding). |
+| **Cost over time** | Same Explorer card as the filters. Stacked bars **grouped by service**. Each period has a **fixed slot** (inner chart scrolls sideways). Monthly canvas is **at least 6 UTC months** through the current month (`$0` padding). |
 | **Cost breakdown** | One row per service; expand for **SKU type**, then **totals per resource kind** |
 | **Invoices** | Generate on demand; Mark paid is manual; VAT appears on invoice totals |
 | **Spend alerts** | Notify only — never stop or suspend resources |
