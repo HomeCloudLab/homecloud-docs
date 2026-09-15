@@ -41,11 +41,12 @@ Anyone with the URL can open a **frozen card snapshot** without signing in (same
 
 1. On the item page (or **⋯** / right-click with `tasks.update`), open **Share**.
 2. Choose expiry: **Never**, **7 days**, or **30 days**; optional label.
-3. **Create link** — copy the URL immediately (shown once).
-4. Recipients open `/share/tasks/{token}` — title, status, type, due date, labels, and details only.
-5. **Revoke** any active link from the same dialog.
+3. Optionally check **Include discussion** to freeze the current comment thread (and system lines) into the link. Assignees are never included. Attachment files appear as names only on the public page.
+4. **Create link** — copy the URL immediately (shown once).
+5. Recipients open `/share/tasks/{token}` — title, status, type, due date, labels, and details; discussion only if you opted in.
+6. **Revoke** any active link from the same dialog.
 
-The snapshot does **not** include discussion, assignees, watchers, or chat attachments. Editing the live task does not change an existing share; create a new link to republish. Share metadata lives in the control plane; files stay in the account `tasks-{account_number}` bucket (share does not copy objects into `shared/`).
+Editing the live task does not change an existing share; create a new link to republish. Share metadata lives in the control plane; files stay in the account `tasks-{account_number}` bucket (share does not copy objects into `shared/`).
 
 ### Archive
 
