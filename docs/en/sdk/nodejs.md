@@ -88,6 +88,8 @@ const result = await client.functions.invoke("hello", { name: "Ada" });
 
 const boxes = await client.mail.listMailboxes();
 const secrets = await client.secrets.list();
+const values = await client.secrets.getValue("my-secret");
+await client.secrets.putValue("my-secret", { API_KEY: "rotated" });
 ```
 
 Method names follow JavaScript conventions (`listMailboxes`, `putJson`, …). Check TypeScript types in the package for the exact signatures of your installed version.

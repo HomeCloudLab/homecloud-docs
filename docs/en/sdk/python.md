@@ -153,8 +153,12 @@ print(client.ir.usage())
 ## Secrets
 
 ```python
-print(client.secrets.list())
+print(client.secrets.list())  # console JWT — metadata
+print(client.secrets.get_value("my-secret"))  # Access Key — {name, version, values}
+client.secrets.put_value("my-secret", {"API_KEY": "rotated"})  # replaces entire map
 ```
+
+Flat map codecs (JSON/ENV/YAML) for files/CLI: `homecloud_sdk.secret_formats`.
 
 ## Errors
 

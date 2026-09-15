@@ -1,12 +1,12 @@
 # Secrets
 
-Secrets store sensitive values (API tokens, DB passwords, webhook keys) as named entries with key/value maps. Apps, Functions, and operators retrieve them without hard-coding secrets in source.
+Secrets store sensitive values (API tokens, DB passwords, webhook keys) as named entries with a **flat** key/value map (`string → string`). Apps, Functions, and operators retrieve them without hard-coding secrets in source.
 
 | Item | Value |
 |------|--------|
 | Console | **Secrets** → `/console/secrets` |
 | Data plane | `secrets.{apex}` (Access Key) |
-| Reveal | Audited in the control plane |
+| Storage | Kubernetes Opaque Secret in the account namespace (etcd encryption at rest + TLS). Metadata lives in the control plane; values are not stored as Postgres plaintext. |
 
 ## Console walkthrough
 
@@ -14,29 +14,50 @@ Secrets store sensitive values (API tokens, DB passwords, webhook keys) as named
 
 1. Open **Secrets** → **Create**.  
 2. Choose a name (stable identifier your app will reference).  
-3. Add one or more keys (for example `username`, `password`, `url`).  
+3. Optionally set initial key/value pairs.  
 4. Save.
 
-### View and rotate
+### Values tab
 
-1. Open the secret.  
-2. Use **Values** to reveal (audited) or update keys.  
-3. Prefer rotation over sharing screenshots in chat.  
-4. **Settings** / **API** tabs show metadata and example calls.
+One canvas for view and edit:
+
+1. Open the secret → **Values**.  
+2. **Reveal** is a switch: turn it on to load and show values (session only).  
+3. **Edit** works without turning Reveal on first — the console fetches the map as part of edit.  
+4. Default editor is the **Table** (same key/value rows as before). Use hover **`+`** between rows to insert.  
+5. **Source** switches to JSON, ENV, or YAML text for the same flat map (nested objects and duplicate keys are rejected).  
+6. **Save new version** replaces the entire map. Removing keys prompts for confirmation.
+
+**Settings** holds description and delete. API/SDK examples live in the [docs](../sdk/index.md) and [CLI](../cli/commands/secrets.md) — not on a Secret detail tab.
 
 ### Delete
 
 Delete unused secrets to reduce exposure. Update consumers first so deploys do not break.
 
-## Use from workloads
+## Formats (JSON / ENV / YAML)
 
-Patterns you will see in HomeCloud:
+All surfaces share one model: a flat map of string keys to string values.
 
-- Application settings reference a secret name / key  
-- Function configuration injects secret values at runtime  
-- Kubernetes / app templates map secret keys to environment variables  
+| Format | Example |
+|--------|---------|
+| JSON | `{ "API_KEY": "…", "DATABASE_URL": "…" }` |
+| ENV | `API_KEY=…` / `DATABASE_URL=…` |
+| YAML | `API_KEY: …` |
 
-Exact binding UI depends on the consuming service — look for “Secret” pickers in Applications, Functions, and Databases connection helpers.
+Rejected: nested objects/arrays, non-string JSON values, duplicate keys.
+
+## CLI
+
+```bash
+homecloud secrets get my-secret
+homecloud secrets get my-secret --format env
+homecloud secrets get my-secret --format yaml
+
+homecloud secrets put my-secret --format env --file .env
+homecloud secrets put my-secret --format json --file values.json
+```
+
+`put` replaces the **entire** secret. See [secrets CLI](../cli/commands/secrets.md).
 
 ## Access Keys and policies
 
@@ -48,10 +69,12 @@ Runtime read of secrets through the data plane requires an Access Key (or assume
 from homecloud import HomeCloud
 
 client = HomeCloud.from_env()
-print(client.secrets.list())
+print(client.secrets.list())  # console JWT — metadata
+print(client.secrets.get_value("my-secret"))  # Access Key — values map
+client.secrets.put_value("my-secret", {"API_KEY": "rotated"})
 ```
 
-Management and reveal often go through the console JWT APIs; keep long-lived automation on least-privilege Access Keys.
+Format helpers for ENV/YAML live in the CLI codecs (`homecloud_sdk.secret_formats`) and the console Source editor; the wire API remains a JSON map on `…/value`.
 
 ## Tips
 
@@ -61,6 +84,7 @@ Management and reveal often go through the console JWT APIs; keep long-lived aut
 
 ## Related
 
+- [CLI secrets](../cli/commands/secrets.md)  
 - [IAM](iam.md)  
 - [Databases](databases.md)  
 - [Functions](functions.md)  

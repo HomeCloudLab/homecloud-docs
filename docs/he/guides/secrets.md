@@ -1,12 +1,12 @@
 # Secrets
 
-Secrets מאחסנים ערכים רגישים (טוקני API, סיסמאות DB, מפתחות webhook) כרשומות בשם עם מפות מפתח/ערך. אפליקציות, Functions ומפעילים שולפים אותם בלי להקשיח סודות במקור.
+Secrets מאחסנים ערכים רגישים (טוקני API, סיסמאות DB, מפתחות webhook) כרשומות בשם עם מפת **שטוחה** של מפתח/ערך (`string → string`). אפליקציות, Functions ומפעילים שולפים אותם בלי להקשיח סודות במקור.
 
 | פריט | ערך |
 |------|--------|
 | Console | **Secrets** → `/console/secrets` |
 | Data plane | `secrets.{apex}` (Access Key) |
-| Reveal | מתועד ב-control plane |
+| אחסון | Kubernetes Opaque Secret ב-namespace של החשבון (הצפנת etcd + TLS). מטא־נתונים ב-control plane; ערכים לא נשמרים כטקסט גלוי ב-Postgres. |
 
 ## הליכה בקונסול
 
@@ -14,33 +14,51 @@ Secrets מאחסנים ערכים רגישים (טוקני API, סיסמאות D
 
 1. פתחו **Secrets** → **Create**.  
 2. בחרו שם (מזהה יציב שהאפליקציה תפנה אליו).  
-3. הוסיפו מפתח אחד או יותר (למשל `username`, `password`, `url`).  
+3. אופציונלי: הגדירו זוגות מפתח/ערך ראשוניים.  
 4. שמרו.
 
-### צפייה וסיבוב
+### לשונית Values
 
-1. פתחו את הסוד.  
-2. השתמשו ב-**Values** לחשיפה (מתועדת) או לעדכון מפתחות.  
-3. העדיפו סיבוב על פני שיתוף צילומי מסך בצ'אט.  
-4. לשוניות **Settings** / **API** מציגות מטא־נתונים ודוגמאות קריאות.
+משטח אחד לצפייה ולעריכה:
+
+1. פתחו את הסוד → **Values**.  
+2. **Reveal** הוא מתג: הפעלה טוענת ומציגה ערכים (למשך הסשן בלבד).  
+3. **Edit** עובד גם בלי Reveal — הקונסול שולף את המפה כחלק מהעריכה.  
+4. עורך ברירת המחדל הוא **Table** (שורות מפתח/ערך כמו קודם). רחפו בין שורות ל־**`+`** להוספה.  
+5. **Source** מחליף לטקסט JSON / ENV / YAML על אותה מפה שטוחה (מבנים מקוננים ומפתחות כפולים נדחים).  
+6. **Save new version** מחליף את כל המפה. הסרת מפתחות דורשת אישור.
+
+**Settings** לתיאור ומחיקה. דוגמאות API/SDK ב[תיעוד](../sdk/index.md) וב-[CLI](../cli/commands/secrets.md) — לא בלשונית בפרטי הסוד.
 
 ### מחיקה
 
 מחקו סודות שאינם בשימוש כדי להפחית חשיפה. עדכנו צרכנים קודם כדי שפריסות לא יישברו.
 
-## שימוש מעומסים
+## פורמטים (JSON / ENV / YAML)
 
-דפוסים שתראו ב-HomeCloud:
+כל המשטחים חולקים מודל אחד: מפה שטוחה של מחרוזות.
 
-- הגדרות Application מפנות לשם סוד / מפתח  
-- תצורת Function מזריקה ערכי סוד בזמן ריצה  
-- תבניות Kubernetes / אפליקציה ממפות מפתחות סוד למשתני סביבה  
+| פורמט | דוגמה |
+|--------|---------|
+| JSON | `{ "API_KEY": "…", "DATABASE_URL": "…" }` |
+| ENV | `API_KEY=…` |
+| YAML | `API_KEY: …` |
 
-ממשק הקישור המדויק תלוי בשירות הצורך — חפשו בוחרי «Secret» ב-Applications, Functions ועוזרי חיבור Databases.
+נדחים: אובייקטים/מערכים מקוננים, ערכי JSON שאינם מחרוזת, מפתחות כפולים.
+
+## CLI
+
+```bash
+homecloud secrets get my-secret
+homecloud secrets get my-secret --format env
+homecloud secrets put my-secret --format env --file .env
+```
+
+`put` מחליף את **כל** הסוד. ראו [secrets CLI](../cli/commands/secrets.md).
 
 ## Access Keys ומדיניות
 
-קריאה בזמן ריצה לסודות דרך ה-data plane דורשת Access Key (או תפקיד מונח) עם פעולות `secrets:…` הנכונות. הגבילו מדיניות ל-ARNs ספציפיים של סודות כשאפשר. ראו [IAM](iam.md).
+קריאה בזמן ריצה דרך ה-data plane דורשת Access Key (או תפקיד) עם פעולות `secrets:…`. הגבילו מדיניות ל-ARNs ספציפיים כשאפשר. ראו [IAM](iam.md).
 
 ## SDK
 
@@ -49,18 +67,19 @@ from homecloud import HomeCloud
 
 client = HomeCloud.from_env()
 print(client.secrets.list())
+print(client.secrets.get_value("my-secret"))
+client.secrets.put_value("my-secret", {"API_KEY": "rotated"})
 ```
-
-ניהול וחשיפה לעיתים עוברים דרך APIs של JWT קונסול; שמרו אוטומציה ארוכת־חיים על Access Keys עם הרשאה מינימלית.
 
 ## טיפים
 
 - לעולם אל תעלו ערכי סוד ל-git או תשימו אותם בקבצי מקור של Function.  
-- השתמשו בסוד אחד לכל אינטגרציה (מסד נתונים, Stripe, SMTP) כדי שסיבוב יהיה מוגבל.  
+- השתמשו בסוד אחד לכל אינטגרציה כדי שסיבוב יהיה מוגבל.  
 - אחרי סיבוב סיסמת DB ב-MDB, עדכנו את ה-Secret שהאפליקציה קוראת.
 
 ## קשור
 
+- [CLI secrets](../cli/commands/secrets.md)  
 - [IAM](iam.md)  
 - [Databases](databases.md)  
 - [Functions](functions.md)  

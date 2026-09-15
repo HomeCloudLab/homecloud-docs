@@ -117,6 +117,7 @@ nav:
       - cli/commands/login.md
       - cli/commands/so.md
       - cli/commands/mq.md
+      - cli/commands/secrets.md
       - cli/commands/fn.md
       - cli/commands/ir.md
       - cli/commands/mail.md

@@ -41,6 +41,13 @@ Complete command map for the `homecloud` binary.
 | `homecloud mq delete-dlq` | Access Key | Delete DLQ message |
 | `homecloud mq purge-dlq` | Access Key | Purge DLQ |
 
+## Secrets (data plane)
+
+| Command | Auth | Description |
+|---------|------|-------------|
+| `homecloud secrets get` | Access Key | Get values (`--format json\|env\|yaml`) |
+| `homecloud secrets put` | Access Key | Replace entire value map |
+
 Details: [mq](mq.md).
 
 ## Object storage (`so`)

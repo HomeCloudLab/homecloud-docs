@@ -41,6 +41,13 @@
 | `homecloud mq delete-dlq` | Access Key | מחיקת הודעת DLQ |
 | `homecloud mq purge-dlq` | Access Key | ניקוי DLQ |
 
+## Secrets (data plane)
+
+| פקודה | Auth | תיאור |
+|---------|------|-------------|
+| `homecloud secrets get` | Access Key | שליפת ערכים (`--format json\|env\|yaml`) |
+| `homecloud secrets put` | Access Key | החלפת כל מפת הערכים |
+
 פרטים: [mq](mq.md).
 
 ## Object storage (`so`)
