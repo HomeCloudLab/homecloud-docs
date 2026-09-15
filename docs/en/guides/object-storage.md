@@ -19,6 +19,18 @@ Use SO for backups, build artifacts, media, and **static websites** served at `h
 2. Click **Create bucket**, choose a DNS-safe name, confirm.  
 3. Open the bucket to see tabs: **Objects**, **Lifecycle**, **Versioning**, **Permissions**, **Website**.
 
+### Account service buckets
+
+The platform may create account-owned buckets for product features:
+
+| Bucket | Purpose |
+|--------|---------|
+| `tasks-{account_number}` | Task discussion attachments |
+| `diagrams-{account_number}` | Diagram node images |
+| `fn-artifacts-{account_number}` | Function version packages |
+
+These are billable and appear under **Show account service buckets**. Non-root users can list them but cannot open, browse, edit, or delete them. The account **root** user has full access like any normal bucket. Do not create buckets with these reserved name prefixes yourself.
+
 ### Browse and upload objects
 
 1. Open the **Objects** tab.  

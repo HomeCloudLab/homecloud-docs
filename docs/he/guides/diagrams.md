@@ -6,7 +6,7 @@
 |------|------|
 | קונסול | **דיאגרמות** → `/console/diagrams` |
 | הרשאות | `diagrams.read` / `diagrams.create` / `diagrams.update` / `diagrams.delete` |
-| דלי נכסים | `so://diagrams-{account_number}/diagrams/{diagram_id}/assets/…` (מופיע ב־Object Storage; בבעלות החשבון ובתשלום שלו) |
+| דלי נכסים | `so://diagrams-{account_number}/diagrams/{diagram_id}/assets/…` (בבעלות החשבון ובתשלום שלו; מופיע תחת **הצג באקטים של שירותי החשבון**) |
 
 ## רשימה ויצירה
 
@@ -57,7 +57,7 @@
 
 ## דלי נכסי SO
 
-תמונות מותאמות ל־nodes מועלות לדלי `diagrams-{account_number}` תחת `diagrams/{diagram_id}/assets/…` (URI: `so://diagrams-{account_number}/diagrams/{diagram_id}/assets/{filename}`). אפשר לדפדף ולמחוק ב־**Object Storage** כמו בכל דלי של החשבון — האחסון בבעלות החשבון ובתשלום שלו. קישורי שיתוף **לא** מעתיקים קבצים; הם עושים presign מחדש לאותם `so://`. הקידומת `shared/{share_id}/` שמורה למצב עתידי של עותק קפוא ואינה בשימוש כרגע.
+תמונות מותאמות ל־nodes מועלות לדלי `diagrams-{account_number}` תחת `diagrams/{diagram_id}/assets/…` (URI: `so://diagrams-{account_number}/diagrams/{diagram_id}/assets/{filename}`). האחסון בבעלות החשבון ובתשלום שלו. ב־**Object Storage** הם מופיעים תחת **הצג באקטים של שירותי החשבון** — משתמשים שאינם root יכולים לראות ברשימה אך לא לפתוח או לשנות; root של החשבון שומר גישה מלאה. קישורי שיתוף **לא** מעתיקים קבצים; הם עושים presign מחדש לאותם `so://`. הקידומת `shared/{share_id}/` שמורה למצב עתידי של עותק קפוא ואינה בשימוש כרגע.
 
 ## הפניות במשימות
 

@@ -6,7 +6,7 @@ Account-scoped architecture diagrams for planning, documentation, and presentati
 |------|--------|
 | Console | **Diagrams** → `/console/diagrams` |
 | Permissions | `diagrams.read` / `diagrams.create` / `diagrams.update` / `diagrams.delete` |
-| Assets bucket | `so://diagrams-{account_number}/diagrams/{diagram_id}/assets/…` (listed under Object Storage; account-owned and billable) |
+| Assets bucket | `so://diagrams-{account_number}/diagrams/{diagram_id}/assets/…` (account-owned/billable; listed under **Show account service buckets**) |
 
 
 ## List and create
@@ -58,7 +58,7 @@ Anyone with the URL can open a **frozen snapshot** without signing in.
 
 ## SO assets bucket
 
-Custom node images upload to the account bucket `diagrams-{account_number}` under `diagrams/{diagram_id}/assets/…` (URI: `so://diagrams-{account_number}/diagrams/{diagram_id}/assets/{filename}`). Browse and delete them under **Object Storage** like any other account bucket — the account owns and pays for the storage. Share links do **not** copy files; they re-presign the same `so://` URIs. The prefix `shared/{share_id}/` is reserved for a future opt-in frozen-copy mode and is unused today.
+Custom node images upload to the account bucket `diagrams-{account_number}` under `diagrams/{diagram_id}/assets/…` (URI: `so://diagrams-{account_number}/diagrams/{diagram_id}/assets/{filename}`). The account owns and pays for the storage. In **Object Storage** these appear under **Show account service buckets** — non-root users can list them but cannot open or change them; the account root retains full access. Share links do **not** copy files; they re-presign the same `so://` URIs. The prefix `shared/{share_id}/` is reserved for a future opt-in frozen-copy mode and is unused today.
 
 ## Task references
 

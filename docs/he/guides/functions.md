@@ -148,7 +148,7 @@ homecloud fn logs hello --id <id> --follow
 
 אל תסיקו מ־`warm=false` לבד שהקוד לא רץ. השתמשו ב־`phase` / לוגים / `error_message` כדי להפריד כשלי הכנה ב־control plane מכשלי runtime.
 
-כשגרסת פונקציה נשמרת ב־Object Storage (`so://…`), ה־control plane מעביר את ה־URI ל־`homecloud-fn` וה־pod **מושך** את ה־zip בשלב `preparing` (דרך API פנימי). חבילות base64 נשארות נתמכות לגרסאות ישנות בלי URI.
+כשגרסת פונקציה נשמרת ב־Object Storage (`so://fn-artifacts-{account_number}/…`), ה־control plane מעביר את ה־URI ל־`homecloud-fn` וה־pod **מושך** את ה־zip בשלב `preparing` (דרך API פנימי). חבילות base64 נשארות נתמכות לגרסאות ישנות בלי URI. באקט הארטיפקטים הוא באקט שירות של החשבון (ברשימה בלבד למשתמשים שאינם root בקונסול).
 
 ראו [CLI `fn`](../cli/commands/fn.md) לדגלים.
 
