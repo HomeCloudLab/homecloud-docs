@@ -15,6 +15,7 @@ https://homecloud-cli.so.holab.abrdns.com/releases/latest/homecloud-windows-amd6
 
 | Version | Highlights |
 |---------|------------|
+| v0.2.50 | `secrets create` (Access Key; KEY=VALUE / `--file` אופציונלי); `so ls-buckets` דרך management SigV1 (תיקון רשימה ריקה לבאקטים בלי קידומת); דורש SDK 0.5.18 |
 | v0.2.49 | `secrets get` / `put` עם `--format json\|env\|yaml`; דורש SDK 0.5.17 (`get_value` / `put_value`) |
 | v0.2.48 | תיקון העלאת release ל-MinIO (URL של `mc` החזיר 410 → לקוח AIStor) |
 | v0.2.47 | זהות ציבורית במספר חשבון בן 12 ספרות (`account_number`; עזרת IR / whoami דרך SDK 0.5.16) |

@@ -49,12 +49,16 @@ Secrets מאחסנים ערכים רגישים (טוקני API, סיסמאות D
 ## CLI
 
 ```bash
+homecloud secrets create my-secret
+homecloud secrets create my-secret API_KEY=test DB_HOST=db.internal
+homecloud secrets create my-secret --format env --file .env
 homecloud secrets get my-secret
 homecloud secrets get my-secret --format env
 homecloud secrets put my-secret --format env --file .env
+homecloud secrets set my-secret API_KEY=rotated
 ```
 
-`put` מחליף את **כל** הסוד. ראו [secrets CLI](../cli/commands/secrets.md).
+`create` דורש Access Key (`homecloud configure`). `get` / `put` / `set` דורשים Access Key. `put` מחליף את **כל** הסוד. ראו [secrets CLI](../cli/commands/secrets.md).
 
 ## Access Keys ומדיניות
 
@@ -67,9 +71,16 @@ from homecloud import HomeCloud
 
 client = HomeCloud.from_env()
 print(client.secrets.list())
+client.secrets.create("my-secret", API_KEY="test")
 print(client.secrets.get_value("my-secret"))
-client.secrets.put_value("my-secret", {"API_KEY": "rotated"})
+print(client.secrets.get_value("my-secret", "API_KEY"))
+client.secrets.put_value("my-secret", {"API_KEY": "rotated"})  # החלפת כל המפה
+client.secrets.put_value("my-secret", API_KEY="test", merge=True)  # upsert שדות
+print(client.secrets.get_value("my-secret", format="env"))
+client.secrets.put_value("my-secret", "API_KEY=x", format="env", merge=True)
 ```
+
+קודקים (`json` | `env` | `yaml`) דרך `format=` ב-`get_value` / `put_value` (כמו `--format` ב-CLI). סטרינג בלי ירידת שורה בסוף תקין.
 
 ## טיפים
 

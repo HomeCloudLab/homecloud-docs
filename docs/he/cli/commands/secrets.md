@@ -2,7 +2,9 @@
 
 ערכי **Secrets** (data plane, Access Key). המודל הקנוני הוא מפה שטוחה `string → string`. JSON/YAML מקוננים ומפתחות כפולים נדחים.
 
-`put` **מחליף את כל הסוד**. מפתחות שלא נכללים בקלט מוסרים.
+- `put` **מחליף** את כל הסוד כברירת מחדל (מפתחות שלא נשלחו נמחקים).
+- `put --merge` / `set` **מעדכנים/יוצרים** רק את המפתחות שנשלחו; השאר נשאר.
+- `get --key` מחזיר תת־קבוצה (מפתח חסר → שגיאה).
 
 `--format` בוחר את קודק הערכים (`json` | `env` | `yaml`). זה נפרד מ-`--output` הגלובלי למעטפות תגובה.
 
@@ -10,36 +12,30 @@
 
 ```bash
 homecloud secrets get my-secret
-homecloud secrets get my-secret --format json
 homecloud secrets get my-secret --format env
-homecloud secrets get my-secret --format yaml
+homecloud secrets get my-secret --key API_KEY --key DB_HOST
+homecloud secrets get my-secret -k API_KEY --format env
 ```
-
-=== "PowerShell"
-
-    ```powershell
-    homecloud secrets get my-secret --format env
-    ```
 
 Stdout הוא המפה המסודרת (לא מעטפת metadata).
 
 ## put
 
 ```bash
+# החלפת כל המפה
 homecloud secrets put my-secret --format env --file .env
-homecloud secrets put my-secret --format json --file values.json
-# stdin
-cat values.json | homecloud secrets put my-secret --format json
+
+# upsert מפתחות בלבד
+homecloud secrets put my-secret --merge --format json --file patch.json
 ```
 
-=== "PowerShell"
+## set
 
-    ```powershell
-    homecloud secrets put my-secret --format env --file .env
-    Get-Content values.json -Raw | homecloud secrets put my-secret --format json
-    ```
+הוספה/עריכה של זוגות `KEY=VALUE` (תמיד merge):
 
-מטא־נתוני התגובה משתמשים ב-`--output` (ברירת מחדל `json`).
+```bash
+homecloud secrets set my-secret API_KEY=rotated DB_HOST=db.internal
+```
 
 ## קשור
 

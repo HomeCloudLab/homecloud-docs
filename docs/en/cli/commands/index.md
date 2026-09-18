@@ -45,8 +45,10 @@ Complete command map for the `homecloud` binary.
 
 | Command | Auth | Description |
 |---------|------|-------------|
+| `homecloud secrets create` | Access Key | Create secret (optional initial values) |
 | `homecloud secrets get` | Access Key | Get values (`--format json\|env\|yaml`) |
 | `homecloud secrets put` | Access Key | Replace entire value map |
+| `homecloud secrets set` | Access Key | Upsert `KEY=VALUE` pairs |
 
 Details: [mq](mq.md).
 

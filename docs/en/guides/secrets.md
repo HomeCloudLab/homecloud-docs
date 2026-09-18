@@ -49,15 +49,20 @@ Rejected: nested objects/arrays, non-string JSON values, duplicate keys.
 ## CLI
 
 ```bash
+homecloud secrets create my-secret
+homecloud secrets create my-secret API_KEY=test DB_HOST=db.internal
+homecloud secrets create my-secret --format env --file .env
+
 homecloud secrets get my-secret
 homecloud secrets get my-secret --format env
 homecloud secrets get my-secret --format yaml
 
 homecloud secrets put my-secret --format env --file .env
 homecloud secrets put my-secret --format json --file values.json
+homecloud secrets set my-secret API_KEY=rotated
 ```
 
-`put` replaces the **entire** secret. See [secrets CLI](../cli/commands/secrets.md).
+`create` needs an Access Key (`homecloud configure`). `get` / `put` / `set` need an Access Key. `put` replaces the **entire** secret by default; use ``--merge`` / `set` to upsert keys. See [secrets CLI](../cli/commands/secrets.md).
 
 ## Access Keys and policies
 
@@ -70,11 +75,16 @@ from homecloud import HomeCloud
 
 client = HomeCloud.from_env()
 print(client.secrets.list())  # console JWT — metadata
-print(client.secrets.get_value("my-secret"))  # Access Key — values map
-client.secrets.put_value("my-secret", {"API_KEY": "rotated"})
+client.secrets.create("my-secret", API_KEY="test")  # Access Key SigV1
+print(client.secrets.get_value("my-secret"))  # full map
+print(client.secrets.get_value("my-secret", "API_KEY"))  # subset
+client.secrets.put_value("my-secret", {"API_KEY": "rotated"})  # replace all
+client.secrets.put_value("my-secret", API_KEY="test", merge=True)  # upsert fields
+print(client.secrets.get_value("my-secret", format="env"))
+client.secrets.put_value("my-secret", "API_KEY=x", format="env", merge=True)
 ```
 
-Format helpers for ENV/YAML live in the CLI codecs (`homecloud_sdk.secret_formats`) and the console Source editor; the wire API remains a JSON map on `…/value`.
+Codecs (`json` | `env` | `yaml`) are available via ``format=`` on ``get_value`` / ``put_value`` (same as CLI ``--format``).
 
 ## Tips
 
