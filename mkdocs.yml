@@ -91,6 +91,7 @@ nav:
       - guides/queues.md
       - guides/databases.md
       - guides/compute.md
+      - guides/containers.md
       - guides/regions.md
       - guides/redis.md
       - guides/functions.md
@@ -119,6 +120,7 @@ nav:
       - cli/commands/mq.md
       - cli/commands/secrets.md
       - cli/commands/fn.md
+      - cli/commands/containers.md
       - cli/commands/ir.md
       - cli/commands/mail.md
       - cli/commands/billing.md

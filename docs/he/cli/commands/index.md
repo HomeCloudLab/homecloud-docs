@@ -74,6 +74,20 @@
 
 פרטים: [fn](fn.md).
 
+## Containers
+
+| פקודה | Auth | תיאור |
+|-------|------|-------|
+| `homecloud containers list` | JWT | רשימת שירותי containers |
+| `homecloud containers create` | JWT | יצירת שירות (`--image`, `--region`, …) |
+| `homecloud containers get` | JWT | פרטי שירות |
+| `homecloud containers tasks` | JWT | רשימת Tasks לשירות |
+| `homecloud containers revisions` | JWT | רשימת Revisions |
+| `homecloud containers logs` | JWT | לוגים שמורים של Task |
+| `homecloud containers delete` | JWT | מחיקת שירות |
+
+פרטים: [containers](containers.md). מדריך: [Containers](../../guides/containers.md).
+
 ## דומיינים
 
 | פקודה | Auth | תיאור |

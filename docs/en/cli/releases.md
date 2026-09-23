@@ -15,6 +15,7 @@ https://homecloud-cli.so.holab.abrdns.com/releases/latest/homecloud-windows-amd6
 
 | Version | Highlights |
 |---------|------------|
+| v0.2.51 | `containers` (list/create/get/delete/tasks/revisions/logs) via JWT → `compute.{apex}`; needs SDK 0.5.19 |
 | v0.2.50 | `secrets create` (Access Key; optional KEY=VALUE / `--file`); `so ls-buckets` via management SigV1 (fixes empty list for unprefixed buckets); needs SDK 0.5.18 |
 | v0.2.49 | `secrets get` / `put` with `--format json\|env\|yaml`; needs SDK 0.5.17 (`get_value` / `put_value`) |
 | v0.2.48 | Fix release MinIO upload (`mc` download URL 410 → AIStor client) |

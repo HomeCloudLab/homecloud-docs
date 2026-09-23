@@ -76,6 +76,20 @@ Details: [so](so.md).
 
 Details: [fn](fn.md).
 
+## Containers
+
+| Command | Auth | Description |
+|---------|------|-------------|
+| `homecloud containers list` | JWT | List container services |
+| `homecloud containers create` | JWT | Create a service (`--image`, `--region`, …) |
+| `homecloud containers get` | JWT | Service detail |
+| `homecloud containers tasks` | JWT | List tasks for a service |
+| `homecloud containers revisions` | JWT | List revisions |
+| `homecloud containers logs` | JWT | Retained task logs |
+| `homecloud containers delete` | JWT | Delete a service |
+
+Details: [containers](containers.md). Guide: [Containers](../../guides/containers.md).
+
 ## Domains
 
 | Command | Auth | Description |
