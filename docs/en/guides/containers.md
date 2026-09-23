@@ -8,17 +8,18 @@ Managed container Services on a HomeCloud **managed Compute pool**. You bring an
 |----------|---------|
 | **Service** | Desired count + desired revision |
 | **Revision** | Immutable config snapshot (image **digest**, CPU/RAM, ports, env, health) |
+| **Deployment** | Internal rollout for update / scale / force redeploy / rollback (status + healthy counts) |
 | **Task** | One running attempt with desired vs observed state |
 | **Session** | Exec into a RUNNING Task (like managed remote access without SSH) |
 
 ## Create a service
 
 1. Open **Containers** in the console.
-2. Create a service: name, region, image.
-3. HomeCloud resolves the image to a digest, creates Revision 1, and reconciles a Task on the managed pool.
+2. Create a service: name, region, image (optional desired count > 1).
+3. HomeCloud resolves the image to a digest, creates Revision 1, and reconciles Tasks on the managed pool.
 4. Watch **Tasks** for `observed` state and any `failure_code` (for example `NO_CAPACITY`).
 
-Updates create a **new Revision** and bump service generation — they never mutate old Revisions.
+Updates create a **new Revision** and a **Deployment** — they never mutate old Revisions. **Force redeploy** keeps the same Revision and starts a new Deployment that replaces Tasks. **Rollback** points desired revision at a prior Revision. **Scale** changes `desired_count` without a new Revision.
 
 ## Access
 
@@ -32,6 +33,10 @@ Requires a console session (`homecloud login`) — Containers live on `compute.{
 ```bash
 homecloud containers list
 homecloud containers create my-web --image nginx:latest --region eu-central
+homecloud containers scale <service-id> 3
+homecloud containers force-redeploy <service-id>
+homecloud containers rollback <service-id> <revision-id>
+homecloud containers deployments <service-id>
 homecloud containers tasks <service-id>
 homecloud containers logs <task-id>
 ```

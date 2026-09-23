@@ -15,6 +15,7 @@ https://homecloud-cli.so.holab.abrdns.com/releases/latest/homecloud-windows-amd6
 
 | Version | Highlights |
 |---------|------------|
+| v0.2.52 | `containers scale` / `force-redeploy` / `rollback` / `deployments`; דורש SDK 0.5.20 |
 | v0.2.51 | `containers` (list/create/get/delete/tasks/revisions/logs) דרך JWT → `compute.{apex}`; דורש SDK 0.5.19 |
 | v0.2.50 | `secrets create` (Access Key; KEY=VALUE / `--file` אופציונלי); `so ls-buckets` דרך management SigV1 (תיקון רשימה ריקה לבאקטים בלי קידומת); דורש SDK 0.5.18 |
 | v0.2.49 | `secrets get` / `put` עם `--format json\|env\|yaml`; דורש SDK 0.5.17 (`get_value` / `put_value`) |
