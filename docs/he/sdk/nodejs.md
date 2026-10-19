@@ -92,6 +92,32 @@ const secrets = await client.secrets.list();
 
 שמות שיטות עוקבים אחרי מוסכמות JavaScript (`listMailboxes`, `putJson`, …). בדקו טיפוסי TypeScript בחבילה לחתימות המדויקות של הגרסה המותקנת.
 
+## משימות ודיאגרמות
+
+מישור ניהול — JWT משתמש (`login`) או Access Key **קשור למשתמש** (SigV1).
+
+```js
+const items = await client.tasks.search("cert @alice &ops due:overdue");
+const detail = await client.tasks.get("TASK-12");
+await client.tasks.create("Rotate cert", {
+  type: "change",
+  priority: "p2",
+  assignees: ["alice"],
+  labelNames: ["ops"],
+});
+await client.tasks.assignMe("TASK-12", { status: "in_progress" });
+await client.tasks.comment("TASK-12", "Deployed to staging");
+
+const diagrams = await client.diagrams.list();
+const doc = await client.diagrams.get(diagramId);
+await client.diagrams.create("Production plan", { description: "Draft" });
+await client.diagrams.update(diagramId, {
+  name: "Prod",
+  document: doc.document,
+  revision: doc.revision,
+});
+```
+
 ## שגיאות
 
 שגיאות מוקלדות משקפות את Python SDK (not found, unauthorized, permission denied, rate limit, …). תפסו את סוג השגיאה הבסיסי מהחבילה ופצלו לפי `statusCode` / name.

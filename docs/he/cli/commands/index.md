@@ -106,6 +106,29 @@
 
 פרטים: [domains](domains.md). מדריך: [דומיינים](../../guides/domains.md).
 
+## משימות (Tasks)
+
+| פקודה | Auth | תיאור |
+|-------|------|-------|
+| `homecloud tasks search` / `list` / `mine` | JWT או מפתח קשור למשתמש | חיפוש חכם (`@user`, `&label`, `due:overdue`, …) |
+| `homecloud tasks get` / `activity` | JWT או מפתח קשור למשתמש | פרטי פריט / ציר דיון |
+| `homecloud tasks create` / `update` / `patch` | JWT או מפתח קשור למשתמש | יצירה / עדכון (שמות משתמש, `--due` חכם) |
+| `homecloud tasks assign` / `assign-me` / `comment*` / `label*` | JWT או מפתח קשור למשתמש | הקצאה, דיון, תוויות |
+| `homecloud tasks archive` / `share*` / `delete` | JWT או מפתח קשור למשתמש | מחזור חיים ושיתוף |
+
+פרטים: [tasks](tasks.md). מדריך: [משימות](../../guides/tasks.md).
+
+## דיאגרמות
+
+| פקודה | Auth | תיאור |
+|-------|------|-------|
+| `homecloud diagrams list` | JWT או מפתח קשור למשתמש | רשימת דיאגרמות |
+| `homecloud diagrams get` | JWT או מפתח קשור למשתמש | דיאגרמה + document |
+| `homecloud diagrams create` | JWT או מפתח קשור למשתמש | יצירת דיאגרמה |
+| `homecloud diagrams patch` | JWT או מפתח קשור למשתמש | עדכון שם/תיאור/document |
+
+פרטים: [diagrams](diagrams.md). מדריך: [דיאגרמות](../../guides/diagrams.md).
+
 ## Image registry (`ir`)
 
 | פקודה | Auth | תיאור |

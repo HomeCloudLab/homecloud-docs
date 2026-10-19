@@ -59,6 +59,27 @@
 
 תמונות מותאמות ל־nodes מועלות לדלי `diagrams-{account_number}` תחת `diagrams/{diagram_id}/assets/…` (URI: `so://diagrams-{account_number}/diagrams/{diagram_id}/assets/{filename}`). האחסון בבעלות החשבון ובתשלום שלו. ב־**Object Storage** הם מופיעים תחת **הצג באקטים של שירותי החשבון** — משתמשים שאינם root יכולים לראות ברשימה אך לא לפתוח או לשנות; root של החשבון שומר גישה מלאה. קישורי שיתוף **לא** מעתיקים קבצים; הם עושים presign מחדש לאותם `so://`. הקידומת `shared/{share_id}/` שמורה למצב עתידי של עותק קפוא ואינה בשימוש כרגע.
 
+## CLI ו-SDK
+
+```bash
+homecloud diagrams list
+homecloud diagrams get DIAGRAM_ID
+homecloud diagrams create "Production plan" --description "Draft"
+homecloud diagrams patch DIAGRAM_ID --name "Production architecture" --revision 1
+```
+
+```python
+from homecloud import HomeCloud
+
+client = HomeCloud()
+for d in client.diagrams.list():
+    print(d["id"], d["name"], d["revision"])
+client.diagrams.create("Production plan", description="Draft")
+client.diagrams.update(diagram_id, name="Production architecture", revision=1)
+```
+
+אימות: JWT משתמש או Access Key קשור למשתמש. פרטים: [diagrams CLI](../cli/commands/diagrams.md), [Python SDK](../sdk/python.md).
+
 ## הפניות במשימות
 
 בכותרת, בפירוט או בדיון של משימות הקלידו `#diagrams` או `#diagrams/<diagram-id>` להשלמה אוטומטית וקישורים.
@@ -68,3 +89,4 @@
 - [משימות — קישורים בקונסול](tasks.md)
 - [Object Storage](object-storage.md)
 - [IAM](iam.md)
+- [CLI — diagrams](../cli/commands/diagrams.md)

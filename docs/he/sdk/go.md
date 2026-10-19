@@ -67,6 +67,27 @@ msgs, _ := client.MQ.Receive(ctx, "orders", homecloud.ReceiveOptions{MaxMessages
 
 `Send` **לא** מרוטרי על 502/503/504 (בניגוד ל-Python/Node) כדי לא לשכפל הודעות.
 
+## משימות ודיאגרמות
+
+מישור ניהול — JWT משתמש (`Login`) או Access Key **קשור למשתמש** (SigV1).
+
+```go
+items, _ := client.Tasks.Search(ctx, "cert @alice &ops due:overdue", homecloud.TaskListOptions{})
+detail, _ := client.Tasks.Get(ctx, "TASK-12")
+_, _ = client.Tasks.Create(ctx, "Rotate cert", homecloud.TaskCreateOptions{
+    Type: "change", Priority: "p2", Assignees: []string{"alice"}, LabelNames: []string{"ops"},
+})
+_, _ = client.Tasks.AssignMe(ctx, "TASK-12", "in_progress")
+_, _ = client.Tasks.Comment(ctx, "TASK-12", "Deployed to staging")
+
+diagrams, _ := client.Diagrams.List(ctx)
+doc, _ := client.Diagrams.Get(ctx, diagramID)
+_, _ = client.Diagrams.Create(ctx, "Production plan", "Draft", nil)
+_, _ = client.Diagrams.Update(ctx, diagramID, map[string]any{
+    "name": "Prod", "document": doc["document"], "revision": doc["revision"],
+})
+```
+
 ## שגיאות
 
 ```go

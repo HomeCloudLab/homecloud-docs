@@ -31,6 +31,7 @@ Create keys in the console: [Access Keys](../getting-started/access-keys.md).
 | Image Registry (`ir`) | list/create repos, usage | Session / key as documented |
 | Secrets | list (JWT), getValue / putValue | Access Key for values |
 | Management helpers | `so.list_buckets` / `create_bucket` / `delete_bucket`, `queues.list` / `get` | **Access Key SigV1** (preferred); Console JWT fallback |
+| Tasks + Diagrams | search/create/assign/comment/archive; diagrams list/get/create/update | User JWT or **user-bound** Access Key |
 | Other console helpers | `apps.list`, `accounts.*`, IR create, Functions management | Console JWT (for now) |
 
 ## Minimal examples

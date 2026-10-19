@@ -163,6 +163,31 @@
 
 הקונסול מציג את זה במקום להיכשל בשקט: הרשימה הנפתחת של הסטטוס מושבתת עם tooltip שמסביר את הכלל, כרטיסים שאסור להזיז אינם נגררים, ופעולות הסטטוס נעלמות מתפריט הלחיצה הימנית ומ־**⋯**. בקשה אחת יכולה גם להקצות וגם לשנות סטטוס, כך ש**הקצה לי** ואחריו שינוי סטטוס עובד בצעד אחד. אם בכל זאת מגיעים לכלל (למשל דרך ה־API), השרת מחזיר `403` עם קוד `tasks.status_requires_assignee`.
 
+## CLI ו-SDK
+
+ניהול מלא מהטרמינל — חיפוש, יצירה, הקצאה, תגובות, תוויות, ארכיון, שיתוף — באותם כללים כמו בקונסול. האימות חייב להיות **משתמש**: `homecloud login` או Access Key קשור למשתמש.
+
+```bash
+homecloud tasks search cert @alice &ops due:overdue
+homecloud tasks create "Rotate cert" --assignee alice --label ops --due +3d
+homecloud tasks assign-me TASK-12 --status in_progress
+homecloud tasks comment TASK-12 "Deployed to staging"
+homecloud tasks activity TASK-12
+```
+
+```python
+from homecloud import HomeCloud
+
+client = HomeCloud()
+for item in client.tasks.search("cert @alice due:overdue"):
+    print(item["key"], item["title"])
+client.tasks.create("Rotate cert", assignees=["alice"], label_names=["ops"])
+client.tasks.assign_me("TASK-12", status="in_progress")
+client.tasks.comment("TASK-12", "Deployed to staging")
+```
+
+פרטים: [tasks CLI](../cli/commands/tasks.md), [Python SDK](../sdk/python.md).
+
 ## טיפים
 
 - משימות אינן **פרויקטים** של החשבון (תיקיות משאבים) ואינן **Operations** (עבודות provision).  
@@ -176,3 +201,5 @@
 - [Domains & DNS](domains.md)  
 - [חשבון וצוות](account.md)  
 - [IAM](iam.md)  
+- [CLI — tasks](../cli/commands/tasks.md)  
+

@@ -94,6 +94,32 @@ await client.secrets.putValue("my-secret", { API_KEY: "rotated" });
 
 Method names follow JavaScript conventions (`listMailboxes`, `putJson`, …). Check TypeScript types in the package for the exact signatures of your installed version.
 
+## Tasks and Diagrams
+
+Management plane — user JWT (`login`) or **user-bound** Access Key SigV1.
+
+```js
+const items = await client.tasks.search("cert @alice &ops due:overdue");
+const detail = await client.tasks.get("TASK-12");
+await client.tasks.create("Rotate cert", {
+  type: "change",
+  priority: "p2",
+  assignees: ["alice"],
+  labelNames: ["ops"],
+});
+await client.tasks.assignMe("TASK-12", { status: "in_progress" });
+await client.tasks.comment("TASK-12", "Deployed to staging");
+
+const diagrams = await client.diagrams.list();
+const doc = await client.diagrams.get(diagramId);
+await client.diagrams.create("Production plan", { description: "Draft" });
+await client.diagrams.update(diagramId, {
+  name: "Prod",
+  document: doc.document,
+  revision: doc.revision,
+});
+```
+
 ## Errors
 
 Typed errors mirror the Python SDK (not found, unauthorized, permission denied, rate limit, …). Catch the base error type from the package and branch on `statusCode` / name.

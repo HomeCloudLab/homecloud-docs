@@ -163,6 +163,32 @@ Everyone else with `tasks.update` can still edit the title, details, labels, due
 
 The console shows this rather than failing silently: the status dropdown is disabled with a tooltip that names the rule, board cards you may not move are not draggable, and the status entries disappear from the right-click and **⋯** menus. A single request may assign and set status together, so **Assign to me** followed by a status change works in one step. If the rule is hit anyway (for example from the API), the server answers `403` with code `tasks.status_requires_assignee`.
 
+## CLI and SDK
+
+Full tracker management from the shell — search, create, assign, comment, labels, archive, share — same rules as the console. Auth must be a **user** principal: `homecloud login` (JWT) or a **user-bound** Access Key (SigV1).
+
+```bash
+homecloud tasks search cert @alice &ops due:overdue
+homecloud tasks create "Rotate cert" --assignee alice --label ops --due +3d
+homecloud tasks assign-me TASK-12 --status in_progress
+homecloud tasks comment TASK-12 "Deployed to staging"
+homecloud tasks activity TASK-12
+homecloud tasks archive TASK-12 --cancel
+```
+
+```python
+from homecloud import HomeCloud
+
+client = HomeCloud()
+for item in client.tasks.search("cert @alice due:overdue"):
+    print(item["key"], item["title"])
+client.tasks.create("Rotate cert", assignees=["alice"], label_names=["ops"])
+client.tasks.assign_me("TASK-12", status="in_progress")
+client.tasks.comment("TASK-12", "Deployed to staging")
+```
+
+Details: [tasks CLI](../cli/commands/tasks.md), [Python SDK](../sdk/python.md).
+
 ## Tips
 
 - Tasks is not Account **Projects** (resource folders) and not **Operations** (async provision jobs).  
@@ -176,3 +202,5 @@ The console shows this rather than failing silently: the status dropdown is disa
 - [Domains & DNS](domains.md)  
 - [Account & team](account.md)  
 - [IAM](iam.md)  
+- [CLI — tasks](../cli/commands/tasks.md)  
+

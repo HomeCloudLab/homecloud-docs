@@ -108,6 +108,31 @@ Details: [containers](containers.md). Guide: [Containers](../../guides/container
 
 Details: [domains](domains.md). Guide: [Domains](../../guides/domains.md).
 
+## Tasks
+
+| Command | Auth | Description |
+|---------|------|-------------|
+| `homecloud tasks search` / `list` / `mine` | JWT or user-bound key | Smart search (`@user`, `&label`, `due:overdue`, …) |
+| `homecloud tasks get` / `activity` | JWT or user-bound key | Item detail / discussion timeline |
+| `homecloud tasks create` / `update` / `patch` | JWT or user-bound key | Create / update (usernames, smart `--due`) |
+| `homecloud tasks assign` / `assign-me` / `unassign` | JWT or user-bound key | Assignees |
+| `homecloud tasks comment*` / `watch*` / `label*` | JWT or user-bound key | Discussion, watchers, labels |
+| `homecloud tasks archive` / `restore` / `delete` | JWT or user-bound key | Lifecycle |
+| `homecloud tasks link` / `share*` / `people` | JWT or user-bound key | Resources, public shares, members |
+
+Details: [tasks](tasks.md). Guide: [Tasks](../../guides/tasks.md).
+
+## Diagrams
+
+| Command | Auth | Description |
+|---------|------|-------------|
+| `homecloud diagrams list` | JWT or user-bound key | List diagrams |
+| `homecloud diagrams get` | JWT or user-bound key | Diagram + document |
+| `homecloud diagrams create` | JWT or user-bound key | Create diagram |
+| `homecloud diagrams patch` | JWT or user-bound key | Update name/description/document |
+
+Details: [diagrams](diagrams.md). Guide: [Diagrams](../../guides/diagrams.md).
+
 ## Image registry (`ir`)
 
 | Command | Auth | Description |

@@ -126,6 +126,21 @@ client.domains.update_record(domain_id, record_id, record_type="A", record="1.2.
 client.domains.detach(attachment_id)
 ```
 
+## משימות ודיאגרמות
+
+Management plane — JWT של **משתמש** (`login`) או Access Key **קשור למשתמש** SigV1.
+
+```python
+items = client.tasks.search("cert @alice &ops due:overdue")
+client.tasks.create("Rotate cert", assignees=["alice"], label_names=["ops"])
+client.tasks.assign_me("TASK-12", status="in_progress")
+client.tasks.comment("TASK-12", "Deployed to staging")
+client.tasks.archive("TASK-12", cancel=True)
+
+diagrams = client.diagrams.list()
+client.diagrams.create("Production plan", description="Draft")
+```
+
 ## Mail
 
 ```python

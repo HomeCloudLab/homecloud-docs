@@ -19,8 +19,8 @@ homecloud login
 | משפחת פקודות | Auth | דוגמאות |
 |--------------|------|---------|
 | Data plane | Access Key (`homecloud configure`) | `so cp`, `so sync`, `mq send`, `mq receive` |
-| Management | סשן קונסול (`homecloud login`) | `queues list`, `so ls-buckets`, `apps list`, `accounts list` |
-| Either / mixed | ראו עמוד כל פקודה | `fn`, `ir`, `mail` |
+| Management | סשן קונסול (`homecloud login`) | `queues list`, `so ls-buckets`, `apps list`, `accounts list`, `tasks`, `diagrams` |
+| Either / mixed | ראו עמוד כל פקודה | `fn`, `ir`, `mail`, מפתח קשור למשתמש ל־`tasks` / `diagrams` |
 
 יצירת מפתחות: [Access Keys](../getting-started/access-keys.md). פרטים: [אימות](authentication.md).
 
@@ -43,6 +43,10 @@ homecloud ir repo list
 
 # Mail
 homecloud mail mailboxes
+
+# משימות / דיאגרמות (login או Access Key קשור למשתמש)
+homecloud tasks list --status open
+homecloud diagrams list
 ```
 
 ## מדריך פקודות
@@ -57,6 +61,8 @@ homecloud mail mailboxes
 | [fn](commands/fn.md) | Functions |
 | [ir](commands/ir.md) | Image registry |
 | [mail](commands/mail.md) | Mail |
+| [tasks](commands/tasks.md) | משימות |
+| [diagrams](commands/diagrams.md) | דיאגרמות |
 | [שחרורים](releases.md) | היסטוריית גרסאות / עדכון |
 
 ## פורמטי פלט

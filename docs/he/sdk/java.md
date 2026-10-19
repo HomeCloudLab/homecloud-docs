@@ -80,6 +80,30 @@ List<Message> msgs = client.mq().receive("orders", new ReceiveOptions(10, 5, fal
 
 `send` **לא** מרוטרי על 502/503/504 (בניגוד ל-Python/Node) כדי לא לשכפל הודעות.
 
+## משימות ודיאגרמות
+
+מישור ניהול — JWT משתמש (`HomeCloudAuth.login`) או Access Key **קשור למשתמש** (SigV1).
+
+```java
+List<Map<String, Object>> items = client.tasks().search("cert @alice &ops due:overdue");
+Map<String, Object> detail = client.tasks().get("TASK-12");
+client.tasks().create("Rotate cert", Map.of(
+    "type", "change",
+    "priority", "p2",
+    "assignees", List.of("alice"),
+    "label_names", List.of("ops")));
+client.tasks().assignMe("TASK-12", "in_progress");
+client.tasks().comment("TASK-12", "Deployed to staging");
+
+List<Map<String, Object>> diagrams = client.diagrams().list();
+Map<String, Object> doc = client.diagrams().get(diagramId);
+client.diagrams().create("Production plan", "Draft", null);
+client.diagrams().update(diagramId, Map.of(
+    "name", "Prod",
+    "document", doc.get("document"),
+    "revision", doc.get("revision")));
+```
+
 ## שגיאות
 
 ```java

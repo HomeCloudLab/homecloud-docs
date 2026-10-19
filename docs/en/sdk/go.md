@@ -10,10 +10,10 @@ Same HomeCloud capabilities as [Python](python.md) and [Node.js](nodejs.md). The
 ## Install
 
 ```bash
-go get github.com/HomeCloudLab/homecloud-sdk/go@v0.5.10
+go get github.com/HomeCloudLab/homecloud-sdk/go@v0.5.21
 ```
 
-Go modules in `homecloud-sdk/go` also need a `go/v0.5.10` git tag.
+Go modules in `homecloud-sdk/go` also need a `go/v0.5.21` git tag.
 
 ## Create a client
 
@@ -88,6 +88,27 @@ for _, msg := range msgs {
 ```
 
 `Send` is **not** retried on 502/503/504 (unlike Python/Node) so a lost response cannot duplicate messages.
+
+## Tasks and Diagrams
+
+Management plane — user JWT (`Login`) or **user-bound** Access Key SigV1.
+
+```go
+items, _ := client.Tasks.Search(ctx, "cert @alice &ops due:overdue", homecloud.TaskListOptions{})
+detail, _ := client.Tasks.Get(ctx, "TASK-12")
+_, _ = client.Tasks.Create(ctx, "Rotate cert", homecloud.TaskCreateOptions{
+    Type: "change", Priority: "p2", Assignees: []string{"alice"}, LabelNames: []string{"ops"},
+})
+_, _ = client.Tasks.AssignMe(ctx, "TASK-12", "in_progress")
+_, _ = client.Tasks.Comment(ctx, "TASK-12", "Deployed to staging")
+
+diagrams, _ := client.Diagrams.List(ctx)
+doc, _ := client.Diagrams.Get(ctx, diagramID)
+_, _ = client.Diagrams.Create(ctx, "Production plan", "Draft", nil)
+_, _ = client.Diagrams.Update(ctx, diagramID, map[string]any{
+    "name": "Prod", "document": doc["document"], "revision": doc["revision"],
+})
+```
 
 ## Errors
 

@@ -133,6 +133,35 @@ client.domains.update_record(domain_id, record_id, record_type="A", record="1.2.
 client.domains.detach(attachment_id)
 ```
 
+## Tasks and Diagrams
+
+Management plane — **user** JWT (`login`) or **user-bound** Access Key SigV1 (not a bare service-account key).
+
+```python
+# Smart search (same q grammar as the console)
+items = client.tasks.search("cert @alice &ops due:overdue")
+detail = client.tasks.get("TASK-12")
+
+# Create / assign by username
+client.tasks.create(
+    "Rotate cert",
+    type="change",
+    priority="p2",
+    assignees=["alice"],
+    label_names=["ops"],
+)
+client.tasks.assign_me("TASK-12", status="in_progress")
+client.tasks.comment("TASK-12", "Deployed to staging")
+for event in client.tasks.activity("TASK-12"):
+    print(event["event_type"], event.get("payload"))
+client.tasks.archive("TASK-12", cancel=True)
+
+diagrams = client.diagrams.list()
+doc = client.diagrams.get(diagram_id)
+client.diagrams.create("Production plan", description="Draft")
+client.diagrams.update(diagram_id, name="Prod", document=doc["document"], revision=doc["revision"])
+```
+
 ## Mail
 
 ```python

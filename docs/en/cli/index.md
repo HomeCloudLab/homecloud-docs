@@ -19,8 +19,8 @@ homecloud login
 | Command family | Auth | Examples |
 |----------------|------|----------|
 | Data plane | Access Key (`homecloud configure`) | `so cp`, `so sync`, `mq send`, `mq receive` |
-| Management | Console session (`homecloud login`) | `queues list`, `so ls-buckets`, `apps list`, `accounts list` |
-| Either / mixed | See each command page | `fn`, `ir`, `mail` |
+| Management | Console session (`homecloud login`) | `queues list`, `so ls-buckets`, `apps list`, `accounts list`, `tasks`, `diagrams` |
+| Either / mixed | See each command page | `fn`, `ir`, `mail`, user-bound key for `tasks` / `diagrams` |
 
 Create keys: [Access Keys](../getting-started/access-keys.md). Details: [Authentication](authentication.md).
 
@@ -43,6 +43,10 @@ homecloud ir repo list
 
 # Mail
 homecloud mail mailboxes
+
+# Tasks / diagrams (login or user-bound Access Key)
+homecloud tasks list --status open
+homecloud diagrams list
 ```
 
 ## Command reference
@@ -57,6 +61,8 @@ homecloud mail mailboxes
 | [fn](commands/fn.md) | Functions |
 | [ir](commands/ir.md) | Image registry |
 | [mail](commands/mail.md) | Mail |
+| [tasks](commands/tasks.md) | Tasks tracker |
+| [diagrams](commands/diagrams.md) | Architecture diagrams |
 | [Releases](releases.md) | Version history / update |
 
 ## Output formats

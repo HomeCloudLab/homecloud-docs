@@ -123,6 +123,8 @@ nav:
       - cli/commands/containers.md
       - cli/commands/ir.md
       - cli/commands/mail.md
+      - cli/commands/tasks.md
+      - cli/commands/diagrams.md
       - cli/commands/billing.md
       - cli/releases.md
   - SDK:

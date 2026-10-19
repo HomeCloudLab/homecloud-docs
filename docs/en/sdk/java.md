@@ -16,7 +16,7 @@ Same HomeCloud capabilities as [Python](python.md), [Node.js](nodejs.md), and [G
 <dependency>
   <groupId>com.homecloudlab</groupId>
   <artifactId>homecloud-sdk</artifactId>
-  <version>0.5.10</version>
+  <version>0.5.21</version>
 </dependency>
 ```
 
@@ -93,6 +93,30 @@ for (Message msg : msgs) {
 ```
 
 `send` is **not** retried on 502/503/504 (unlike Python/Node) so a lost response cannot duplicate messages.
+
+## Tasks and Diagrams
+
+Management plane — user JWT (`HomeCloudAuth.login`) or **user-bound** Access Key SigV1.
+
+```java
+List<Map<String, Object>> items = client.tasks().search("cert @alice &ops due:overdue");
+Map<String, Object> detail = client.tasks().get("TASK-12");
+client.tasks().create("Rotate cert", Map.of(
+    "type", "change",
+    "priority", "p2",
+    "assignees", List.of("alice"),
+    "label_names", List.of("ops")));
+client.tasks().assignMe("TASK-12", "in_progress");
+client.tasks().comment("TASK-12", "Deployed to staging");
+
+List<Map<String, Object>> diagrams = client.diagrams().list();
+Map<String, Object> doc = client.diagrams().get(diagramId);
+client.diagrams().create("Production plan", "Draft", null);
+client.diagrams().update(diagramId, Map.of(
+    "name", "Prod",
+    "document", doc.get("document"),
+    "revision", doc.get("revision")));
+```
 
 ## Errors
 

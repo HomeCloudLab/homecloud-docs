@@ -60,6 +60,27 @@ Anyone with the URL can open a **frozen snapshot** without signing in.
 
 Custom node images upload to the account bucket `diagrams-{account_number}` under `diagrams/{diagram_id}/assets/…` (URI: `so://diagrams-{account_number}/diagrams/{diagram_id}/assets/{filename}`). The account owns and pays for the storage. In **Object Storage** these appear under **Show account service buckets** — non-root users can list them but cannot open or change them; the account root retains full access. Share links do **not** copy files; they re-presign the same `so://` URIs. The prefix `shared/{share_id}/` is reserved for a future opt-in frozen-copy mode and is unused today.
 
+## CLI and SDK
+
+```bash
+homecloud diagrams list
+homecloud diagrams get DIAGRAM_ID
+homecloud diagrams create "Production plan" --description "Draft"
+homecloud diagrams patch DIAGRAM_ID --name "Production architecture" --revision 1
+```
+
+```python
+from homecloud import HomeCloud
+
+client = HomeCloud()
+for d in client.diagrams.list():
+    print(d["id"], d["name"], d["revision"])
+client.diagrams.create("Production plan", description="Draft")
+client.diagrams.update(diagram_id, name="Production architecture", revision=1)
+```
+
+Auth: user JWT or user-bound Access Key. Details: [diagrams CLI](../cli/commands/diagrams.md), [Python SDK](../sdk/python.md).
+
 ## Task references
 
 In Tasks title, details, or discussion, type `#diagrams` or `#diagrams/<diagram-id>` for autocomplete and deep links.
@@ -69,3 +90,4 @@ In Tasks title, details, or discussion, type `#diagrams` or `#diagrams/<diagram-
 - [Tasks — console references](tasks.md#console-references)
 - [Object Storage](object-storage.md)
 - [IAM](iam.md)
+- [CLI — diagrams](../cli/commands/diagrams.md)
