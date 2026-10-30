@@ -62,6 +62,7 @@ homecloud diagrams list
 | [ir](commands/ir.md) | Image registry |
 | [mail](commands/mail.md) | Mail |
 | [tasks](commands/tasks.md) | משימות |
+| [MCP](mcp.md) | שרת MCP לפלטפורמה (כלי AI) |
 | [diagrams](commands/diagrams.md) | דיאגרמות |
 | [שחרורים](releases.md) | היסטוריית גרסאות / עדכון |
 

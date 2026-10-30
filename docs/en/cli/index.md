@@ -62,6 +62,7 @@ homecloud diagrams list
 | [ir](commands/ir.md) | Image registry |
 | [mail](commands/mail.md) | Mail |
 | [tasks](commands/tasks.md) | Tasks tracker |
+| [MCP](mcp.md) | Platform MCP server for AI tools |
 | [diagrams](commands/diagrams.md) | Architecture diagrams |
 | [Releases](releases.md) | Version history / update |
 

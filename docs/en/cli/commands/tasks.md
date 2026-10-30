@@ -23,16 +23,31 @@ homecloud tasks search cert @alice &ops due:overdue
 homecloud tasks list --mine --status open,in_progress
 homecloud tasks mine
 homecloud tasks list "rotate type:change" --output table
+homecloud tasks list --limit 50 --sort -sequence --all
+homecloud tasks list --output jsonl --fields key,title,status
+homecloud tasks list --wide --output table
 ```
 
 ## Create and update
 
 Assignees accept **username**, `@user`, `me`, or UUID. Due accepts ISO-8601, `today`, `tomorrow`, `+3d`, `+1w`.
 
+Discover allowed values (types, statuses, priorities, transitions):
+
+```bash
+homecloud tasks schema
+```
+
 ```bash
 homecloud tasks create "Rotate cert" --type change --priority p2 \
-  --assignee alice --label ops --due +3d \
-  --description-file ./notes.md
+  --status in_progress --assignee alice --label ops --due +3d \
+  --external-id jira-1001 --description-file ./notes.md
+homecloud tasks create "Draft" --description-file -
+
+homecloud tasks upsert --external-id jira-1001 --title "Rotate cert v2" --status in_progress
+homecloud tasks import --file tasks.jsonl --failed-out failed.jsonl
+homecloud tasks bulk-delete TASK-1 TASK-2 --yes
+homecloud tasks bulk-delete --file keys.txt --yes
 
 homecloud tasks update TASK-12 --status in_progress --assign-me
 homecloud tasks patch TASK-12 --title "Rotate certs" --clear-due
@@ -44,6 +59,8 @@ homecloud tasks unassign TASK-12
 ## Discussion and activity
 
 ```bash
+homecloud tasks get TASK-12
+homecloud tasks get TASK-12 --no-mark-seen
 homecloud tasks comment TASK-12 "Deployed to staging"
 homecloud tasks comment TASK-12 --file ./note.md
 homecloud tasks activity TASK-12
@@ -72,6 +89,12 @@ homecloud tasks delete TASK-12 --yes
 
 homecloud tasks link TASK-12 --type compute --id MACHINE_ID --ref web-1
 homecloud tasks unlink TASK-12 LINK_ID
+
+homecloud tasks relate TASK-12 --to TASK-34 --type blocks
+homecloud tasks relations TASK-12
+homecloud tasks unrelate TASK-12 RELATION_ID
+
+Use `--dry-run` on `create`, `upsert`, and `import` to print planned writes without calling the API.
 
 homecloud tasks share TASK-12 --expires-in 7d --include-discussion
 homecloud tasks shares TASK-12

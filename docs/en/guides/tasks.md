@@ -1,6 +1,6 @@
 # Tasks
 
-Tasks is a lightweight operational tracker for the account (Hebrew UI name: **משימות**). Use it for assignment, due dates, statuses, labels, and links to Compute / MDB / Domains — not as a Jira replacement.
+Tasks is the account work tracker (Hebrew UI name: **משימות**). Use it for assignment, due dates, workflows, parent/epic hierarchy (two levels), issue types, custom fields, labels, and links to Compute / MDB / Domains. It is lighter than full Jira but supports structured imports (`homecloud tasks import-jira`) and account-scoped workflow definitions.
 
 | Item | Value |
 |------|--------|
@@ -9,6 +9,12 @@ Tasks is a lightweight operational tracker for the account (Hebrew UI name: **מ
 | Storage | Control-plane Postgres (not an Orchestrator resource) |
 | Notify | Email via platform **noreply** to people with a role on the item (assignees on create/assign; creator **and** assignees on done/cancelled). The console bell lists **one row per unseen discussion** for creator / assignees / watchers (not a copy of each comment). Quoting someone's message also rings their bell even if they are not on the item, as long as they can open Tasks. |
 | Live UI | Realtime Gateway SSE hint; REST is source of truth. The console uses **one SSE connection per tab**; Tasks listens on that stream (it does not open a second `/realtime/events`). Opening a task sets `last_seen_at` for you (WhatsApp-style). Members with `tasks.read` (and no `resources.read`) still get the live stream and the bell for Tasks — the gateway is not a Mail-only channel. |
+
+### Hierarchy and workflows (Wave 3)
+
+- **Parent / epic** — at most two levels (epic → task → sub-task). Epics cannot have a parent. Set `parent_key` on create or in the console form.
+- **Workflows** — each account gets a seeded **default** workflow; status changes follow its transition graph. Admins manage definitions at **Tasks → Settings** or via `/tasks/workflows`, `/statuses`, `/issue-types`, `/fields` API routes (`tasks.administer`).
+- **Jira import** — `homecloud tasks import-jira --file export.jsonl --map mapping.yaml` upserts `external_id=jira:{KEY}` and links parents in a second pass.
 
 ## Console walkthrough
 

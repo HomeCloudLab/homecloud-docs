@@ -113,6 +113,7 @@ nav:
       - cli/index.md
       - cli/install.md
       - cli/authentication.md
+      - cli/mcp.md
       - cli/commands/index.md
       - cli/commands/configure.md
       - cli/commands/login.md
