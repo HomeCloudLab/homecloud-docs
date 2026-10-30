@@ -50,12 +50,19 @@ jobs:
       - name: Install HomeCloud CLI
         run: |
           set -euo pipefail
-          curl -fsSL https://homecloud-cli.so.holab.abrdns.com/releases/latest/homecloud-linux-amd64 -o /tmp/homecloud
-          chmod +x /tmp/homecloud
-          if /tmp/homecloud version; then
-            sudo mv /tmp/homecloud /usr/local/bin/homecloud
-          else
-            echo "::warning::Published binary failed smoke test; installing CLI from GitHub + SDK from PyPI"
+          CLI_URL="https://homecloud-cli.so.holab.abrdns.com/releases/latest/homecloud-linux-amd64"
+          installed=0
+          # SO download can flake (HTTP/2 INTERNAL_ERROR); retry + HTTP/1.1, then fall back.
+          if curl -fsSL --retry 5 --retry-delay 2 --retry-all-errors --http1.1 \
+              "$CLI_URL" -o /tmp/homecloud; then
+            chmod +x /tmp/homecloud
+            if /tmp/homecloud version; then
+              sudo mv /tmp/homecloud /usr/local/bin/homecloud
+              installed=1
+            fi
+          fi
+          if [ "$installed" -ne 1 ]; then
+            echo "::warning::Published binary unavailable; installing CLI from GitHub + SDK from PyPI"
             python -m pip install --upgrade pip
             python -m pip install "homecloud-sdk>=0.5.6"
             python -m pip install "git+https://github.com/HomeCloudLab/homecloud-cli.git@master"
