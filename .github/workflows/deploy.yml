@@ -68,9 +68,19 @@ jobs:
           HOMECLOUD_SECRET_ACCESS_KEY: ${{ secrets.HOMECLOUD_SECRET_ACCESS_KEY }}
           HOMECLOUD_APEX: ${{ secrets.HOMECLOUD_APEX }}
         run: |
-          if [ -z "$HOMECLOUD_ACCESS_KEY_ID" ] || [ -z "$HOMECLOUD_SECRET_ACCESS_KEY" ]; then
+          set -euo pipefail
+          if [ -z "${HOMECLOUD_ACCESS_KEY_ID:-}" ] || [ -z "${HOMECLOUD_SECRET_ACCESS_KEY:-}" ]; then
             echo "::error::Missing HOMECLOUD_ACCESS_KEY_ID or HOMECLOUD_SECRET_ACCESS_KEY repo secrets"
             exit 1
           fi
-          homecloud so sync ./site so://docs/ --delete --output json
+          # Fail the job if sync prints an auth/transport error (CLI may exit 0 on some failures).
+          OUT="$(mktemp)"
+          if ! homecloud so sync ./site so://docs/ --delete --output json 2>&1 | tee "$OUT"; then
+            echo "::error::homecloud so sync failed"
+            exit 1
+          fi
+          if grep -Eiq 'Invalid Access Key|UNAUTHORIZED|Not authenticated|AccessDenied|Forbidden' "$OUT"; then
+            echo "::error::docs SO sync rejected credentials — update HOMECLOUD_* secrets on homecloud-docs"
+            exit 1
+          fi
           echo "Deployed → https://docs.web.${HOMECLOUD_APEX:-holab.abrdns.com}"
