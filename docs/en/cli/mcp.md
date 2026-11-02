@@ -41,4 +41,4 @@ See the [homecloud-mcp](https://github.com/HomeCloudLab/homecloud-mcp) README fo
 
 ## Tasks tools (first module)
 
-Search, get (read-only by default), schema, people, create/update/transition, bulk upsert, comments, labels, links, and delete (with `confirm=true`). Use `tasks_schema` to discover valid statuses and transitions before calling `tasks_transition`.
+Search, get (read-only by default), schema, people, create/update/transition, bulk upsert/delete, comments (edit/delete), **activity** (discussion + history), **comment_file_url** (chat attachments via `so_uri`), labels, relations/links, archive/restore, watch, shares, **projects** (list/create), and delete (`confirm=true`). Use `tasks_schema` before `tasks_transition`.

@@ -39,4 +39,4 @@ homecloud-mcp
 
 ## כלי Tasks (מודול ראשון)
 
-חיפוש, get (ברירת מחדל ללא כתיבה), schema, people, create/update/transition, bulk upsert, תגובות, תוויות, קישורים, ומחיקה (`confirm=true`). השתמשו ב-`tasks_schema` לפני `tasks_transition`.
+חיפוש, get (ברירת מחדל ללא כתיבה), schema, people, create/update/transition, bulk upsert/delete, תגובות (כולל עריכה/מחיקה), **activity** (דיון+היסטוריה), **comment_file_url** (הורדת קבצים מצ׳אט לפי `so_uri`), תוויות, קישורים/יחסים, archive/restore, watch, shares, **projects** (list/create), ומחיקה (`confirm=true`). השתמשו ב-`tasks_schema` לפני `tasks_transition`.
