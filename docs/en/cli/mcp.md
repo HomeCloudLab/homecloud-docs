@@ -1,30 +1,63 @@
 # MCP (Model Context Protocol)
 
-**homecloud-mcp** is the platform MCP server for AI assistants (Cursor, Claude Desktop, etc.). It speaks MCP over stdio and calls HomeCloud through the **Python SDK** — not the CLI binary.
+HomeCloud exposes MCP in two ways:
 
-## Design
+1. **Remote MCP (Wave 1)** — Streamable HTTP at `https://mcp.<apex>/mcp`, authenticated with a **Console JWT**.
+2. **Local stdio** — `homecloud-mcp` package for Cursor/Claude Desktop (SDK profile / Access Key).
 
-- **One server** for the whole platform; tool names are prefixed by service (`tasks_search`, future `mq_*`, `so_*`, …).
-- **Core** handles auth (`HomeCloudClient`), tool registry, error shaping, and read-only/destructive hints.
-- **Modules** implement each service. Tasks shipped first; add modules by registering them in the package (see the project README).
+## Remote MCP (recommended for Cursor / Claude Code)
 
-## Auth
+### Auth
 
-Same as Tasks CLI / SDK:
+1. Sign in: `homecloud login` or `homecloud login --browser` (same Console JWT as the CLI).
+2. Export the token into the environment of the IDE process (**do not** commit it):
 
-- `homecloud login` (console JWT), or
-- User-bound Access Key in `~/.homecloud/credentials` / env (`HC_PROFILE`, `HOMECLOUD_ACCESS_KEY_ID`, …).
+```bash
+# bash / zsh
+eval "$(homecloud mcp env)"
 
-Service-account keys cannot act as a Tasks user.
+# PowerShell
+Invoke-Expression (homecloud mcp env --shell powershell)
+```
 
-## Install and run
+Or print only: `homecloud mcp print-token`.
+
+3. Point the client at the public endpoint with header interpolation:
+
+**Cursor** (`~/.cursor/mcp.json` — user-global, not a project commit):
+
+```json
+{
+  "mcpServers": {
+    "homecloud": {
+      "url": "https://mcp.holab.abrdns.com/mcp",
+      "headers": {
+        "Authorization": "Bearer ${env:HC_ACCESS_TOKEN}"
+      }
+    }
+  }
+}
+```
+
+**Claude Code:**
+
+```bash
+claude mcp add --transport http homecloud https://mcp.holab.abrdns.com/mcp \
+  --header "Authorization: Bearer $HC_ACCESS_TOKEN"
+```
+
+Restart the IDE after exporting the env var if it only reads the environment at process start.
+
+Wave 1 exposes **`tasks_search` only**. JWT validation uses the same cloud-api chain as the console (`session_version`, device revoke, active user). Tasks IAM (`tasks.read`) remains authoritative on the API.
+
+Access Key / SigV1 remain for automation and dataplane services; they are not required for the human Remote path in Wave 1.
+
+## Local stdio
 
 ```bash
 pip install homecloud-mcp homecloud-sdk
 homecloud-mcp
 ```
-
-## Cursor
 
 ```json
 {
@@ -37,8 +70,11 @@ homecloud-mcp
 }
 ```
 
-See the [homecloud-mcp](https://github.com/HomeCloudLab/homecloud-mcp) README for a full tool list and module extension guide.
+Auth: `homecloud login` (JWT) or user-bound Access Key (`HC_PROFILE`). Service-account keys cannot act as a Tasks user.
 
-## Tasks tools (first module)
+## Design
 
-Search, get (read-only by default), schema, people, create/update/transition, bulk upsert/delete, comments (edit/delete), **activity** (discussion + history), **comment_file_url** (chat attachments via `so_uri`), labels, relations/links, archive/restore, watch, shares, **projects** (list/create), and delete (`confirm=true`). Use `tasks_schema` before `tasks_transition`.
+- Shared tool core with the `homecloud-mcp` package; Remote Wave 1 filters to `tasks_search`.
+- stdio keeps the full Tasks (+ SO list) surface for local use.
+
+See the [homecloud-mcp](https://github.com/HomeCloudLab/homecloud-mcp) README for the full local tool list.
