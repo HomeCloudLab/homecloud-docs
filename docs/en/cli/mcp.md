@@ -2,35 +2,35 @@
 
 HomeCloud exposes MCP in two ways:
 
-1. **Remote MCP (Wave 1)** — Streamable HTTP at `https://mcp.<apex>/mcp`, authenticated with a **Console JWT**.
+1. **Remote MCP** — Streamable HTTP at `https://mcp.<apex>/mcp/`, authenticated with a **Console JWT** (or a short-lived JWT from Access Key exchange).
 2. **Local stdio** — `homecloud-mcp` package for Cursor/Claude Desktop (SDK profile / Access Key).
 
 ## Remote MCP (recommended for Cursor / Claude Code)
 
-### Auth
+### Humans — Console JWT
 
-1. Sign in: `homecloud login` or `homecloud login --browser` (same Console JWT as the CLI).
-2. Export the token into the environment of the IDE process (**do not** commit it):
+1. Sign in: `homecloud login` or `homecloud login --browser`.
+2. Export the token (**do not** commit it):
 
 ```bash
-# bash / zsh
+# bash / zsh — current shell only
 eval "$(homecloud mcp env)"
 
-# PowerShell
-Invoke-Expression (homecloud mcp env --shell powershell)
+# PowerShell — current process + persist for Cursor (User env)
+Invoke-Expression (homecloud mcp env --shell powershell --persist)
 ```
 
 Or print only: `homecloud mcp print-token`.
 
-3. Point the client at the public endpoint with header interpolation:
+3. Point the client at the public endpoint:
 
-**Cursor** (`~/.cursor/mcp.json` — user-global, not a project commit):
+**Cursor** (`~/.cursor/mcp.json` — user-global):
 
 ```json
 {
   "mcpServers": {
     "homecloud": {
-      "url": "https://mcp.holab.abrdns.com/mcp",
+      "url": "https://mcp.holab.abrdns.com/mcp/",
       "headers": {
         "Authorization": "Bearer ${env:HC_ACCESS_TOKEN}"
       }
@@ -42,15 +42,41 @@ Or print only: `homecloud mcp print-token`.
 **Claude Code:**
 
 ```bash
-claude mcp add --transport http homecloud https://mcp.holab.abrdns.com/mcp \
+claude mcp add --transport http --scope user homecloud https://mcp.holab.abrdns.com/mcp/ \
   --header "Authorization: Bearer $HC_ACCESS_TOKEN"
 ```
 
-Restart the IDE after exporting the env var if it only reads the environment at process start.
+Fully **restart** the IDE after setting User env (Cursor only reads env at process start).
 
-Wave 1 exposes **`tasks_search` only**. JWT validation uses the same cloud-api chain as the console (`session_version`, device revoke, active user). Tasks IAM (`tasks.read`) remains authoritative on the API.
+### Agents — Access Key → MCP JWT
 
-Access Key / SigV1 remain for automation and dataplane services; they are not required for the human Remote path in Wave 1.
+User-bound Access Key (SigV1) can mint a ~1h Bearer JWT:
+
+```bash
+# requires homecloud configure with a user-bound key
+homecloud mcp token --shell bash
+# or raw JWT:
+homecloud mcp token
+```
+
+Endpoint: `POST /api/v1/mcp/token` (SigV1). Service-account keys are rejected.
+
+### Tool surface (Remote)
+
+| Area | Tools |
+|------|--------|
+| Tasks | Full `tasks_*` set (search, get, create/update, comments, labels, shares, …) |
+| SO | `so_list_buckets`, `so_list_objects` |
+| MQ | `mq_list_queues`, `mq_get_queue` |
+
+JWT validation uses the same cloud-api chain as the console (`session_version`, device revoke, active user). Tasks / SO / MQ IAM remains authoritative on the API.
+
+### OAuth / Marketplace
+
+Protected Resource Metadata: `https://mcp.<apex>/.well-known/oauth-protected-resource`  
+Cursor plugin package: `homecloud-cursor-plugin/` (submit to [Cursor Marketplace](https://cursor.com/marketplace/publish)).
+
+Access map: [task-54 MCP access matrix](https://github.com/HomeCloudLab/cloud-infra/blob/main/docs/tasks/task-54-mcp-access-matrix.md) (internal).
 
 ## Local stdio
 
@@ -70,11 +96,11 @@ homecloud-mcp
 }
 ```
 
-Auth: `homecloud login` (JWT) or user-bound Access Key (`HC_PROFILE`). Service-account keys cannot act as a Tasks user.
+Auth: `homecloud login` (JWT) or user-bound Access Key (`HC_PROFILE`). Service-account keys cannot act as a Tasks user. Stdio also includes SO list tools and MQ list/get.
 
 ## Design
 
-- Shared tool core with the `homecloud-mcp` package; Remote Wave 1 filters to `tasks_search`.
-- stdio keeps the full Tasks (+ SO list) surface for local use.
+- Shared tool core with the `homecloud-mcp` package; Remote hosts Tasks + SO/MQ read tools on cloud-api.
+- Data-plane MQ send/receive and raw Access Key dataplane remain available via SDK/CLI; agent Remote path uses JWT (login or `mcp token` exchange).
 
 See the [homecloud-mcp](https://github.com/HomeCloudLab/homecloud-mcp) README for the full local tool list.
